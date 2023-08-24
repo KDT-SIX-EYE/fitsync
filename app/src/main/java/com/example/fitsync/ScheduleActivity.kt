@@ -11,7 +11,7 @@ class ScheduleActivity: ComponentActivity() {
         super.onCreate(savedInstanceState, persistentState)
         setContent {
             FitSyncTheme {
-
+var a = 1
             }
         }
     }
