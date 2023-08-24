@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "428349157349",
+    "project_id": "imjin-42c6a",
+    "storage_bucket": "imjin-42c6a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:428349157349:android:7505132b897080149c890c",
+        "android_client_info": {
+          "package_name": "com.example.fitsync"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "428349157349-uts0qep0rfcmr4tii90a7kn46k0tgul1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA4oThhenj6p0VSDKUIHyxZgQrTY0W9fDk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "428349157349-uts0qep0rfcmr4tii90a7kn46k0tgul1.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
