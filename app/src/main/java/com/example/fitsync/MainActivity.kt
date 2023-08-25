@@ -44,10 +44,24 @@ class MainActivity : ComponentActivity() {
                         }) {
                             Text(text = "예약")
                         }
+                        Button(onClick = {
+                            val intent = Intent(context, Membership::class.java)
+                            context.startActivity(intent)
+                        }) {
+                            Text(text = "회원가입")
+                        }
+                        Button(onClick = {
+                            val intent = Intent(context, LoginActivity::class.java)
+                            context.startActivity(intent)
+                        }) {
+                            Text(text = "로그인")
+                        }
                     }
                 }
             }
         }
     }
 }
+
+
 
