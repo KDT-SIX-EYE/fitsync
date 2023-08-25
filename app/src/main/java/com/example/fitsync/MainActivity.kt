@@ -44,7 +44,7 @@ class MainActivity : ComponentActivity() {
                             Text(text = "예약")
                         }
                         Button(onClick = {
-                            val intent = Intent(context, messengerActivity::class.java)
+                            val intent = Intent(context, MessengerActivity::class.java)
                             context.startActivity(intent)
                         }) {
                             Text(text = "메신저")
