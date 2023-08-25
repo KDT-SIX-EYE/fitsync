@@ -23,6 +23,16 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".CalenderActivity"
+            android:label="Calendar Activity" />
+        <activity
+            android:name=".ScheduleActivity"
+            android:label="Schedule Activity" />
+        <activity
+            android:name=".BookActivity"
+            android:label="Book Activity" />
+
     </application>
 
 </manifest>
