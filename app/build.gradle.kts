@@ -76,4 +76,8 @@ dependencies {
     implementation("com.google.firebase:firebase-firestore-ktx")
 
     implementation ("androidx.compose.material:material-icons-extended:1.2.0")
+
+    // 뷰모델
+    val lifecycleVersion = "2.6.1"
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion")
 }
