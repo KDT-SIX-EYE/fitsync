@@ -43,6 +43,7 @@ class MainActivity : ComponentActivity() {
                         }) {
                             Text(text = "예약")
                         }
+                        Text(text = "안녕")
                     }
                 }
             }
