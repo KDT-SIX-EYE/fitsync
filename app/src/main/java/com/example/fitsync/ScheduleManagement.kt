@@ -51,7 +51,7 @@ import java.util.Locale
 var calendarUiModel: CalendarUiModel? = null
 
 class ScheduleManagement : ComponentActivity() {
-//    private val calenderViewModel: CalenderViewModel by viewModels()
+    //    private val calenderViewModel: CalenderViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -85,7 +85,7 @@ fun asd(db: FirebaseFirestore) {
             mutableStateOf(0) // 기본 시간을 선택합니다.
         }
         Button(onClick = { calendarOpen = true }) {
-Text(text = "날짜")
+            Text(text = "날짜 $clickedDate")
         }
         Button(onClick = { timeListOpen = true }) {
             Text(text = "시간 $selectedTime")
@@ -109,7 +109,9 @@ Text(text = "날짜")
                 var expandedTrainerIndex by remember { mutableStateOf(-1) }
                 var selectedTrainer by remember { mutableStateOf("") }
 
-                Button(onClick = { expandedTrainerIndex = if (expandedTrainerIndex == -1) 0 else -1 }) {
+                Button(onClick = {
+                    expandedTrainerIndex = if (expandedTrainerIndex == -1) 0 else -1
+                }) {
                     Text(text = "트레이너 선택")
                 }
                 if (expandedTrainerIndex != -1) {
@@ -138,7 +140,7 @@ Text(text = "날짜")
                 { Text(text = "예약") }
             }
             Column(modifier = Modifier.background(Color.LightGray)) {
-                if (timeListOpen){
+                if (timeListOpen) {
                     timeOptions.forEach { timeOption ->
                         Text(
                             text = "$timeOption ~ ${timeOption + 1}",

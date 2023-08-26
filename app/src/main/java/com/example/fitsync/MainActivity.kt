@@ -26,12 +26,6 @@ class MainActivity : ComponentActivity() {
                     Column {
                         val context = LocalContext.current
                         Button(onClick = {
-                            val intent = Intent(context, MainActivity2::class.java)
-                            context.startActivity(intent)
-                        }) {
-                            Text(text = "캘린더")
-                        }
-                        Button(onClick = {
                             val intent = Intent(context, ScheduleActivity::class.java)
                             context.startActivity(intent)
                         }) {
@@ -44,7 +38,7 @@ class MainActivity : ComponentActivity() {
                             Text(text = "예약")
                         }
                         Button(onClick = {
-                            val intent = Intent(context, CalenderActivity::class.java)
+                            val intent = Intent(context, CalendarActivity::class.java)
                             context.startActivity(intent)
                         }) {
                             Text(text = "캘린더")
