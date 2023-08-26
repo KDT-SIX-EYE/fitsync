@@ -55,9 +55,8 @@ class ScheduleManagement : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-
             val db = Firebase.firestore
-            asd(db)
+            GymCalendar(db)
         }
     }
 }
@@ -67,7 +66,7 @@ class ScheduleManagement : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun asd(db: FirebaseFirestore) {
+fun GymCalendar(db: FirebaseFirestore) {
     var calendarOpen by remember {
         mutableStateOf(false)
     }
@@ -157,9 +156,6 @@ fun asd(db: FirebaseFirestore) {
             }
 
         }
-
-
-
         Text(text = "$clickedDate")
     }
     if (calendarOpen) {
@@ -231,7 +227,7 @@ fun Header(
     onPrevClickListener: (LocalDate) -> Unit,
     onNextClickListener: (LocalDate) -> Unit,
     onMinusMonth: () -> Unit,
-    onPlusMonth: () -> Unit
+    onPlusMonth: () -> Unit,
 ) {
     val currentYearMonth = YearMonth.now()
     val currentMonth = remember { mutableStateOf(currentYearMonth) }
@@ -280,7 +276,7 @@ fun Content(
     currentYearMonth: YearMonth,
     data: CalendarUiModel,
     onDateClickListener: (CalendarUiModel.Date) -> Unit,
-    onClickedDate: () -> Unit
+    onClickedDate: () -> Unit,
 ) {
     Column {
         repeat(6) { rowIndex ->
@@ -309,7 +305,7 @@ fun ContentItem(
     currentYearMonth: YearMonth,
     date: CalendarUiModel.Date,
     onClickListener: (CalendarUiModel.Date) -> Unit,
-    onClickedDate: () -> Unit
+    onClickedDate: () -> Unit,
 ) {
     val textColor =
         if (date.date.year == currentYearMonth.year && date.date.month == currentYearMonth.month) {
