@@ -1,14 +1,12 @@
 package com.example.fitsync
 
-import android.app.Activity
-import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.viewModels
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -40,7 +38,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.ViewModelProvider
 import com.google.firebase.FirebaseApp
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
@@ -49,17 +46,18 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
-import java.util.Date
 import java.util.Locale
 
+var calendarUiModel: CalendarUiModel? = null
+
 class ScheduleManagement : ComponentActivity() {
-    private val calenderViewModel: CalenderViewModel by viewModels()
+//    private val calenderViewModel: CalenderViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
 
             val db = Firebase.firestore
-            asd(db, calenderViewModel)
+            asd(db)
         }
     }
 }
@@ -69,66 +67,97 @@ class ScheduleManagement : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun asd(db: FirebaseFirestore, calenderViewModel: CalenderViewModel) {
+fun asd(db: FirebaseFirestore) {
     var calendarOpen by remember {
         mutableStateOf(false)
     }
-//    var clickedDate by remember {
-//        mutableStateOf(LocalDate.now().year * 10000 + LocalDate.now().monthValue * 100 + LocalDate.now().dayOfMonth)
-//    }
     var clickedDate by remember {
         mutableStateOf(0)
     }
+    var timeListOpen by remember {
+        mutableStateOf(false)
+    }
     Column {
-        val context = LocalContext.current
         var memberName by remember {
             mutableStateOf("")
         }
-        var trainerName by remember {
-            mutableStateOf("")
+        var selectedTime by remember {
+            mutableStateOf(0) // 기본 시간을 선택합니다.
         }
-        val activity = LocalContext.current as? Activity
-        val sharedPref = remember {
-            activity?.getPreferences(Context.MODE_PRIVATE)
-        }
-
         Button(onClick = { calendarOpen = true }) {
+Text(text = "날짜")
+        }
+        Button(onClick = { timeListOpen = true }) {
+            Text(text = "시간 $selectedTime")
+        }
+        val startTime = 7
+        val endTime = 23
+        val timeOptions = mutableListOf<Int>()
+
+        for (hour in startTime until endTime) {
+            timeOptions.add(hour)
+        }
+
+        Box {
+
+            Column {
+                TextField(value = memberName, onValueChange = { memberName = it })
+                var trainers = listOf("Trainer 1", "Trainer 2", "Trainer 3")
+                var trainerList by remember {
+                    mutableStateOf(trainers)
+                }
+                var expandedTrainerIndex by remember { mutableStateOf(-1) }
+                var selectedTrainer by remember { mutableStateOf("") }
+
+                Button(onClick = { expandedTrainerIndex = if (expandedTrainerIndex == -1) 0 else -1 }) {
+                    Text(text = "트레이너 선택")
+                }
+                if (expandedTrainerIndex != -1) {
+                    trainerList.forEachIndexed { index, trainer ->
+                        Text(
+                            text = trainer,
+                            modifier = Modifier
+                                .clickable {
+                                    selectedTrainer = trainer
+                                    expandedTrainerIndex = -1
+                                }
+                        )
+                    }
+                }
+                Button(
+                    onClick = {
+                        val userData = hashMapOf(
+                            "Member Name" to memberName,
+                            "Trainer Name" to selectedTrainer,
+                            "Clicked Date" to clickedDate,
+                            "Clicked Time" to selectedTime
+                        )
+                        db.collection("schedule").add(userData)
+                    }
+                )
+                { Text(text = "예약") }
+            }
+            Column(modifier = Modifier.background(Color.LightGray)) {
+                if (timeListOpen){
+                    timeOptions.forEach { timeOption ->
+                        Text(
+                            text = "$timeOption ~ ${timeOption + 1}",
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    selectedTime = timeOption
+                                    timeListOpen = false
+                                }
+                                .padding(8.dp)
+                        )
+                    }
+                }
+            }
 
         }
-        TextField(value = memberName, onValueChange = { memberName = it })
-        val trainers = listOf("Trainer 1", "Trainer 2", "Trainer 3")
-        var trainerList by remember {
-            mutableStateOf(trainers)
-        }
-        var expandedTrainerIndex by remember { mutableStateOf(-1) }
-        var selectedTrainer by remember { mutableStateOf("") }
 
-        Button(onClick = {expandedTrainerIndex = if (expandedTrainerIndex == -1) 0 else -1}) {
-            Text(text = "트레이너 선택")
-        }
-        if (expandedTrainerIndex != -1) {
-            trainerList.forEachIndexed { index, trainer ->
-                Text(
-                    text = trainer,
-                    modifier = Modifier
-                        .clickable {
-                            selectedTrainer = trainer
-                            expandedTrainerIndex = -1
-                        }
-                )
-            }
-        }
-        Button(
-            onClick = {
-                val userData = hashMapOf(
-                    "Member Name" to memberName,
-                    "Trainer Name" to selectedTrainer,
-                    "Clicked Date" to clickedDate
-                )
-                db.collection("schedule").add(userData)
-            }
-        )
-        { Text(text = "예약") }
+
+
         Text(text = "$clickedDate")
     }
     if (calendarOpen) {
@@ -137,14 +166,11 @@ fun asd(db: FirebaseFirestore, calenderViewModel: CalenderViewModel) {
             return date.year * 10000 + date.monthValue * 100 + date.dayOfMonth
         }
 
-        val dataSource = CalendarDataSource()
-        var calendarUiModel by remember {
-            mutableStateOf(dataSource.getData(lastSelectedDate = dataSource.today))
-        }
         CalendarWindow(onClick = {
-            clickedDate = convertLocalDateToInt(calendarUiModel.selectedDate)
+            clickedDate = convertLocalDateToInt(calendarUiModel!!.selectedDate)
         }, onClickedDate = { calendarOpen = false })
     }
+
 }
 
 @Composable
@@ -154,43 +180,36 @@ fun CalendarWindow(onClick: () -> Unit, onClickedDate: () -> Unit) {
     Column {
 
         val dataSource = CalendarDataSource()
-        var calendarUiModel by remember {
-            mutableStateOf(dataSource.getData(lastSelectedDate = dataSource.today))
-        }
+        calendarUiModel = dataSource.getData(lastSelectedDate = dataSource.today)
         var currentYearMonth by remember {
             mutableStateOf(YearMonth.now())
         }
         Header(
-            data = calendarUiModel,
+            data = calendarUiModel!!,
             onPrevClickListener = { startDate ->
                 val finalStartDate = startDate.minusDays(1)
                 calendarUiModel = dataSource.getData(
                     startDate = finalStartDate,
-                    lastSelectedDate = calendarUiModel.selectedDate.date
+                    lastSelectedDate = calendarUiModel!!.selectedDate.date
                 )
             },
             onNextClickListener = { endDate ->
                 val finalStartDate = endDate.plusDays(2)
                 calendarUiModel = dataSource.getData(
                     startDate = finalStartDate,
-                    lastSelectedDate = calendarUiModel.selectedDate.date
+                    lastSelectedDate = calendarUiModel!!.selectedDate.date
                 )
             },
             onMinusMonth = { currentYearMonth = currentYearMonth.minusMonths(1) },
             onPlusMonth = { currentYearMonth = currentYearMonth.plusMonths(1) }
         )
 
-        fun convertLocalDateToInt(dateModel: CalendarUiModel.Date): Int {
-            val date = dateModel.date
-            return date.year * 10000 + date.monthValue * 100 + date.dayOfMonth
-        }
-
         Content(
-            currentYearMonth = currentYearMonth, data = calendarUiModel,
+            currentYearMonth = currentYearMonth, data = calendarUiModel!!,
             onDateClickListener = { date ->
-                calendarUiModel = calendarUiModel.copy(
+                calendarUiModel = calendarUiModel!!.copy(
                     selectedDate = date,
-                    visibleDates = calendarUiModel.visibleDates.map {
+                    visibleDates = calendarUiModel!!.visibleDates.map {
                         it.copy(
                             isSelected = it.date.isEqual(date.date)
                         )
