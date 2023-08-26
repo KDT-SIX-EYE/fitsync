@@ -1,0 +1,67 @@
+Index: app/src/main/java/com/example/fitsync/MainActivity.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.fitsync\r\n\r\nimport android.content.Intent\r\nimport android.os.Bundle\r\nimport androidx.activity.ComponentActivity\r\nimport androidx.activity.compose.setContent\r\nimport androidx.compose.foundation.layout.Column\r\nimport androidx.compose.foundation.layout.fillMaxSize\r\nimport androidx.compose.material3.Button\r\nimport androidx.compose.material3.MaterialTheme\r\nimport androidx.compose.material3.Surface\r\nimport androidx.compose.material3.Text\r\nimport androidx.compose.ui.Modifier\r\nimport androidx.compose.ui.platform.LocalContext\r\nimport com.example.fitsync.ui.theme.FitSyncTheme\r\n\r\nclass MainActivity : ComponentActivity() {\r\n    override fun onCreate(savedInstanceState: Bundle?) {\r\n        super.onCreate(savedInstanceState)\r\n        setContent {\r\n            FitSyncTheme {\r\n                Surface(\r\n                    modifier = Modifier.fillMaxSize(),\r\n                    color = MaterialTheme.colorScheme.background\r\n                ) {\r\n                    Column {\r\n                        val context = LocalContext.current\r\n                        Button(onClick = {\r\n                            val intent = Intent(context, ScheduleActivity::class.java)\r\n                            context.startActivity(intent)\r\n                        }) {\r\n                            Text(text = \"스케줄\")\r\n                        }\r\n                        Button(onClick = {\r\n                            val intent = Intent(context, BookActivity::class.java)\r\n                            context.startActivity(intent)\r\n                        }) {\r\n                            Text(text = \"예약\")\r\n                        }\r\n                        Button(onClick = {\r\n                            val intent = Intent(context, CalendarActivity::class.java)\r\n                            context.startActivity(intent)\r\n                        }) {\r\n                            Text(text = \"캘린더\")\r\n                        }\r\n                    }\r\n                }\r\n            }\r\n        }\r\n    }\r\n}\r\n\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/fitsync/MainActivity.kt b/app/src/main/java/com/example/fitsync/MainActivity.kt
+--- a/app/src/main/java/com/example/fitsync/MainActivity.kt	
++++ b/app/src/main/java/com/example/fitsync/MainActivity.kt	
+@@ -37,12 +37,12 @@
+                         }) {
+                             Text(text = "예약")
+                         }
+-                        Button(onClick = {
+-                            val intent = Intent(context, CalendarActivity::class.java)
+-                            context.startActivity(intent)
+-                        }) {
+-                            Text(text = "캘린더")
+-                        }
++//                        Button(onClick = {
++//                            val intent = Intent(context, Event::class.java)
++//                            context.startActivity(intent)
++//                        }) {
++//                            Text(text = "캘린더")
++//                        }
+                     }
+                 }
+             }
+Index: app/src/main/java/com/example/fitsync/CalendarActivity.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.fitsync\r\n\r\nimport android.content.Intent\r\nimport androidx.appcompat.app.AppCompatActivity\r\nimport android.os.Bundle\r\nimport androidx.activity.ComponentActivity\r\nimport androidx.activity.compose.setContent\r\nimport androidx.compose.foundation.layout.Column\r\nimport androidx.compose.material3.Button\r\nimport androidx.compose.material3.Text\r\nimport androidx.compose.ui.platform.LocalContext\r\n\r\nclass CalendarActivity : ComponentActivity() {\r\n    override fun onCreate(savedInstanceState: Bundle?) {\r\n        super.onCreate(savedInstanceState)\r\n        setContent {\r\n            Column {\r\n                val context = LocalContext.current\r\n                Button(onClick = { val intent = Intent(context, ScheduleCheckActivity::class.java)\r\n                    context.startActivity(intent) }) {\r\n                    Text(text = \"예약 확인\")\r\n                }\r\n                Button(onClick = {\r\n                    val intent = Intent(context, ScheduleManagement::class.java)\r\n                    context.startActivity(intent)\r\n                }) {\r\n                    Text(text = \"예약\")\r\n                }\r\n            }\r\n\r\n        }\r\n    }\r\n}
+===================================================================
+diff --git a/app/src/main/java/com/example/fitsync/CalendarActivity.kt b/app/src/main/java/com/example/fitsync/CalendarActivity.kt
+--- a/app/src/main/java/com/example/fitsync/CalendarActivity.kt	
++++ b/app/src/main/java/com/example/fitsync/CalendarActivity.kt	
+@@ -16,8 +16,10 @@
+         setContent {
+             Column {
+                 val context = LocalContext.current
+-                Button(onClick = { val intent = Intent(context, ScheduleCheckActivity::class.java)
+-                    context.startActivity(intent) }) {
++                Button(onClick = {
++                    val intent = Intent(context, ScheduleCheckActivity::class.java)
++                    context.startActivity(intent)
++                }) {
+                     Text(text = "예약 확인")
+                 }
+                 Button(onClick = {
+@@ -26,8 +28,14 @@
+                 }) {
+                     Text(text = "예약")
+                 }
+-            }
++                Button(onClick = {
++                    val intent = Intent(context, ScheduleManagement::class.java)
++                    context.startActivity(intent)
++                }) {
++                    Text(text = "일정 알림")
++                }
+ 
++            }
+         }
+     }
+ }
+\ No newline at end of file
