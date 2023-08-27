@@ -1,7 +1,3 @@
-
-
-// firebase quick start
-// https://github.com/firebase/quickstart-android/blob/master/auth/app/src/main/java/com/google/firebase/quickstart/auth/kotlin/EmailPasswordFragment.kt
 package com.example.fitsync
 
 import android.content.Intent
@@ -28,13 +24,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
-
 
 class Membership : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,6 +45,8 @@ class Membership : ComponentActivity() {
     fun SignupScreen() {
         var email by remember { mutableStateOf("") }
         var password by remember { mutableStateOf("") }
+        var signupErrorMessage by remember { mutableStateOf("") }
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -63,9 +61,6 @@ class Membership : ComponentActivity() {
                 keyboardOptions = KeyboardOptions.Default.copy(
                     imeAction = ImeAction.Done
                 ),
-                keyboardActions = KeyboardActions(
-                    onDone = { signup(email, password) }
-                )
             )
             Spacer(modifier = Modifier.height(8.dp))
             OutlinedTextField(
@@ -76,36 +71,38 @@ class Membership : ComponentActivity() {
                 keyboardOptions = KeyboardOptions.Default.copy(
                     imeAction = ImeAction.Done
                 ),
-                keyboardActions = KeyboardActions(
-                    onDone = { signup(email, password) }
-                )
             )
             Spacer(modifier = Modifier.height(16.dp))
             Button(
-                onClick = { signup(email, password) },
+                onClick = {
+                    val auth: FirebaseAuth = Firebase.auth
+                    auth.createUserWithEmailAndPassword(email, password)
+                        .addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                navigateToMainActivity()
+                            } else {
+                                signupErrorMessage = "회원가입에 실패했습니다\n이메일과 비밀번호를 확인하십시오"
+                            }
+                        }
+                },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("회원가입")
             }
-        }
-    }
 
-    private fun signup(email: String, password: String) {
-        val auth: FirebaseAuth = Firebase.auth
-        auth.createUserWithEmailAndPassword(email, password)
-            .addOnCompleteListener(this) { task ->
-                if (task.isSuccessful) {
-                    // 회원가입 성공
-                    navigateToMainActivity()
-                } else {
-                    // 회원가입 실패
-                }
+            if (signupErrorMessage.isNotEmpty()) {
+                Text(
+                    text = signupErrorMessage,
+                    color = Color.Red,
+                    modifier = Modifier.padding(8.dp)
+                )
             }
+        }
     }
 
     private fun navigateToMainActivity() {
         val intent = Intent(this, MainActivity::class.java)
         startActivity(intent)
-        finish() // 현재 액티비티를 종료합니다.
+        finish()
     }
 }

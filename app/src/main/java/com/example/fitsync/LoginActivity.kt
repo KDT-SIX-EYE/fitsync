@@ -26,7 +26,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import com.google.firebase.auth.FirebaseAuth
 
-
 class LoginActivity : ComponentActivity() {
     private val loginViewModel = LoginViewModel()
 
@@ -91,6 +90,22 @@ fun LoginScreen(viewModel: LoginViewModel, onLoginSuccess: (Boolean) -> Unit) {
             Text(text = "Log In")
         }
 
+        Button(
+            onClick = {
+                val email = emailState.value
+                if (email.isNotEmpty()) {
+                    viewModel.sendPasswordResetEmail(email)
+                } else {
+                    viewModel.errorMessage = "이메일을 입력해주세요."
+                }
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp)
+        ) {
+            Text(text = "비밀번호 재설정")
+        }
+
         if (viewModel.errorMessage.isNotEmpty()) {
             Text(
                 text = viewModel.errorMessage,
@@ -121,7 +136,15 @@ class LoginViewModel : ViewModel() {
                 }
             }
     }
-}
 
-// firebase quick start
-// https://github.com/firebase/quickstart-android/blob/master/auth/app/src/main/java/com/google/firebase/quickstart/auth/kotlin/EmailPasswordFragment.kt
+    fun sendPasswordResetEmail(email: String) {
+        auth.sendPasswordResetEmail(email)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    errorMessage = "비밀번호 재설정 이메일을 보냈습니다. 이메일을 확인해주세요."
+                } else {
+                    errorMessage = "비밀번호 재설정 이메일 전송에 실패했습니다. \n다시 시도해주세요."
+                }
+            }
+    }
+}
