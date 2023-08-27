@@ -8,7 +8,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import com.example.fitsync.ui.theme.FitSyncTheme
 
-class CalenderActivity: ComponentActivity() {
+class CalenderActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?, persistentState: PersistableBundle?) {
         super.onCreate(savedInstanceState, persistentState)

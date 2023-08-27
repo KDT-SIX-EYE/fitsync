@@ -55,6 +55,18 @@ class MainActivity : ComponentActivity() {
                         }) {
                             Text(text = "로그인")
                         }
+                        Button(onClick = {
+                            val intent = Intent(context, MemberRegistration::class.java)
+                            context.startActivity(intent)
+                        }) {
+                            Text(text = "회원등록")
+                        }
+                        Button(onClick = {
+                            val intent = Intent(context, MemberProfile::class.java)
+                            context.startActivity(intent)
+                        }) {
+                            Text(text = "회원정보")
+                        }
                     }
                 }
             }
