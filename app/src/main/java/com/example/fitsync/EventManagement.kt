@@ -1,6 +1,7 @@
 package com.example.fitsync
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -14,7 +15,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.ChevronRight
@@ -28,7 +33,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -58,8 +65,11 @@ class EventManagementActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            val context = LocalContext.current
             Column(
-                modifier = Modifier,
+                modifier = Modifier
+                    .verticalScroll(rememberScrollState())
+                    .fillMaxSize(),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -85,8 +95,29 @@ class EventManagementActivity : ComponentActivity() {
                     onStartTimeChange = { startTime = it },
                     endTime = endTime,
                     onEndTimeChange = { endTime = it },
-                    selectedDate = calendarUiModel?.selectedDate
+                    selectedDate = calendarUiModel?.selectedDate,
+                    onSaveButtonClick = {
+                        val event = EventData(
+                            eventDate = eventDate,
+                            eventName = eventName,
+                            registrant = registrant,
+                            startTime = startTime,
+                            endTime = endTime
+                        )
+                        db.collection("events").add(event)
+                        eventDate = ""
+                        eventName = ""
+                        registrant = ""
+                        startTime = ""
+                        endTime = ""
+                    }
                 )
+                Button(onClick = {
+                    val intent = Intent(context, EventCheckActivity::class.java)
+                    context.startActivity(intent)
+                }) {
+                    Text(text = "등록일정 확인하기")
+                }
             }
         }
     }
@@ -215,7 +246,6 @@ class EventManagementActivity : ComponentActivity() {
     }
 
     @SuppressLint("UnrememberedMutableState")
-    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun ContentItem(
         currentYearMonth: YearMonth,
@@ -244,16 +274,14 @@ class EventManagementActivity : ComponentActivity() {
         } else {
             Color.White
         }
-        var lastClickTime by remember {
-            mutableStateOf(0L)
-        }
+        var lastClickTime by remember { mutableStateOf(0L) }
         var clickCount by remember { mutableStateOf(0) }
 
 
         Card(
             modifier = Modifier
                 .width(50.dp)
-                .height(100.dp)
+                .height(80.dp)
                 .clickable {
                     clickCount++
                     val currentTime = System.currentTimeMillis()
@@ -314,6 +342,7 @@ class EventManagementActivity : ComponentActivity() {
         endTime: String,
         onEndTimeChange: (String) -> Unit,
         selectedDate: CalendarUiModel.Date?,
+        onSaveButtonClick: () -> Unit
     ) {
         Column(
             modifier = Modifier
@@ -381,6 +410,14 @@ class EventManagementActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxWidth(),
                     textAlign = TextAlign.Center
                 )
+            }
+            Button(
+                onClick = onSaveButtonClick,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp)
+            ) {
+                Text(text = "저장")
             }
         }
     }

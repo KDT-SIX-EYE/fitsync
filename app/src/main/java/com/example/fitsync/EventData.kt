@@ -1,6 +1,6 @@
 package com.example.fitsync
 
-data class Event(
+data class EventData(
     val eventDate: String,
     val eventName: String,
     val registrant: String,

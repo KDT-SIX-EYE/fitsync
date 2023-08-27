@@ -23,6 +23,9 @@
             android:name=".EventCheckActivity"
             android:exported="false" />
         <activity
+            android:name=".EventData"
+            android:exported="false" />
+        <activity
             android:name=".ScheduleCheckActivity"
             android:exported="false" />
         <activity
