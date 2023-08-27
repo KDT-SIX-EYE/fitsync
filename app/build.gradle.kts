@@ -4,6 +4,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("com.google.gms.google-services")
+    id("kotlin-android")
 }
 
 android {
@@ -68,6 +69,7 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.9.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+    implementation("androidx.camera:camera-core:1.2.3")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
@@ -75,5 +77,33 @@ dependencies {
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
+    implementation ("com.github.yuriy-budiyev:code-scanner:2.3.2")
+    implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
+    implementation ("androidx.lifecycle:lifecycle-runtime-ktx:2.4.0")
+
+
+    implementation("androidx.legacy:legacy-support-v4:1.0.0")
+    implementation("androidx.recyclerview:recyclerview:1.2.1")
+
+
+    implementation("com.intuit.sdp:sdp-android:1.1.0")
+
+    implementation("com.google.zxing:core:3.4.1")
+    // Use this dependency to bundle the model with your app
+    implementation("com.google.mlkit:barcode-scanning:17.0.2")
+
+    // CameraX core library using the camera2 implementation
+    val camerax_version = "1.3.0-alpha04"
+    implementation("androidx.camera:camera-camera2:$camerax_version")
+    // If you want to additionally use the CameraX Lifecycle library
+    implementation("androidx.camera:camera-lifecycle:$camerax_version")
+    // If you want to additionally use the CameraX View class
+    implementation("androidx.camera:camera-view:$camerax_version")
+
+    /**
+     * ZXing 3.4+ uses Java 8 language features, so it is required to enable core library desugaring
+     * in order to use the Zxing on API < 23
+     */
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:1.1.5")
 
 }

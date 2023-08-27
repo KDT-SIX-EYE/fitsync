@@ -44,6 +44,13 @@ class MainActivity : ComponentActivity() {
                         }) {
                             Text(text = "예약")
                         }
+                        Button(onClick = {
+                            val intent = Intent(context, QRcheckActivity::class.java)
+                            context.startActivity(intent)
+                        }) {
+                            Text(text = "QR출석체크")
+                        }
+
                     }
                 }
             }

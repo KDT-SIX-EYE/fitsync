@@ -1,3 +1,10 @@
+dependencyResolutionManagement {
+
+    repositories {
+
+        maven("https://jitpack.io")
+    }
+}
 pluginManagement {
     repositories {
         google()
