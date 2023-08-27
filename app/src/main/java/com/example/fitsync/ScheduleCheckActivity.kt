@@ -47,24 +47,17 @@ fun ScheduleScreen() {
 fun TimeButton(db: FirebaseFirestore) {
     Row {
         val clickedDate = 20230901 // 원하는 ClickedDate 값으로 변경해주세요
-Button(onClick = {db.collection("schedule")
-    .whereEqualTo("Clicked Date", clickedDate)
-    .get()
-    .addOnSuccessListener { querySnapshot ->
-        for (document in querySnapshot) {
-            val memberName = document.getString("Member Name")
-            if (memberName != null) {
-                // 검색된 데이터의 memberName을 사용하여 작업 수행
-                println("Member Name: $memberName")
+        db.collection("schedule")
+            .whereEqualTo("Clicked Date", clickedDate)
+            .get()
+            .addOnSuccessListener { documents ->
+                for (document in documents) {
+                    Log.d(TAG, "${document.id} => ${document.data}")
+                }
             }
-        }
-    }
-    .addOnFailureListener { exception ->
-        Log.w(TAG, "Error getting documents: ", exception)
-    } }) {
-
-}
-
+            .addOnFailureListener { exception ->
+                Log.w(TAG, "Error getting documents: ", exception)
+            }
 //            .addOnFailureListener { exception ->
 //                // 실패 처리 코드를 작성합니다
 //               Text(text = "Error getting documents: $exception")

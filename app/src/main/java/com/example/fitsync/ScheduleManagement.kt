@@ -48,26 +48,21 @@ import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-var calendarUiModel: CalendarUiModel? = null
-
 class ScheduleManagement : ComponentActivity() {
-    //    private val calenderViewModel: CalenderViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
 
             val db = Firebase.firestore
-            asd(db)
+            Asd(db)
         }
     }
 }
 
-//data class SharedData(val clickedDate: Int)
-
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun asd(db: FirebaseFirestore) {
+fun Asd(db: FirebaseFirestore) {
+
     var calendarOpen by remember {
         mutableStateOf(false)
     }
@@ -134,7 +129,7 @@ fun asd(db: FirebaseFirestore) {
                             "Clicked Date" to clickedDate,
                             "Clicked Time" to selectedTime
                         )
-                        //document : schedule 컬렉션의 asf라는 문서, 문서 하나를 지정하므로 asf문서의 위 값들이 수정됨.
+                        //collection().document(asf) : schedule 컬렉션의 asf라는 문서, 문서 하나를 지정하므로 asf문서의 위 값들이 수정됨.
                         db.collection("schedule").add(userData)
                     }
                 )
@@ -165,62 +160,74 @@ fun asd(db: FirebaseFirestore) {
         Text(text = "$clickedDate")
     }
     if (calendarOpen) {
+        val dataSource = CalendarDataSource()
+        var calendarUiModel by remember {
+            mutableStateOf(dataSource.getData(lastSelectedDate = dataSource.today))
+        }
         fun convertLocalDateToInt(dateModel: CalendarUiModel.Date): Int {
             val date = dateModel.date
             return date.year * 10000 + date.monthValue * 100 + date.dayOfMonth
         }
-
-        CalendarWindow(onClick = {
-            clickedDate = convertLocalDateToInt(calendarUiModel!!.selectedDate)
-        }, onClickedDate = { calendarOpen = false })
-    }
-
-}
-
-@Composable
-fun CalendarWindow(onClick: () -> Unit, onClickedDate: () -> Unit) {
-    val context = LocalContext.current
-    FirebaseApp.initializeApp(context)
-    Column {
-
-        val dataSource = CalendarDataSource()
-        calendarUiModel = dataSource.getData(lastSelectedDate = dataSource.today)
-        var currentYearMonth by remember {
-            mutableStateOf(YearMonth.now())
-        }
-        Header(
-            data = calendarUiModel!!,
+        CalendarWindow(data = calendarUiModel, calendarUiModel = calendarUiModel, onClickedDate = { calendarOpen = false },
             onPrevClickListener = { startDate ->
                 val finalStartDate = startDate.minusDays(1)
                 calendarUiModel = dataSource.getData(
                     startDate = finalStartDate,
-                    lastSelectedDate = calendarUiModel!!.selectedDate.date
+                    lastSelectedDate = calendarUiModel.selectedDate.date
                 )
-            },
-            onNextClickListener = { endDate ->
+            }, onNextClickListener = { endDate ->
                 val finalStartDate = endDate.plusDays(2)
                 calendarUiModel = dataSource.getData(
                     startDate = finalStartDate,
-                    lastSelectedDate = calendarUiModel!!.selectedDate.date
+                    lastSelectedDate = calendarUiModel.selectedDate.date
                 )
+            }, onDateClickListener = { date ->
+                calendarUiModel = calendarUiModel.copy(
+                    selectedDate = date,
+                    visibleDates = calendarUiModel.visibleDates.map {
+                        it.copy(
+                            isSelected = it.date.isEqual(date.date)
+                        )
+                    }
+                )
+                clickedDate = convertLocalDateToInt(calendarUiModel.selectedDate)
+
+            }
+        )
+    }
+}
+
+@Composable
+fun CalendarWindow(
+    data: CalendarUiModel,
+    calendarUiModel: CalendarUiModel,
+    onClickedDate: () -> Unit,
+    onPrevClickListener: (LocalDate) -> Unit,
+    onNextClickListener: (LocalDate) -> Unit,
+    onDateClickListener: (CalendarUiModel.Date) -> Unit
+) {
+    val context = LocalContext.current
+    FirebaseApp.initializeApp(context)
+    Column {
+        var currentYearMonth by remember {
+            mutableStateOf(YearMonth.now())
+        }
+        Header(
+            data = calendarUiModel,
+            onPrevClickListener = {
+                onPrevClickListener(data.startDate.date)
+            },
+            onNextClickListener = {
+                onNextClickListener(data.endDate.date)
             },
             onMinusMonth = { currentYearMonth = currentYearMonth.minusMonths(1) },
             onPlusMonth = { currentYearMonth = currentYearMonth.plusMonths(1) }
         )
 
         Content(
-            currentYearMonth = currentYearMonth, data = calendarUiModel!!,
-            onDateClickListener = { date ->
-                calendarUiModel = calendarUiModel!!.copy(
-                    selectedDate = date,
-                    visibleDates = calendarUiModel!!.visibleDates.map {
-                        it.copy(
-                            isSelected = it.date.isEqual(date.date)
-                        )
-                    }
-                )
-                onClick()
-            },
+            currentYearMonth = currentYearMonth, data = calendarUiModel,
+            onDateClickListener =
+            onDateClickListener,
             onClickedDate = onClickedDate
         )
     }
