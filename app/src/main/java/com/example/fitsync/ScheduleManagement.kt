@@ -130,7 +130,7 @@ fun Asd(db: FirebaseFirestore) {
                             "Clicked Time" to selectedTime
                         )
                         //collection().document(asf) : schedule 컬렉션의 asf라는 문서, 문서 하나를 지정하므로 asf문서의 위 값들이 수정됨.
-                        db.collection("schedule").add(userData)
+                        db.collection("schedule").document(clickedDate.toString()).collection("asd").add(userData)
                     }
                 )
                 { Text(text = "예약") }

@@ -46,46 +46,61 @@ fun ScheduleScreen() {
 @Composable
 fun TimeButton(db: FirebaseFirestore) {
     Row {
-        val clickedDate = 20230901 // 원하는 ClickedDate 값으로 변경해주세요
-        db.collection("schedule")
-            .whereEqualTo("Clicked Date", clickedDate)
+
+        Button(onClick = {
+            db.collection("schedule").document("20230815")
+//            .whereEqualTo("Clicked Date", clickedDate)
+                .get()
+                .addOnSuccessListener { document ->
+                    if (document != null) {
+                        Log.d(TAG, "DocumentSnapshot data: ${document.data}")
+                    } else {
+                        Log.d(TAG, "No such document")
+                    }
+                }
+                .addOnFailureListener { exception ->
+                    Log.w(TAG, "Error getting documents: ", exception)
+                }
+        }) {
+
+        }
+        db.collection("schedule").document("20230815")
+//            .whereEqualTo("Clicked Date", clickedDate)
             .get()
-            .addOnSuccessListener { documents ->
-                for (document in documents) {
-                    Log.d(TAG, "${document.id} => ${document.data}")
+            .addOnSuccessListener { document ->
+                if (document != null) {
+                    Log.d(TAG, "DocumentSnapshot data: ${document.data}")
+                } else {
+                    Log.d(TAG, "No such document")
                 }
             }
             .addOnFailureListener { exception ->
                 Log.w(TAG, "Error getting documents: ", exception)
             }
-//            .addOnFailureListener { exception ->
-//                // 실패 처리 코드를 작성합니다
-//               Text(text = "Error getting documents: $exception")
+//        Column {
+//            var selectedTime by remember {
+//                mutableStateOf(0) // 기본 시간을 선택합니다.
 //            }
-        Column {
-            var selectedTime by remember {
-                mutableStateOf(0) // 기본 시간을 선택합니다.
-            }
-            val startTime = 7
-            val endTime = 23
-            val timeOptions = mutableListOf<Int>()
-
-            for (hour in startTime until endTime) {
-                timeOptions.add(hour)
-            }
-            timeOptions.forEach { timeOption ->
-                Text(
-                    text = "$timeOption",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable {
-                            selectedTime = timeOption
-                        }
-                        .padding(8.dp)
-                )
-            }
-
-        }
+//            val startTime = 7
+//            val endTime = 23
+//            val timeOptions = mutableListOf<Int>()
+//
+//            for (hour in startTime until endTime) {
+//                timeOptions.add(hour)
+//            }
+//            timeOptions.forEach { timeOption ->
+//                Text(
+//                    text = "$timeOption",
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .clickable {
+//                            selectedTime = timeOption
+//                        }
+//                        .padding(8.dp)
+//                )
+//            }
+//
+//        }
 
     }
 }
