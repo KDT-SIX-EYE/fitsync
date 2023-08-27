@@ -142,7 +142,8 @@ private fun ChatScreen(firebaseAuth: FirebaseAuth) {
                                         // data class에 맞춰 바꾸기 (로그인)
                                         message = composingMessage,
                                         userId = user?.uid,
-                                        userName = user?.displayName,
+//                                        userName = user?.displayName,
+                                        userName = "상은",
                                         uploadDate = currentDate)
 //                                sentMessages += composingMessage
                                 saveChatMessage(newChatMessage)
@@ -165,14 +166,6 @@ private fun ChatScreen(firebaseAuth: FirebaseAuth) {
                     message = message,
                     UserId = user?.uid
                 )
-//                Box(
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .padding(end = 20.dp, top = 10.dp, bottom = 10.dp),
-//                    contentAlignment = Alignment.BottomEnd
-//                ) {
-//
-//                }
             }
         }
     }
@@ -180,14 +173,14 @@ private fun ChatScreen(firebaseAuth: FirebaseAuth) {
 
 fun loadChatMessages(listener: (List<ChatMessage>) -> Unit) {
     val database = getInstance("https://fit-sync-76834-default-rtdb.asia-southeast1.firebasedatabase.app/")
-    val chatRef = database.getReference("LoadChat")
+    val chatRef = database.getReference("chat")
 
     chatRef.addValueEventListener(object : ValueEventListener {
         override fun onDataChange(snapshot: DataSnapshot) {
             val messages = mutableListOf<ChatMessage>()
             for (childSnapshot in snapshot.children) {
-                val message = childSnapshot.getValue(ChatMessage::class.java)
-                message?.let {
+                val chatMessage = childSnapshot.getValue(ChatMessage::class.java)
+                chatMessage?.let {
                     messages.add(it)
                 }
             }
@@ -199,14 +192,11 @@ fun loadChatMessages(listener: (List<ChatMessage>) -> Unit) {
     })
 }
 
-
-
-fun saveChatMessage(chatmessage: ChatMessage) {
-    val database = getInstance("https://dataclass-27aac-default-rtdb.asia-southeast1.firebasedatabase.app/")
-    val chatRef = database.getReference("SaveChat")
-    val newMessageRef = chatRef.push() // 새로운 메시지를 추가하기 위한 참조
-
-    newMessageRef.setValue(chatmessage)
+fun saveChatMessage(chatMessage: ChatMessage) {
+    val database = getInstance("https://fit-sync-76834-default-rtdb.asia-southeast1.firebasedatabase.app/")
+    val chatRef = database.getReference("chat")
+    val newMessageRef = chatRef.push()
+    newMessageRef.setValue(chatMessage)
 }
 
 
@@ -229,9 +219,8 @@ fun CustomTextField(
                 .background(Color.White),
             textStyle = LocalTextStyle.current.copy(fontSize = 16.sp)
         )
-
         IconButton(
-            onClick = onSendClick
+            onClick = { onSendClick() }
         ) {
             Icon(
                 imageVector = Icons.Default.Send,
@@ -247,8 +236,9 @@ fun ChatItemBubble(
     UserId: String?
 ) {
     val isCurrentUserMessage = UserId == message.userId
-    val bubbleColor = if (isCurrentUserMessage) Color.DarkGray else Color.Blue // 사용자와 상대방 메시지에 다른 색 지정
+    val bubbleColor = if (isCurrentUserMessage) Color.Yellow else Color.Yellow // 사용자와 상대방 메시지에 다른 색 지정
     val alignment = if (isCurrentUserMessage) Alignment.BottomEnd else Alignment.BottomStart
+
     Column {
         if (!isCurrentUserMessage) {
             Text(text = message.userName ?: "")
@@ -259,22 +249,15 @@ fun ChatItemBubble(
             }
             Box(
                 modifier = Modifier
-                    .fillMaxWidth()
+//                    .fillMaxWidth()
                     .padding(7.dp)
                     .background(bubbleColor),
                 contentAlignment = alignment
             ) {
-                Text(
-                    text = message.message ?: "",
-                    color = Color.White,
-                    modifier = Modifier.padding(8.dp))
+                Text(text = message.message ?: "")
             }
             if (!isCurrentUserMessage) {
-                Text(
-                    text = message.uploadDate ?: "",
-                    color = Color.Black,
-                    modifier = Modifier.padding(8.dp)
-                )
+                Text(text = message.uploadDate ?: "")
             }
         }
     }
