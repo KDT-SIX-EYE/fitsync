@@ -1,16 +1,11 @@
 package com.example.fitsync
 
 import android.annotation.SuppressLint
-import android.content.Context
-import android.content.SharedPreferences
 import android.os.Bundle
-import android.widget.DatePicker
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -18,15 +13,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.Done
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -34,8 +25,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -44,10 +35,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.firebase.FirebaseApp
@@ -58,8 +50,7 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
-import java.util.Calendar
-import java.util.Date
+
 import java.util.Locale
 
 //var calendarUiModel: CalendarUiModel? = null //calendarUiModel 사용시 주석 풀기
@@ -70,17 +61,41 @@ class EventManagementActivity : ComponentActivity() {
             Column(
                 modifier = Modifier,
                 verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.Start
-            )
-            {
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
                 val db = Firebase.firestore
-                CalendarWindow(onClick = { /*TODO*/ }) {}
+                var eventDate by remember { mutableStateOf("") }
+                var eventName by remember { mutableStateOf("") }
+                var registrant by remember { mutableStateOf("") }
+                var startTime by remember { mutableStateOf("") }
+                var endTime by remember { mutableStateOf("") }
+
+                CalendarWindow(
+                    onClick = { /*TODO*/ },
+                    onClickedDate = { /*TODO*/ }
+                )
+                EventInputFields(
+                    date = eventDate,
+                    onDateChange = { eventDate = it },
+                    eventname = eventName,
+                    onNameChange = { eventName = it },
+                    registrant = registrant,
+                    onRegistrantChange = { registrant = it },
+                    startTime = startTime,
+                    onStartTimeChange = { startTime = it },
+                    endTime = endTime,
+                    onEndTimeChange = { endTime = it },
+                    selectedDate = calendarUiModel?.selectedDate
+                )
             }
         }
     }
 
     @Composable
-    fun CalendarWindow(onClick: () -> Unit, onClickedDate: () -> Unit) {
+    fun CalendarWindow(
+        onClick: () -> Unit,
+        onClickedDate: () -> Unit,
+    ) {
         val context = LocalContext.current
         FirebaseApp.initializeApp(context)
         Column {
@@ -90,8 +105,7 @@ class EventManagementActivity : ComponentActivity() {
             var currentYearMonth by remember {
                 mutableStateOf(YearMonth.now())
             }
-            Header(
-                data = calendarUiModel!!,
+            Header(data = calendarUiModel!!,
                 onPrevClickListener = { startDate ->
                     val finalStartDate = startDate.minusDays(1)
                     calendarUiModel = dataSource.getData(
@@ -107,11 +121,11 @@ class EventManagementActivity : ComponentActivity() {
                     )
                 },
                 onMinusMonth = { currentYearMonth = currentYearMonth.minusMonths(1) },
-                onPlusMonth = { currentYearMonth = currentYearMonth.plusMonths(1) }
-            )
+                onPlusMonth = { currentYearMonth = currentYearMonth.plusMonths(1) })
 
             Content(
-                currentYearMonth = currentYearMonth, data = calendarUiModel!!,
+                currentYearMonth = currentYearMonth,
+                data = calendarUiModel!!,
                 onDateClickListener = { date ->
                     calendarUiModel = calendarUiModel!!.copy(
                         selectedDate = date,
@@ -119,8 +133,7 @@ class EventManagementActivity : ComponentActivity() {
                             it.copy(
                                 isSelected = it.date.isEqual(date.date)
                             )
-                        }
-                    )
+                        })
                     onClick()
                 },
                 onClickedDate = onClickedDate
@@ -141,15 +154,11 @@ class EventManagementActivity : ComponentActivity() {
         Column(modifier = Modifier.padding(10.dp)) {
             Row {
                 Text(
-                    text =
-                    currentMonth.value.format(
+                    text = currentMonth.value.format(
                         DateTimeFormatter.ofPattern(
-                            "yyyy년 MMMM",
-                            Locale("ko")
+                            "yyyy년 MMMM", Locale("ko")
                         )
-                    ),
-                    modifier = Modifier.weight(1f),
-                    fontSize = 30.sp
+                    ), modifier = Modifier.weight(1f), fontSize = 30.sp
                 )
 
                 IconButton(onClick = {
@@ -159,8 +168,7 @@ class EventManagementActivity : ComponentActivity() {
                     onMinusMonth()
                 }) {
                     Icon(
-                        imageVector = Icons.Filled.ChevronLeft,
-                        contentDescription = "Back"
+                        imageVector = Icons.Filled.ChevronLeft, contentDescription = "Back"
                     )
                 }
                 IconButton(onClick = {
@@ -170,8 +178,7 @@ class EventManagementActivity : ComponentActivity() {
                     onPlusMonth()
                 }) {
                     Icon(
-                        imageVector = Icons.Filled.ChevronRight,
-                        contentDescription = "Next"
+                        imageVector = Icons.Filled.ChevronRight, contentDescription = "Next"
                     )
                 }
             }
@@ -213,17 +220,11 @@ class EventManagementActivity : ComponentActivity() {
     fun ContentItem(
         currentYearMonth: YearMonth,
         date: CalendarUiModel.Date,
+        eventDate: String,
+        eventName: String,
         onClickListener: (CalendarUiModel.Date) -> Unit,
         onClickedDate: () -> Unit,
     ) {
-        var isPopupVisible by remember { mutableStateOf(false) } // 팝업 띄울때 사용변수
-        val closePopup = { isPopupVisible = false } // 팝업 닫는함수
-        var enteredText by remember { mutableStateOf("") } // 사용자가 입력한 텍스트
-        val colorOptions = listOf(Color.Red, Color(0xFF800080), Color.Green)
-        var selectedColor by mutableStateOf(colorOptions[0])
-        val db = Firebase.firestore
-
-
         val textColor =
             if (date.date.year == currentYearMonth.year && date.date.month == currentYearMonth.month) {
                 if (date.date.dayOfWeek == DayOfWeek.SUNDAY) {
@@ -252,7 +253,7 @@ class EventManagementActivity : ComponentActivity() {
         Card(
             modifier = Modifier
                 .width(50.dp)
-                .height(70.dp)
+                .height(100.dp)
                 .clickable {
                     clickCount++
                     val currentTime = System.currentTimeMillis()
@@ -260,17 +261,13 @@ class EventManagementActivity : ComponentActivity() {
                     lastClickTime = currentTime
                     onClickListener(date)
                     onClickedDate()
-
-                    isPopupVisible = true // 팝업코드
-
                 },
             colors = CardDefaults.cardColors(
                 backgroundColor
             ),
         ) {
             Column(
-                modifier = Modifier
-                    .fillMaxSize(),
+                modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
@@ -285,99 +282,199 @@ class EventManagementActivity : ComponentActivity() {
                     style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
                     color = textColor
                 )
-                if (enteredText.isNotEmpty()) {
-                    Text(
-                        text = enteredText,
-                        modifier = Modifier
-                            .padding(top = 4.dp)
-                            .fillMaxWidth()
-                            .wrapContentWidth(Alignment.CenterHorizontally),
-                    style = MaterialTheme.typography.displaySmall.copy(fontSize = 8.sp),
+                Spacer(modifier = Modifier.height(4.dp)) // 추가: 간격 조정
+                Text(
+                    text = eventDate, // 추가: Event 날짜 표시
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                    style = MaterialTheme.typography.labelSmall,
                     color = textColor
-                    )
-                }
+                )
+                Spacer(modifier = Modifier.height(4.dp)) // 추가: 간격 조정
+                Text(
+                    text = eventName, // 추가: Event 이름 표시
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = textColor
+                )
             }
-        }
-
-        if (isPopupVisible) {
-            AlertDialog(
-                onDismissRequest = closePopup,
-                title = { Text(text = "일정등록") },
-                text = {
-                    Column {
-                        TextField(
-                            value = enteredText,
-                            onValueChange = { enteredText = it },
-                            label = { Text("일정내용입력") }
-                        )
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.padding(top = 8.dp)
-                        ) {
-                            Text("색 선택:", modifier = Modifier.padding(end = 4.dp))
-                            ColorPicker(selectedColor, colorOptions) { color ->
-                                selectedColor = color
-                            }
-                        }
-                    }
-                },
-                confirmButton = {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.End
-                    ) {
-                        Button(
-                            onClick = closePopup,
-                            modifier = Modifier.padding(12.dp)
-                        ) {
-                            Text(text = "닫기")
-                        }
-                        Button(
-                            onClick = {
-                                val userData = hashMapOf(
-                                    "EventTitle" to enteredText,
-                                    "PickedColor" to selectedColor,
-                                )
-                                db.collection("Event").add(userData)
-                            }
-                        )
-                        { Text(text = "저장") }
-                    }
-                }
-            )
         }
     }
 
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    fun ColorPicker(
-        selectedColor: Color,
-        colorOptions: List<Color>,
-        onColorSelected: (Color) -> Unit,
+    fun EventInputFields(
+        date: String,
+        onDateChange: (String) -> Unit,
+        eventname: String,
+        onNameChange: (String) -> Unit,
+        registrant: String,
+        onRegistrantChange: (String) -> Unit,
+        startTime: String,
+        onStartTimeChange: (String) -> Unit,
+        endTime: String,
+        onEndTimeChange: (String) -> Unit,
+        selectedDate: CalendarUiModel.Date?,
     ) {
-        Row {
-            colorOptions.forEach { color ->
-                Box(
-                    modifier = Modifier
-                        .size(24.dp)
-                        .clickable {
-                            onColorSelected(color)
-                        }
-                        .background(
-                            color = color,
-                            shape = CircleShape
-                        )
-                        .padding(4.dp)
-                ) {
-                    if (color == selectedColor) {
-                        Icon(
-                            imageVector = Icons.Default.Done,
-                            contentDescription = "Selected",
-                            tint = Color.White
-                        )
-                    }
-                }
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            OutlinedTextField(
+                value = date,
+                onValueChange = onDateChange,
+                label = { Text(text = "날짜설정") },
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    imeAction = ImeAction.Done, keyboardType = KeyboardType.Number
+                ),
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            OutlinedTextField(
+                value = eventname,
+                onValueChange = onNameChange,
+                label = { Text(text = "제목설정") },
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    imeAction = ImeAction.Done, keyboardType = KeyboardType.Text
+                ),
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+            OutlinedTextField(
+                value = registrant,
+                onValueChange = onRegistrantChange,
+                label = { Text(text = "등록자") },
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    imeAction = ImeAction.Done, keyboardType = KeyboardType.Text
+                ),
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                OutlinedTextField(
+                    value = startTime,
+                    onValueChange = onStartTimeChange,
+                    label = { Text(text = "시작시간") },
+                    keyboardOptions = KeyboardOptions.Default.copy(
+                        imeAction = ImeAction.Done, keyboardType = KeyboardType.Number
+                    ),
+                    modifier = Modifier.weight(1f)
+                )
+                Spacer(modifier = Modifier.width(16.dp))
+                OutlinedTextField(
+                    value = endTime,
+                    onValueChange = onEndTimeChange,
+                    label = { Text(text = "종료시간") },
+                    keyboardOptions = KeyboardOptions.Default.copy(
+                        imeAction = ImeAction.Done, keyboardType = KeyboardType.Number
+                    ),
+                    modifier = Modifier.weight(1f)
+                )
+            }
+            selectedDate?.let {
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = "선택된 날짜의 이벤트 이름: ${it.eventName}",
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center
+                )
             }
         }
     }
 }
 
+
+//                if (enteredText.isNotEmpty()) {
+//                    Text(
+//                        text = enteredText,
+//                        modifier = Modifier
+//                            .padding(top = 4.dp)
+//                            .fillMaxWidth()
+//                            .wrapContentWidth(Alignment.CenterHorizontally),
+//                    style = MaterialTheme.typography.displaySmall.copy(fontSize = 8.sp),
+//                    color = textColor
+//                    )
+//                }
+
+//        if (isPopupVisible) {
+//            AlertDialog(
+//                onDismissRequest = closePopup,
+//                title = { Text(text = "일정등록") },
+//                text = {
+//                    Column {
+//                        TextField(
+//                            value = enteredText,
+//                            onValueChange = { enteredText = it },
+//                            label = { Text("일정내용입력") }
+//                        )
+//                        Row(
+//                            verticalAlignment = Alignment.CenterVertically,
+//                            modifier = Modifier.padding(top = 8.dp)
+//                        ) {
+//                            Text("색 선택:", modifier = Modifier.padding(end = 4.dp))
+//                            ColorPicker(selectedColor, colorOptions) { color ->
+//                                selectedColor = color
+//                            }
+//                        }
+//                    }
+//                },
+//                confirmButton = {
+//                    Row(
+//                        modifier = Modifier.fillMaxWidth(),
+//                        horizontalArrangement = Arrangement.End
+//                    ) {
+//                        Button(
+//                            onClick = closePopup,
+//                            modifier = Modifier.padding(12.dp)
+//                        ) {
+//                            Text(text = "닫기")
+//                        }
+//                        Button(
+//                            onClick = {
+//                                val userData = hashMapOf(
+//                                    "EventTitle" to enteredText,
+//                                    "PickedColor" to selectedColor,
+//                                )
+//                                db.collection("Event").add(userData)
+//                            }
+//                        )
+//                        { Text(text = "저장") }
+//                    }
+//                }
+//            )
+//        }
+
+//    @Composable
+//    fun ColorPicker(
+//        selectedColor: Color,
+//        colorOptions: List<Color>,
+//        onColorSelected: (Color) -> Unit,
+//    ) {
+//        Row {
+//            colorOptions.forEach { color ->
+//                Box(
+//                    modifier = Modifier
+//                        .size(24.dp)
+//                        .clickable {
+//                            onColorSelected(color)
+//                        }
+//                        .background(
+//                            color = color,
+//                            shape = CircleShape
+//                        )
+//                        .padding(4.dp)
+//                ) {
+//                    if (color == selectedColor) {
+//                        Icon(
+//                            imageVector = Icons.Default.Done,
+//                            contentDescription = "Selected",
+//                            tint = Color.White
+//                        )
+//                    }
+//                }
+//            }
+//        }
+//    }

@@ -15,11 +15,7 @@ class EventActivity : ComponentActivity() {
         setContent {
             Column {
                 val context = LocalContext.current
-                Button(onClick = {
-                    val intent = Intent(context, EventCheckActivity::class.java)
-                    context.startActivity(intent)
-                }) {
-                    Text(text = "일정 등록")}
+
                 Button(onClick = {
                     val intent = Intent(context, EventManagementActivity::class.java)
                     context.startActivity(intent)
