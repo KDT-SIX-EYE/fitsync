@@ -1,5 +1,6 @@
 package com.example.fitsync
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -12,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
@@ -29,8 +29,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -97,9 +95,9 @@ private fun ChatScreen(firebaseAuth: FirebaseAuth) {
             TopAppBar(
                 title = { Text(text = "Messenger", fontSize = 17.sp, fontFamily = FontFamily.SansSerif) },
                 navigationIcon = {
-                    IconButton(onClick = { /* 채팅 목록 액티비티로 이동 */
-//                        val intent = Intent(context, ChatListActivity::class.java)
-//                        context.startActivity(intent)
+                    IconButton(onClick = { /* 메인 액티비티로 이동 */
+                        val intent = Intent(context, MainActivity::class.java)
+                        context.startActivity(intent)
                     }) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
@@ -236,7 +234,7 @@ fun ChatItemBubble(
     UserId: String?
 ) {
     val isCurrentUserMessage = UserId == message.userId
-    val bubbleColor = if (isCurrentUserMessage) Color.Yellow else Color.Yellow // 사용자와 상대방 메시지에 다른 색 지정
+    val bubbleColor = if (isCurrentUserMessage) Color.Transparent else Color.Yellow // 사용자와 상대방 메시지에 다른 색 지정
     val alignment = if (isCurrentUserMessage) Alignment.BottomEnd else Alignment.BottomStart
 
     Column {
@@ -249,7 +247,6 @@ fun ChatItemBubble(
             }
             Box(
                 modifier = Modifier
-//                    .fillMaxWidth()
                     .padding(7.dp)
                     .background(bubbleColor),
                 contentAlignment = alignment
