@@ -1,6 +1,8 @@
 package com.example.fitsync
 
+import android.content.ContentValues
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
@@ -127,13 +129,23 @@ fun Asd(db: FirebaseFirestore) {
                             "Member Name" to memberName,
                             "Trainer Name" to selectedTrainer,
                             "Clicked Date" to clickedDate,
-                            "Clicked Time" to selectedTime
+                            "Selected Time" to selectedTime
                         )
                         //collection().document(asf) : schedule 컬렉션의 asf라는 문서, 문서 하나를 지정하므로 asf문서의 위 값들이 수정됨.
-                        db.collection("schedule").document(clickedDate.toString()).collection("asd").add(userData)
+                        db.collection("schedule").document(clickedDate.toString()).collection("asd").document(selectedTime.toString()).set(userData)
                     }
                 )
                 { Text(text = "예약") }
+                db.collection("schedule")
+                    .get()
+                    .addOnSuccessListener { result ->
+                        for (document in result) {
+                            Log.d(ContentValues.TAG, "${document.id} => ${document.data}")
+                        }
+                    }
+                    .addOnFailureListener { exception ->
+                        Log.d(ContentValues.TAG, "Error getting documents: ", exception)
+                    }
             }
 
             Column(modifier = Modifier.background(Color.LightGray)) {
@@ -168,7 +180,7 @@ fun Asd(db: FirebaseFirestore) {
             val date = dateModel.date
             return date.year * 10000 + date.monthValue * 100 + date.dayOfMonth
         }
-        CalendarWindow(data = calendarUiModel, calendarUiModel = calendarUiModel, onClickedDate = { calendarOpen = false },
+        CalendarWindow(data = calendarUiModel, onClickedDate = { calendarOpen = false },
             onPrevClickListener = { startDate ->
                 val finalStartDate = startDate.minusDays(1)
                 calendarUiModel = dataSource.getData(
@@ -200,7 +212,6 @@ fun Asd(db: FirebaseFirestore) {
 @Composable
 fun CalendarWindow(
     data: CalendarUiModel,
-    calendarUiModel: CalendarUiModel,
     onClickedDate: () -> Unit,
     onPrevClickListener: (LocalDate) -> Unit,
     onNextClickListener: (LocalDate) -> Unit,
@@ -213,7 +224,7 @@ fun CalendarWindow(
             mutableStateOf(YearMonth.now())
         }
         Header(
-            data = calendarUiModel,
+            data = data,
             onPrevClickListener = {
                 onPrevClickListener(data.startDate.date)
             },
@@ -225,7 +236,7 @@ fun CalendarWindow(
         )
 
         Content(
-            currentYearMonth = currentYearMonth, data = calendarUiModel,
+            currentYearMonth = currentYearMonth, data = data,
             onDateClickListener =
             onDateClickListener,
             onClickedDate = onClickedDate
