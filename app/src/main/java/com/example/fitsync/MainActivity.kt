@@ -45,10 +45,10 @@ class MainActivity : ComponentActivity() {
                             Text(text = "예약")
                         }
                         Button(onClick = {
-                            val intent = Intent(context, QRcheckActivity::class.java)
+                            val intent = Intent(context, AttendanceActivity::class.java)
                             context.startActivity(intent)
                         }) {
-                            Text(text = "QR출석체크")
+                            Text(text = "근태관리")
                         }
 
                     }

@@ -8,8 +8,8 @@ import com.example.fitsync.ui.theme.FitSyncTheme
 
 class CalenderActivity: ComponentActivity() {
 
-    override fun onCreate(savedInstanceState: Bundle?, persistentState: PersistableBundle?) {
-        super.onCreate(savedInstanceState, persistentState)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         setContent {
             FitSyncTheme {
 
