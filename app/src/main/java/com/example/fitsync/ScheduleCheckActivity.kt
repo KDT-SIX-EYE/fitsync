@@ -109,38 +109,14 @@ fun ScheduleCheckScreen() {
                 onTimeListOpen = { timeListOpen = !timeListOpen }
             )
         }
-        var selectedTime = 11
-        TimeButton(clickedDate, selectedTime, timeListOpen)
+
+        TimeButton(clickedDate, timeListOpen)
     }
 }
 
 @Composable
-fun TimeButton(clickedDate: Int, selectedTime: Int, timeListOpen: Boolean) {
+fun TimeButton(clickedDate: Int, timeListOpen: Boolean) {
     Row {
-        var scheduledName by remember { mutableStateOf("") }
-//        Button(onClick = {
-//            fetchScheduledName(db, clickedDate, selectedTime) { fetchedName ->
-//                scheduledName = fetchedName
-//            }
-//        }) {
-//
-//        }
-        Text(text = scheduledName)
-//        db.collection("schedule")
-//            .document("$clickedDate")
-//            .collection("Time").document("$selectedTime").collection("Trainer")
-//            .get()
-//            .addOnSuccessListener { result ->
-//                for (document in result) {
-//                    Log.d(TAG, "${document.id} => ${document.data}")
-//                }
-//            }
-//            .addOnFailureListener { exception ->
-//                Log.w(TAG, "Error getting documents: ", exception)
-//            }
-//        var timeButtonOpen by remember {
-//            mutableStateOf(false)
-//        }
         if (timeListOpen) {
             LazyColumn {
                 item {
@@ -154,26 +130,7 @@ fun TimeButton(clickedDate: Int, selectedTime: Int, timeListOpen: Boolean) {
                     for (hour in startTime until endTime) {
                         timeOptions.add(hour)
                     }
-                    var callbackText by remember { mutableStateOf("") }
 
-                    // Firebase에서 데이터 가져오기 등의 로직 수행 후 affList 업데이트
-                    // 예시로 임의의 데이터 추가
-//                    if (affList.isEmpty()) {
-//                        val tempList = mutableListOf<Int>()
-//                        db.collection("schedule").document("$clickedDate").collection("Time").get()
-//                            .addOnSuccessListener { documents ->
-//                                for (document in documents) {
-//                                    val aff: Int = document.id.toInt()
-//                                    tempList.add(aff)
-//                                    Log.d(TAG, "${document.id} => ${document.data}")
-//                                }
-//                                // affList를 업데이트하여 UI를 자동으로 업데이트
-//                                affList = tempList
-//                            }
-//                            .addOnFailureListener {
-//                                Log.d(TAG, "$it")
-//                            }
-//                    }
                     var affList by remember { mutableStateOf(listOf<String>()) }
                     var wqeqweList by remember { mutableStateOf(listOf<Triple<String, String, String>>()) }
                     if (affList.isEmpty()) {
@@ -200,13 +157,12 @@ fun TimeButton(clickedDate: Int, selectedTime: Int, timeListOpen: Boolean) {
 
                     Column {
                         for (item in wqeqweList) {
-                            Text(text = item.first) // 여기서 item.first는 Member Name, item.second는 Trainer Name
+                            Text(text = item.first)
                             Text(text = item.second)
                         }
                     }
                     var selectedButtonTime by remember { mutableStateOf(-1) }
                     for (timeOption in timeOptions) {
-                        val isSelected = timeOption == selectTime
                         val isSelectedAndInAffList = affList.contains(timeOption.toString())
                         val buttonBackgroundColor = if (isSelectedAndInAffList) {
                             Color.Red // affList에 포함되어 있으면 빨간색
@@ -255,30 +211,6 @@ fun TimeButton(clickedDate: Int, selectedTime: Int, timeListOpen: Boolean) {
         }
     }
 }
-
-fun fetchScheduledName(
-    db: FirebaseFirestore,
-    clickedDate: Int,
-    selectedTime: Int,
-    callback: (String, String) -> Unit
-) {
-    db.collection("schedule")
-        .document("$clickedDate")
-        .collection("Time")
-        .get()
-        .addOnSuccessListener { result ->
-            for (document in result) {
-                var memberName = document.getString("Member Name") ?: ""
-                var trainerName = document.getString("Trainer Name") ?: ""
-                Log.d(TAG, "${document.id} => ${document.data}")
-                callback(memberName, trainerName)
-            }
-        }
-        .addOnFailureListener { exception ->
-            Log.w(TAG, "Error getting documents: ", exception)
-        }
-}
-
 
 @Composable
 fun CalendarWindow3(
