@@ -48,19 +48,20 @@ import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-val db = Firebase.firestore
+
 
 class ScheduleCheckActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            ScheduleCheckScreen()
+            val db = Firebase.firestore
+            ScheduleCheckScreen(db)
         }
     }
 }
 
 @Composable
-fun ScheduleCheckScreen() {
+fun ScheduleCheckScreen(db: FirebaseFirestore) {
     var clickedDate by remember {
         mutableStateOf(0)
     }
@@ -110,12 +111,12 @@ fun ScheduleCheckScreen() {
             )
         }
 
-        TimeButton(clickedDate, timeListOpen)
+        TimeButton(db, clickedDate, timeListOpen)
     }
 }
 
 @Composable
-fun TimeButton(clickedDate: Int, timeListOpen: Boolean) {
+fun TimeButton(db: FirebaseFirestore,clickedDate: Int, timeListOpen: Boolean) {
     Row {
         if (timeListOpen) {
             LazyColumn {
@@ -131,47 +132,40 @@ fun TimeButton(clickedDate: Int, timeListOpen: Boolean) {
                         timeOptions.add(hour)
                     }
 
-                    var affList by remember { mutableStateOf(listOf<String>()) }
-                    var wqeqweList by remember { mutableStateOf(listOf<Triple<String, String, String>>()) }
-                    if (affList.isEmpty()) {
+                    var scheduledTImeList by remember { mutableStateOf(listOf<String>()) }
+                    var scheduledInfoList by remember { mutableStateOf(listOf<Triple<String, String, String>>()) }
+                    if (scheduledTImeList.isEmpty()) {
                         val tempList = mutableListOf<String>()
                         val tripelList = mutableListOf<Triple<String, String, String>>()
                         db.collection("schedule").document("$clickedDate").collection("Time").get()
                             .addOnSuccessListener { documents ->
                                 for (document in documents) {
-                                    val aff = document.get("Selected Time").toString()
+                                    val scheduledTime = document.get("Selected Time").toString()
                                     val membername = document.get("Member Name").toString()
                                     val trainername = document.get("Trainer Name").toString()
-                                    tempList.add(aff)
-                                    tripelList.add(Triple(aff, membername, trainername))
+                                    tempList.add(scheduledTime)
+                                    tripelList.add(Triple(scheduledTime, membername, trainername))
                                     Log.d(TAG, "${document.id} => ${document.data}")
                                 }
-                                // affList를 업데이트하여 UI를 자동으로 업데이트
-                                affList = tempList
-                                wqeqweList = tripelList
+                                scheduledTImeList = tempList
+                                scheduledInfoList = tripelList
                             }
                             .addOnFailureListener {
                                 Log.d(TAG, "$it")
                             }
                     }
 
-                    Column {
-                        for (item in wqeqweList) {
-                            Text(text = item.first)
-                            Text(text = item.second)
-                        }
-                    }
                     var selectedButtonTime by remember { mutableStateOf(-1) }
                     for (timeOption in timeOptions) {
-                        val isSelectedAndInAffList = affList.contains(timeOption.toString())
-                        val buttonBackgroundColor = if (isSelectedAndInAffList) {
-                            Color.Red // affList에 포함되어 있으면 빨간색
+                        val isSelectedAndInAffList = scheduledTImeList.contains(timeOption.toString())
+                        val buttonBackgroundColor = if (isSelectedAndInAffList) {       // 버튼 배경색
+                            Color.Red // scheduledTImeList에 포함되어 있으면 빨간색
                         } else {
                             Color.Blue // 포함되어 있지 않으면 파란색
                         }
 
-                        val buttonContentColor = if (isSelectedAndInAffList) {
-                            Color.White // affList에 포함되어 있으면 글자색 흰색
+                        val buttonContentColor = if (isSelectedAndInAffList) {          //버튼 글자색
+                            Color.White // scheduledTImeList에 포함되어 있으면 글자색 흰색
                         } else {
                             Color.Black // 포함되어 있지 않으면 글자색 검은색
                         }
@@ -184,8 +178,8 @@ fun TimeButton(clickedDate: Int, timeListOpen: Boolean) {
                                     selectedButtonTime = selectTime // 선택된 버튼 시간 저장
                                 },
                                 colors = ButtonDefaults.buttonColors(
-                                    buttonBackgroundColor,
-                                    contentColor = buttonContentColor // 버튼 내용의 글자색 설정
+                                    buttonBackgroundColor,              // 버튼 배경색
+                                    contentColor = buttonContentColor // 버튼 내용의 글자색
                                 )
                             ) {
                                 Text(text = "$timeOption")
@@ -194,7 +188,7 @@ fun TimeButton(clickedDate: Int, timeListOpen: Boolean) {
                             // 오른쪽에 선택된 버튼 정보 표시
                             if (selectedButtonTime == timeOption) {
                                 val matchingTriples =
-                                    wqeqweList.filter { it.first == timeOption.toString() }
+                                    scheduledInfoList.filter { it.first == timeOption.toString() }
                                 if (matchingTriples.isNotEmpty()) {
                                     Column {
                                         for (matchingTriple in matchingTriples) {
