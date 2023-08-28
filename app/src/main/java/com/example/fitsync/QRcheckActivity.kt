@@ -4,6 +4,8 @@ import android.content.pm.PackageManager
 import android.graphics.ImageFormat
 import android.os.Bundle
 import android.util.Size
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -21,6 +23,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -49,6 +52,7 @@ class QRcheckActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             FitSyncTheme {
+
                 var code by remember {
                     mutableStateOf("")
                 }
@@ -77,8 +81,6 @@ class QRcheckActivity : ComponentActivity() {
                 LaunchedEffect(key1 = true) {
                     launcher.launch(android.Manifest.permission.CAMERA)
                 }
-
-
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
@@ -88,6 +90,7 @@ class QRcheckActivity : ComponentActivity() {
                 ) {
                     if (hasCamPermission) {
                         if (hasReadCode) {
+                            LoadWebUrl(code)
                             BackHandler {
                                 restartApp()
                             }
@@ -139,6 +142,15 @@ class QRcheckActivity : ComponentActivity() {
         }
     }
 
+    @Composable
+    fun LoadWebUrl(url: String) {
+        AndroidView(factory = {
+            WebView(this).apply {
+                webViewClient = WebViewClient()
+                loadUrl(url)
+            }
+        })
+    }
 
     private fun restartApp() {
         val intent = Intent(this, MainActivity::class.java)

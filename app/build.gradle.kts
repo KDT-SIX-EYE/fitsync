@@ -1,5 +1,3 @@
-
-
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -9,12 +7,12 @@ plugins {
 
 android {
     namespace = "com.example.fitsync"
-    compileSdk = 33
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "com.example.fitsync"
         minSdk = 26
-        targetSdk = 33
+        targetSdk = 34
         versionCode = 1
         versionName = "1.0"
 
@@ -83,7 +81,7 @@ dependencies {
     implementation ("com.github.yuriy-budiyev:code-scanner:2.3.2")
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
     implementation ("androidx.lifecycle:lifecycle-runtime-ktx:2.4.0")
-
+    implementation("com.journeyapps:zxing-android-embedded:3.6.0")
 
     implementation("androidx.legacy:legacy-support-v4:1.0.0")
     implementation("androidx.recyclerview:recyclerview:1.2.1")
