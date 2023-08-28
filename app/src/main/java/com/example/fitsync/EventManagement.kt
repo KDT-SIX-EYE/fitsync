@@ -1,8 +1,10 @@
 package com.example.fitsync
 
 import android.annotation.SuppressLint
+import android.content.ContentValues.TAG
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.clickable
@@ -50,9 +52,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.firebase.FirebaseApp
+import com.google.firebase.database.DatabaseReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.tasks.await
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
@@ -60,7 +64,8 @@ import java.time.format.DateTimeFormatter
 
 import java.util.Locale
 
-//var calendarUiModel: CalendarUiModel? = null //calendarUiModel 사용시 주석 풀기
+var calendarUiModel: CalendarUiModel? = null //calendarUiModel 사용시 주석 풀기
+
 class EventManagementActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -97,19 +102,24 @@ class EventManagementActivity : ComponentActivity() {
                     onEndTimeChange = { endTime = it },
                     selectedDate = calendarUiModel?.selectedDate,
                     onSaveButtonClick = {
-                        val event = EventData(
-                            eventDate = eventDate,
-                            eventName = eventName,
-                            registrant = registrant,
-                            startTime = startTime,
-                            endTime = endTime
+                        val event = hashMapOf(
+                            "eventDate" to eventDate,
+                            "eventName" to eventName,
+                            "registrant" to registrant,
+                            "startTime" to startTime,
+                            "endTime" to endTime
                         )
-                        db.collection("events").add(event)
-                        eventDate = ""
-                        eventName = ""
-                        registrant = ""
-                        startTime = ""
-                        endTime = ""
+                        db.collection("events")
+                            .add(event)
+                            .addOnSuccessListener { documentReference ->
+                                Log.d(
+                                    TAG,
+                                    "DocumentSnapshot added with ID: ${documentReference.id}"
+                                )
+                            }
+                            .addOnFailureListener { e ->
+                                Log.w(TAG, "Error adding document", e)
+                            }
                     }
                 )
                 Button(onClick = {
@@ -121,6 +131,7 @@ class EventManagementActivity : ComponentActivity() {
             }
         }
     }
+
 
     @Composable
     fun CalendarWindow(
@@ -342,7 +353,7 @@ class EventManagementActivity : ComponentActivity() {
         endTime: String,
         onEndTimeChange: (String) -> Unit,
         selectedDate: CalendarUiModel.Date?,
-        onSaveButtonClick: () -> Unit
+        onSaveButtonClick: () -> Unit,
     ) {
         Column(
             modifier = Modifier
@@ -403,16 +414,25 @@ class EventManagementActivity : ComponentActivity() {
                     modifier = Modifier.weight(1f)
                 )
             }
-            selectedDate?.let {
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = "선택된 날짜의 이벤트 이름: ${it.eventName}",
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Center
-                )
-            }
+             // 입력한 데이터 저장 버튼
             Button(
-                onClick = onSaveButtonClick,
+                onClick = {
+                    val eventData = hashMapOf(
+                        "eventDate" to date,
+                        "eventName" to eventname,
+                        "registrant" to registrant,
+                        "startTime" to startTime,
+                        "endTime" to  endTime
+                    )
+                    db.collection("EventData").
+                    add(eventData)
+                        .addOnSuccessListener {  documentReference ->
+                            Log.d(TAG, "DocumentSnapshot added with ID: ${documentReference.id}")
+                        }
+                        .addOnFailureListener { e ->
+                            Log.w(TAG, "Error adding document", e)
+                        }
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 16.dp)

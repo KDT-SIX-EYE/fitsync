@@ -11,5 +11,4 @@ private val _clickedDateState = MutableStateFlow(0)
     fun updateClickedDate(date: Int) {
         _clickedDateState.value = date
     }
-
 }
