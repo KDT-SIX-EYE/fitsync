@@ -1,6 +1,7 @@
 package com.example.fitsync
 
 import android.content.ContentValues
+import android.content.ContentValues.TAG
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -41,6 +42,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.firebase.FirebaseApp
+import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -61,6 +63,8 @@ class ScheduleManagement : ComponentActivity() {
     }
 }
 
+//collection().document(asf) : schedule 컬렉션의 asf라는 문서, 문서 하나를 지정하므로 asf문서의 위 값들이 수정됨.
+//                        db.collection("schedule").document(clickedDate.toString()).collection("asd").document(selectedTime.toString()).set(userData)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Asd(db: FirebaseFirestore) {
@@ -131,21 +135,56 @@ fun Asd(db: FirebaseFirestore) {
                             "Clicked Date" to clickedDate,
                             "Selected Time" to selectedTime
                         )
-                        //collection().document(asf) : schedule 컬렉션의 asf라는 문서, 문서 하나를 지정하므로 asf문서의 위 값들이 수정됨.
-                        db.collection("schedule").document(clickedDate.toString()).collection("asd").document(selectedTime.toString()).set(userData)
+                        val baseDocumentRef =
+                            db.collection("schedule").document("$clickedDate")
+//                                .collection("Time").document("$selectedTime")
+
+                        fun findAvailableDocumentName(
+                            documentRef: DocumentReference,
+                            candidateName: String,
+                            attempt: Int = 1,
+                            maxAttempts: Int = 3
+                        ) {
+                            val newDocumentCandidate =
+                                if (attempt == 1) candidateName else "${candidateName}_$attempt"
+                            documentRef.collection("Time").document(newDocumentCandidate).get()
+                                .addOnCompleteListener { task ->
+                                    if (task.isSuccessful) {
+                                        val documentSnapshot = task.result
+                                        if (!documentSnapshot.exists()) {
+                                            val newDocumentRef = documentRef.collection("Time")
+                                                .document(newDocumentCandidate)
+                                            newDocumentRef.set(userData)
+                                        } else {
+                                            if (attempt < maxAttempts) {
+                                                findAvailableDocumentName(
+                                                    documentRef,
+                                                    candidateName,
+                                                    attempt + 1,
+                                                    maxAttempts
+                                                )
+                                            } else {
+                                                Log.w(
+                                                    TAG,
+                                                    "Maximum additional documents reached for this time."
+                                                )
+                                            }
+                                        }
+                                    } else {
+                                        Log.w(
+                                            TAG,
+                                            "Error checking document existence: ",
+                                            task.exception
+                                        )
+                                    }
+                                }
+                        }
+
+                        findAvailableDocumentName(baseDocumentRef, "$selectedTime")
+
                     }
                 )
                 { Text(text = "예약") }
-                db.collection("schedule")
-                    .get()
-                    .addOnSuccessListener { result ->
-                        for (document in result) {
-                            Log.d(ContentValues.TAG, "${document.id} => ${document.data}")
-                        }
-                    }
-                    .addOnFailureListener { exception ->
-                        Log.d(ContentValues.TAG, "Error getting documents: ", exception)
-                    }
             }
 
             Column(modifier = Modifier.background(Color.LightGray)) {
@@ -164,11 +203,7 @@ fun Asd(db: FirebaseFirestore) {
                     }
                 }
             }
-
         }
-
-
-
         Text(text = "$clickedDate")
     }
     if (calendarOpen) {
@@ -176,6 +211,7 @@ fun Asd(db: FirebaseFirestore) {
         var calendarUiModel by remember {
             mutableStateOf(dataSource.getData(lastSelectedDate = dataSource.today))
         }
+
         fun convertLocalDateToInt(dateModel: CalendarUiModel.Date): Int {
             val date = dateModel.date
             return date.year * 10000 + date.monthValue * 100 + date.dayOfMonth
