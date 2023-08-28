@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
+//버튼 클릭과 이동 드디어 성공!
 class KanbanViewModel : ViewModel() {
     private val firestore = Firebase.firestore
 
@@ -23,7 +24,15 @@ class KanbanViewModel : ViewModel() {
 
     private suspend fun fetchTasks(): List<Task> {
         val tasksSnapshot = firestore.collection("tasks").get().await()
-        return tasksSnapshot.documents.mapNotNull { it.toObject(Task::class.java) }
+        return tasksSnapshot.documents.mapNotNull { doc ->
+            val data = doc.data
+            val id = doc.id
+            if (data != null) {
+                Task(id, data["title"] as String, data["description"] as String, data["status"] as String)
+            } else {
+                null
+            }
+        }
     }
 
     fun updateTaskStatus(taskId: String, newStatus: String) {
@@ -31,21 +40,13 @@ class KanbanViewModel : ViewModel() {
             val taskRef = firestore.collection("tasks").document(taskId)
 
             try {
-                val taskSnapshot = taskRef.get().await()
+                val updateData = mapOf(
+                    "status" to newStatus
+                )
+                taskRef.update(updateData).await()
 
-                if (taskSnapshot.exists()) {
-                    // 해당 문서가 존재하는 경우에만 업데이트 진행
-                    val updateData = mapOf(
-                        "status" to newStatus
-                    )
-                    taskRef.update(updateData).await()
-                    println("Status updated: $newStatus")
-
-                    val fetchedTasks = fetchTasks() // Firestore로부터 업데이트된 목록 가져옴
-                    _tasks.value = fetchedTasks // 로컬 상태를 업데이트하여 UI 업데이트
-                } else {
-                    println("Task with ID $taskId does not exist.")
-                }
+                val fetchedTasks = fetchTasks()
+                _tasks.value = fetchedTasks
             } catch (e: Exception) {
                 println("Error updating status of task with ID: $taskId")
             }
