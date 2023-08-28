@@ -83,7 +83,6 @@ fun KanbanBoardScreen(viewModel: KanbanViewModel) {
         }
     }
 
-
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -99,18 +98,33 @@ fun KanbanBoardScreen(viewModel: KanbanViewModel) {
                     .weight(1f)
                     .padding(end = 4.dp)
             ) {
-                StatusColumn("To Do", tasks.filter { it.status == "To Do" }) { task, newStatus ->
-                    viewModel.updateTaskStatus(task.id, newStatus)
-                }
+                StatusColumn(
+                    status = "To Do",
+                    tasks = tasks.filter { it.status == "To Do" },
+                    onTaskStatusChanged = { task, newStatus ->
+                        viewModel.updateTaskStatus(task.id, newStatus)
+                    },
+                    onTaskDeleted = { task ->
+                        viewModel.deleteTask(task.id)
+                    }
+                )
+
             }
             Box(
                 modifier = Modifier
                     .weight(1f)
                     .padding(start = 4.dp)
             ) {
-                StatusColumn("In Progress", tasks.filter { it.status == "In Progress" }) { task, newStatus ->
-                    viewModel.updateTaskStatus(task.id, newStatus)
-                }
+                StatusColumn(
+                    status = "In Progress",
+                    tasks = tasks.filter { it.status == "In Progress" },
+                    onTaskStatusChanged = { task, newStatus ->
+                        viewModel.updateTaskStatus(task.id, newStatus)
+                    },
+                    onTaskDeleted = { task ->
+                        viewModel.deleteTask(task.id)
+                    }
+                )
             }
         }
         Box(
@@ -118,9 +132,16 @@ fun KanbanBoardScreen(viewModel: KanbanViewModel) {
                 .fillMaxWidth()
                 .align(Alignment.Center)
         ) {
-            StatusColumn("Done", tasks.filter { it.status == "Done" }) { task, newStatus ->
-                viewModel.updateTaskStatus(task.id, newStatus)
-            }
+            StatusColumn(
+                status = "Done",
+                tasks = tasks.filter { it.status == "Done" },
+                onTaskStatusChanged = { task, newStatus ->
+                    viewModel.updateTaskStatus(task.id, newStatus)
+                },
+                onTaskDeleted = { task ->
+                    viewModel.deleteTask(task.id)
+                }
+            )
         }
         Box(
             modifier = Modifier
@@ -135,9 +156,12 @@ fun KanbanBoardScreen(viewModel: KanbanViewModel) {
 }
 
 @Composable
-fun StatusColumn(status: String,
-                 tasks: List<Task>,
-                 onTaskStatusChanged: (Task, String) -> Unit) {
+fun StatusColumn(
+    status: String,
+    tasks: List<Task>,
+    onTaskStatusChanged: (Task, String) -> Unit,
+    onTaskDeleted: (Task) -> Unit
+) {
     Column(
         modifier = Modifier
             .padding(8.dp)
@@ -147,46 +171,69 @@ fun StatusColumn(status: String,
         Spacer(modifier = Modifier.height(8.dp))
 
         tasks.forEach { task ->
-            TaskCard(task, onTaskStatusChanged)
+            TaskCard(task, onTaskStatusChanged, onTaskDeleted)
             Spacer(modifier = Modifier.height(8.dp))
         }
     }
 }
 
 @Composable
-fun TaskCard(task: Task, onTaskStatusChanged: (Task, String) -> Unit) {
+fun TaskCard(
+    task: Task,
+    onTaskStatusChanged: (Task, String) -> Unit,
+    onTaskDeleted: (Task) -> Unit // 이 파라미터 추가
+) {
     val currentStatus = remember { mutableStateOf(task.status) }
+    val showCard = remember { mutableStateOf(true) } // TaskCard 표시 여부
 
     Column(
         modifier = Modifier
             .padding(8.dp)
-            .background(Color.LightGray)
+            .background(androidx.compose.ui.graphics.Color.LightGray)
             .padding(8.dp)
     ) {
-        Text(text = task.title, fontWeight = FontWeight.Bold)
-        Text(text = task.description)
-        Spacer(modifier = Modifier.height(8.dp))
-        Button(
-            onClick = {
-                val newStatus = when (task.status) {
-                    "To Do" -> "In Progress"
-                    "In Progress" -> "Done"
-                    else -> task.status
-                }
+        if (showCard.value) {
+            Text(text = task.title, fontWeight = FontWeight.Bold)
+            Text(text = task.description)
+            Spacer(modifier = Modifier.height(8.dp))
+            Button(
+                onClick = {
+                    val newStatus = when (task.status) {
+                        "To Do" -> "In Progress"
+                        "In Progress" -> "Done"
+                        "Done" -> {
+                            // Done 상태에서 삭제 버튼 클릭 시 TaskCard 및 데이터 삭제
+                            onTaskDeleted(task)
+                            showCard.value = false
+                            return@Button
+                        }
+                        else -> task.status
+                    }
 
-                onTaskStatusChanged(task, newStatus)
-                currentStatus.value = newStatus
-            },
-            modifier = Modifier
-                .align(Alignment.CenterHorizontally)
-                .padding(8.dp)
-        ) {
-            Text(if (task.status == "To Do") "Start" else "Complete")
+                    onTaskStatusChanged(task, newStatus)
+                    currentStatus.value = newStatus
+                },
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(8.dp)
+            ) {
+                Text(
+                    when (task.status) {
+                        "To Do" -> "Start"
+                        "In Progress" -> "Complete"
+                        "Done" -> "Delete"
+                        else -> ""
+                    }
+                )
+            }
         }
 
-        // LaunchedEffect를 사용하여 상태가 변경되었을 때 UI 업데이트
-        LaunchedEffect(currentStatus.value) {
-            // 상태 변경에 따른 UI 업데이트 로직 작성 (필요하면)
+        if (showCard.value) {
+            // LaunchedEffect를 사용하여 상태가 변경되었을 때 UI 업데이트
+            LaunchedEffect(currentStatus.value) {
+                // 상태 변경에 따른 UI 업데이트 로직 작성 (필요하면)
+            }
         }
     }
 }
+

@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
-//버튼 클릭과 이동을 firebase와 연동 드디어 성공!
 class KanbanViewModel : ViewModel() {
     private val firestore = Firebase.firestore
 
@@ -53,6 +52,21 @@ class KanbanViewModel : ViewModel() {
         }
     }
 
+    fun deleteTask(taskId: String) {
+        viewModelScope.launch {
+            val taskRef = firestore.collection("tasks").document(taskId)
+
+            try {
+                taskRef.delete().await()
+
+                val fetchedTasks = fetchTasks()
+                _tasks.value = fetchedTasks
+            } catch (e: Exception) {
+                println("Error deleting task with ID: $taskId")
+            }
+        }
+    }
+
     fun addTask(newTask: Task) {
         viewModelScope.launch {
             firestore.collection("tasks").add(newTask).await()
@@ -60,7 +74,6 @@ class KanbanViewModel : ViewModel() {
             _tasks.value = updatedTasks
         }
     }
-
 
     private fun loadTasks() {
         viewModelScope.launch {
