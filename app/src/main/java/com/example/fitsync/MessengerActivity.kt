@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -46,7 +47,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.semantics.Role.Companion.Image
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -63,7 +63,6 @@ import com.google.firebase.database.ValueEventListener
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import java.util.concurrent.TimeUnit
 
 class MessengerActivity : ComponentActivity() {
     private lateinit var firebaseAuth: FirebaseAuth
@@ -168,7 +167,7 @@ private fun ChatScreen(firebaseAuth: FirebaseAuth) {
             items(sentMessages.reversed()) { message ->
                 ChatItemBubble(
                     message = message,
-                    UserId = user?.uid,
+                    UserId = user?.uid
                 )
             }
         }
@@ -219,8 +218,8 @@ fun CustomTextField(
             onValueChange = onValueChange,
             modifier = Modifier
                 .weight(1f) // 여기서 비율을 조정
-                .padding(horizontal = 16.dp, vertical = 8.dp)
-                .background(Color.White),
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+//                .background(Color.White),
             textStyle = LocalTextStyle.current.copy(fontSize = 16.sp)
         )
         IconButton(
@@ -234,66 +233,89 @@ fun CustomTextField(
     }
 }
 
-
 @Composable
 fun ChatItemBubble(
     message: ChatMessage,
-    UserId: String?,
+    UserId: String?
 ) {
     val isCurrentUserMessage = UserId == message.userId
     val bubbleColor = if (isCurrentUserMessage) Color(0xFFE2F2FF) else Color(0xFFFCE4EC)
-
     val horizontalArrangement = if (isCurrentUserMessage) Arrangement.End else Arrangement.Start
 
+    if (!isCurrentUserMessage) {
+        Column(
+            modifier = Modifier.padding(8.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = horizontalArrangement,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.userimage),
+                    contentDescription = "Profile Picture",
+                    modifier = Modifier
+                        .size(24.dp)
+                        .clip(CircleShape)
+                )
+                Column {
+                    Text(
+                        text = message.userName ?: "",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 12.sp
+                    )
+                    Box(
+                        modifier = Modifier
+                            .background(color = bubbleColor, shape = RoundedCornerShape(16.dp))
+                            .padding(6.dp)
+                    ) {
+                        Text(
+                            text = message.message ?: "",
+                            fontSize = 16.sp
+                        )
+                    }
+                }
+                Text(
+                    text = message.uploadDate ?: "",
+                    fontSize = 9.sp,
+                    modifier = Modifier.padding(top = 6.dp)
+                )
+            }
+        }
+    }
 
-    Column(
-        modifier = Modifier.padding(8.dp)
-    ) {
+    if (isCurrentUserMessage) {
+        Spacer(modifier = Modifier.padding(4.dp))
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = horizontalArrangement,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.userimage),
-                contentDescription = "Profile Picture",
-                modifier = Modifier
-                    .size(24.dp)
-                    .clip(CircleShape)
-            )
-            Column {
-                Text(
-                    text = message.userName ?: "",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 12.sp,
-                    color = if (isCurrentUserMessage) Color.Black else Color.Black                )
-                Box(
-                    modifier = Modifier
-                        .background(color = bubbleColor, shape = RoundedCornerShape(16.dp))
-                        .padding(6.dp)
-                ) {
-                    Text(
-                        text = message.message ?: "",
-                        fontSize = 16.sp,
-                        color = if (isCurrentUserMessage) Color.Black else Color.Black
-                    )
-                }
-            }
             Text(
                 text = message.uploadDate ?: "",
-                fontSize = 10.sp,
-                color = Color.Black,
+                fontSize = 9.sp,
                 modifier = Modifier.padding(top = 6.dp)
             )
+            Box(
+                modifier = Modifier
+                    .background(color = bubbleColor, shape = RoundedCornerShape(16.dp))
+                    .padding(6.dp)
+            ) {
+                Text(
+                    text = message.message ?: "",
+                    fontSize = 16.sp)
+            }
         }
     }
 }
 
 
+
+
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
-    val firebaseAuth = FirebaseAuth.getInstance() // Firebase 초기화 및 인스턴스 생성
+    val firebaseAuth = FirebaseAuth.getInstance()
     FitSyncTheme {
         ChatScreen(firebaseAuth = firebaseAuth)
     }
