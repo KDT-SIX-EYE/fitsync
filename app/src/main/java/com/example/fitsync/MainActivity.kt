@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -74,7 +75,7 @@ fun MainScreen() {
                 actions = {
                     IconButton(onClick = { /* 사용자 계정 화면 */ }) {
                         Icon(
-                            imageVector = Icons.Default.AccountCircle,
+                            imageVector = Icons.Default.Face,
                             contentDescription = "사용자 프로필"
                         )
                     }
@@ -115,7 +116,17 @@ fun MainScreen() {
                         Icon(
                             painter = painterResource(id = R.drawable.baseline_call_24),
                             contentDescription = "예약 액티비티로 이동"
-                        )                    }
+                        )
+                    }
+                    IconButton(onClick = {
+                        val intent = Intent(context, UsersActivity::class.java)
+                        context.startActivity(intent)
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.AccountCircle,
+                            contentDescription = "사용자 목록 액티비티로 이동"
+                        )
+                    }
                     IconButton(onClick = {
                         val intent = Intent(context, MessengerActivity::class.java)
                         context.startActivity(intent)
@@ -134,7 +145,7 @@ fun MainScreen() {
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-
+            // 메인 화면 내용을 어떻게 채울까??
         }
     }
 }

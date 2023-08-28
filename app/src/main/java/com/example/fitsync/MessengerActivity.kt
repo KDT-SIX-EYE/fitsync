@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -62,6 +63,7 @@ import com.google.firebase.database.ValueEventListener
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import java.util.concurrent.TimeUnit
 
 class MessengerActivity : ComponentActivity() {
     private lateinit var firebaseAuth: FirebaseAuth
@@ -234,151 +236,6 @@ fun CustomTextField(
     }
 }
 
-//@Composable
-//fun ChatItemBubble(
-//    message: ChatMessage,
-//    UserId: String?
-//) {
-//    val isCurrentUserMessage = UserId == message.userId
-//    val bubbleColor = if (isCurrentUserMessage) Color.Transparent else Color.Yellow // 사용자와 상대방 메시지에 다른 색 지정
-//    val alignment = if (isCurrentUserMessage) Alignment.BottomEnd else Alignment.BottomStart
-//
-//    Column {
-//        if (!isCurrentUserMessage) {
-//            Text(text = message.userName ?: "")
-//        }
-//        Row {
-//            if (isCurrentUserMessage){
-//                Text(text = message.uploadDate ?: "")
-//            }
-//            Box(
-//                modifier = Modifier
-//                    .padding(7.dp)
-//                    .background(bubbleColor),
-//                contentAlignment = alignment
-//            ) {
-//                Text(text = message.message ?: "")
-//            }
-//            if (!isCurrentUserMessage) {
-//                Text(text = message.uploadDate ?: "")
-//            }
-//        }
-//    }
-//}
-
-//@Composable
-//fun ChatItemBubble(
-//    message: ChatMessage,
-//    UserId: String?
-//) {
-//    val isCurrentUserMessage = UserId == message.userId
-//    val bubbleColor = if (isCurrentUserMessage) Color(0xFFE2F2FF) else Color(0xFFFCE4EC)
-//    val alignment = if (isCurrentUserMessage) Alignment.End else Alignment.Start
-//
-//    Column(
-//        modifier = Modifier.padding(8.dp)
-//    ) {
-//        Row(
-//            verticalAlignment = Alignment.CenterVertically,
-//            horizontalArrangement = Arrangement.spacedBy(8.dp)
-//        ) {
-//            Image(
-//                painter = painterResource(id = R.drawable.userimage), // 프로필 사진 이미지 리소스 사용
-//                contentDescription = "Profile Picture",
-//                modifier = Modifier
-//                    .size(30.dp) // 프로필 사진 크기 조정
-//                    .clip(CircleShape)
-//            )
-//            Text(
-//                text = message.userName ?: "",
-//                fontWeight = FontWeight.Bold,
-//                fontSize = 18.sp, // 텍스트 크기 조정
-//                color = MaterialTheme.colorScheme.primary
-//            )
-//        }
-//        Row(
-//            modifier = Modifier.fillMaxWidth(),
-//            horizontalArrangement = Arrangement.End
-//        ) {
-//            Box(
-//                modifier = Modifier
-//                    .background(color = bubbleColor, shape = RoundedCornerShape(16.dp))
-//                    .padding(16.dp),
-//                contentAlignment = alignment
-//            ) {
-//                Text(
-//                    text = message.message ?: "",
-//                    fontSize = 16.sp, // 텍스트 크기 조정
-//                    color = if (isCurrentUserMessage) Color.Black else Color.White
-//                )
-//            }
-//        }
-//        Row(
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .padding(top = 4.dp),
-//            horizontalArrangement = Arrangement.End
-//        ) {
-//            Text(
-//                text = message.uploadDate ?: "",
-//                fontSize = 14.sp, // 텍스트 크기 조정
-//                color = MaterialTheme.colorScheme.secondary
-//            )
-//        }
-//    }
-//}
-
-//@Composable
-//fun ChatItemBubble(
-//    message: ChatMessage,
-//    UserId: String?
-//) {
-//    val isCurrentUserMessage = UserId == message.userId
-//    val bubbleColor = if (isCurrentUserMessage) Color(0xFFE2F2FF) else Color(0xFFFCE4EC)
-//
-//    Column (
-//        modifier = Modifier.padding(8.dp)
-//    ) {
-//        Row(
-//            verticalAlignment = Alignment.CenterVertically,
-//            horizontalArrangement = Arrangement.spacedBy(8.dp)
-//        ) {
-//            Image(
-//                painter = painterResource(id = R.drawable.userimage), // 프로필 사진 이미지 리소스 사용
-//                contentDescription = "Profile Picture",
-//                modifier = Modifier
-//                    .size(24.dp) // 프로필 사진 크기 조정
-//                    .clip(CircleShape)
-//            )
-//            Text(
-//                text = message.userName ?: "",
-//                fontWeight = FontWeight.Bold,
-//                fontSize = 12.sp, // 텍스트 크기 조정
-//                color = Color.Black
-//            )
-//        }
-//
-//        Box(
-//            modifier = Modifier
-//                .background(color = bubbleColor, shape = RoundedCornerShape(16.dp))
-//                .padding(6.dp)
-//        ) {
-//            Text(
-//                text = message.message ?: "",
-//                fontSize = 16.sp, // 텍스트 크기 조정
-//                color = if (isCurrentUserMessage) Color.Black else Color.Black
-//            )
-//        }
-//        Text(
-//            text = message.uploadDate ?: "",
-//            fontSize = 10.sp, // 텍스트 크기 조정
-//            color = MaterialTheme.colorScheme.secondary,
-//            modifier = Modifier
-//                .align(if (isCurrentUserMessage) Alignment.End else Alignment.Start)
-//                .padding(top = 4.dp)
-//        )
-//    }
-//}
 
 @Composable
 fun ChatItemBubble(
@@ -430,6 +287,8 @@ fun ChatItemBubble(
         }
     }
 }
+
+
 
 
 @Preview(showBackground = true)

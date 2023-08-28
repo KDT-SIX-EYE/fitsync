@@ -7,3 +7,8 @@ data class ChatMessage(
     val userName: String? = "이름 오류",
     val uploadDate: String? = ""
 )
+
+data class User(
+    val userId: String,
+    val userName: String
+)
