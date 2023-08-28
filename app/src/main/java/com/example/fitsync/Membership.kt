@@ -43,6 +43,7 @@ class Membership : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun SignupScreen() {
+        var name by remember { mutableStateOf("") }
         var email by remember { mutableStateOf("") }
         var password by remember { mutableStateOf("") }
         var signupErrorMessage by remember { mutableStateOf("") }
@@ -55,11 +56,20 @@ class Membership : ComponentActivity() {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             OutlinedTextField(
+                value = name,
+                onValueChange = { name = it },
+                label = { Text("이름") },
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    imeAction = ImeAction.Next
+                ),
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
                 label = { Text("이메일") },
                 keyboardOptions = KeyboardOptions.Default.copy(
-                    imeAction = ImeAction.Done
+                    imeAction = ImeAction.Next
                 ),
             )
             Spacer(modifier = Modifier.height(8.dp))

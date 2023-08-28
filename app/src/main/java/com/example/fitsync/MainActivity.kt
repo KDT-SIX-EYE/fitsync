@@ -67,6 +67,18 @@ class MainActivity : ComponentActivity() {
                         }) {
                             Text(text = "회원정보")
                         }
+                        Button(onClick = {
+                            val intent = Intent(context, MessengerActivity::class.java)
+                            context.startActivity(intent)
+                        }) {
+                            Text(text = "메신저")
+                        }
+                        Button(onClick = {
+                            val intent = Intent(context, MainActivity2::class.java)
+                            context.startActivity(intent)
+                        }) {
+                            Text(text = "uid")
+                        }
                     }
                 }
             }
