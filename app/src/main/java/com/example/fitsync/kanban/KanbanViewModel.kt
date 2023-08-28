@@ -21,38 +21,53 @@ class KanbanViewModel : ViewModel() {
     init {
         loadTasks()
     }
-    //  firebase에서도 동시 삭제되는
+
     private suspend fun fetchTasks(): List<Task> {
         val tasksSnapshot = firestore.collection("tasks").get().await()
         return tasksSnapshot.documents.mapNotNull { doc ->
             val data = doc.data
             val id = doc.id
             if (data != null) {
-                Task(id, data["title"] as String, data["description"] as String, data["status"] as String)
+                Task(
+                    id,
+                    data["title"] as String,
+                    data["description"] as String,
+                    data["status"] as String
+                )
             } else {
                 null
             }
         }
     }
 
-    fun updateTaskStatus(taskId: String, newStatus: String) {
-        viewModelScope.launch {
-            val taskRef = firestore.collection("tasks").document(taskId)
+    suspend fun updateTaskStatus(taskId: String, newStatus: String) {
+        val taskRef = firestore.collection("tasks").document(taskId)
 
-            try {
-                val updateData = mapOf(
-                    "status" to newStatus
-                )
-                taskRef.update(updateData).await()
-
-                val fetchedTasks = fetchTasks()
-                _tasks.value = fetchedTasks
-            } catch (e: Exception) {
-                println("Error updating status of task with ID: $taskId")
-            }
+        try {
+            val updateData = mapOf(
+                "status" to newStatus
+            )
+            // 데이터베이스 업데이트
+            taskRef.update(updateData).await()
+        } catch (e: Exception) {
+            println("Error updating status of task with ID: $taskId")
         }
     }
 
+    suspend fun updateTaskInFirestore(editedTask: Task) {
+        val taskRef = firestore.collection("tasks").document(editedTask.id)
+
+        try {
+            val updateData = mapOf(
+                "title" to editedTask.title,
+                "description" to editedTask.description,
+                "status" to editedTask.status
+            )
+            taskRef.update(updateData).await()
+        } catch (e: Exception) {
+            println("Error updating task with ID: ${editedTask.id}")
+        }
+    }
 
     fun deleteTask(taskId: String) {
         viewModelScope.launch {
@@ -69,11 +84,13 @@ class KanbanViewModel : ViewModel() {
         }
     }
 
+
     fun addTask(newTask: Task) {
         viewModelScope.launch {
             firestore.collection("tasks").add(newTask).await()
-            val updatedTasks = _tasks.value + newTask
-            _tasks.value = updatedTasks
+
+            // 데이터가 추가된 후에 즉시 상태 업데이트
+            _tasks.value = _tasks.value + newTask
         }
     }
 
