@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
+// Delete시 firebase에서 삭제
 class KanbanViewModel : ViewModel() {
     private val firestore = Firebase.firestore
 
@@ -20,7 +21,7 @@ class KanbanViewModel : ViewModel() {
     init {
         loadTasks()
     }
-
+    //  firebase에서도 동시 삭제되는
     private suspend fun fetchTasks(): List<Task> {
         val tasksSnapshot = firestore.collection("tasks").get().await()
         return tasksSnapshot.documents.mapNotNull { doc ->
@@ -52,6 +53,7 @@ class KanbanViewModel : ViewModel() {
         }
     }
 
+
     fun deleteTask(taskId: String) {
         viewModelScope.launch {
             val taskRef = firestore.collection("tasks").document(taskId)
@@ -82,4 +84,3 @@ class KanbanViewModel : ViewModel() {
         }
     }
 }
-

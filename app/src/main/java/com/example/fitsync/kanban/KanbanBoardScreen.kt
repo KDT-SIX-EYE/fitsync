@@ -32,9 +32,9 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import java.util.UUID
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+//Delete시 firebase에서 삭제
 fun KanbanBoardScreen(viewModel: KanbanViewModel) {
     val tasks by viewModel.tasks.collectAsState()
 
@@ -236,4 +236,3 @@ fun TaskCard(
         }
     }
 }
-

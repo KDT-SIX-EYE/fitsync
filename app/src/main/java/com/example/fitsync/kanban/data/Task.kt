@@ -5,14 +5,16 @@ data class Task(
     val title: String = "",
     val description: String = "",
     val status: String = ""
-){
-    fun toMap(): Map<String, Any> {
-        return mapOf(
-            "id" to id,
-            "title" to title,
-            "description" to description,
-            "status" to status
-        )
-    }
-}
+)
+
+//{
+//    fun toMap(): Map<String, Any> {
+//        return mapOf(
+//            "id" to id,
+//            "title" to title,
+//            "description" to description,
+//            "status" to status
+//        )
+//    }
+//}
 
