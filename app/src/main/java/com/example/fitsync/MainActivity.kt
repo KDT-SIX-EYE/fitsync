@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -34,6 +35,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.fitsync.ui.theme.FitSyncTheme
 
@@ -58,12 +60,14 @@ fun MainScreen() {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(
-                    text = "Fit Sync",
-                    fontSize = 24.sp,
-                    fontFamily = FontFamily.SansSerif,
-                    fontWeight = FontWeight.ExtraBold
-                ) },
+                title = {
+                    Text(
+                        text = "Fit Sync",
+                        fontSize = 24.sp,
+                        fontFamily = FontFamily.SansSerif,
+                        fontWeight = FontWeight.ExtraBold
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = { /* 메뉴 아이콘 */ }) {
                         Icon(
@@ -108,7 +112,8 @@ fun MainScreen() {
                         Icon(
                             painter = painterResource(id = R.drawable.baseline_schedule_24),
                             contentDescription = "스케쥴 액티비티로 이동"
-                        )                    }
+                        )
+                    }
                     IconButton(onClick = {
                         val intent = Intent(context, BookActivity::class.java)
                         context.startActivity(intent)
@@ -145,7 +150,64 @@ fun MainScreen() {
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            // 메인 화면 내용을 어떻게 채울까??
+            item {
+                val context = LocalContext.current
+                Button(
+                    onClick = {
+                        val intent = Intent(context, MemberProfile::class.java)
+                        context.startActivity(intent)
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                ) {
+                    Text(text = "MemberProfile")
+                }
+                Button(
+                    onClick = {
+                        val intent = Intent(context, LoginActivity::class.java)
+                        context.startActivity(intent)
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                ) {
+                    Text(text = "LoginActivity")
+                }
+                Button(
+                    onClick = {
+                        val intent = Intent(context, MemberRegistration::class.java)
+                        context.startActivity(intent)
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                ) {
+                    Text(text = "MemberRegistration")
+                }
+                Button(
+                    onClick = {
+                        val intent = Intent(context, MessengerActivity::class.java)
+                        context.startActivity(intent)
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                ) {
+                    Text(text = "MessengerActivity")
+                }
+                Button(
+                    onClick = {
+                        val intent = Intent(context, Membership::class.java)
+                        context.startActivity(intent)
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                ) {
+                    Text(text = "Membership")
+                }
+            }
         }
     }
 }

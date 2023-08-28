@@ -141,17 +141,15 @@ private fun ChatScreen(firebaseAuth: FirebaseAuth) {
                         value = composingMessage,
                         onValueChange = { composingMessage = it },
                         onSendClick = {
-                            if (composingMessage.isNotEmpty()) {
+                            if (composingMessage.isNotEmpty() && user?.displayName != null) {
                                 val currentDate = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date())
                                 val newChatMessage =
                                     ChatMessage(
-                                        // data class에 맞춰 바꾸기 (로그인)
                                         message = composingMessage,
                                         userId = user?.uid,
-//                                        userName = user?.displayName,
-                                        userName = "상은",
-                                        uploadDate = currentDate)
-//                                sentMessages += composingMessage
+                                        userName = user?.displayName,
+                                        uploadDate = currentDate
+                                    )
                                 saveChatMessage(newChatMessage)
                                 composingMessage = ""
                             }
@@ -170,7 +168,7 @@ private fun ChatScreen(firebaseAuth: FirebaseAuth) {
             items(sentMessages.reversed()) { message ->
                 ChatItemBubble(
                     message = message,
-                    UserId = user?.uid
+                    UserId = user?.uid,
                 )
             }
         }
@@ -178,7 +176,7 @@ private fun ChatScreen(firebaseAuth: FirebaseAuth) {
 }
 
 fun loadChatMessages(listener: (List<ChatMessage>) -> Unit) {
-    val database = getInstance("https://fit-sync-76834-default-rtdb.asia-southeast1.firebasedatabase.app/")
+    val database = getInstance("https://fitsyncproject-default-rtdb.asia-southeast1.firebasedatabase.app/")
     val chatRef = database.getReference("chat")
 
     chatRef.addValueEventListener(object : ValueEventListener {
@@ -199,7 +197,7 @@ fun loadChatMessages(listener: (List<ChatMessage>) -> Unit) {
 }
 
 fun saveChatMessage(chatMessage: ChatMessage) {
-    val database = getInstance("https://fit-sync-76834-default-rtdb.asia-southeast1.firebasedatabase.app/")
+    val database = getInstance("https://fitsyncproject-default-rtdb.asia-southeast1.firebasedatabase.app/")
     val chatRef = database.getReference("chat")
     val newMessageRef = chatRef.push()
     newMessageRef.setValue(chatMessage)
@@ -240,32 +238,35 @@ fun CustomTextField(
 @Composable
 fun ChatItemBubble(
     message: ChatMessage,
-    UserId: String?
+    UserId: String?,
 ) {
     val isCurrentUserMessage = UserId == message.userId
     val bubbleColor = if (isCurrentUserMessage) Color(0xFFE2F2FF) else Color(0xFFFCE4EC)
+
+    val horizontalArrangement = if (isCurrentUserMessage) Arrangement.End else Arrangement.Start
+
 
     Column(
         modifier = Modifier.padding(8.dp)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = horizontalArrangement,
+            modifier = Modifier.fillMaxWidth()
         ) {
             Image(
-                painter = painterResource(id = R.drawable.userimage), // 프로필 사진 이미지 리소스 사용
+                painter = painterResource(id = R.drawable.userimage),
                 contentDescription = "Profile Picture",
                 modifier = Modifier
-                    .size(24.dp) // 프로필 사진 크기 조정
+                    .size(24.dp)
                     .clip(CircleShape)
             )
             Column {
                 Text(
                     text = message.userName ?: "",
                     fontWeight = FontWeight.Bold,
-                    fontSize = 12.sp, // 텍스트 크기 조정
-                    color = Color.Black
-                )
+                    fontSize = 12.sp,
+                    color = if (isCurrentUserMessage) Color.Black else Color.Black                )
                 Box(
                     modifier = Modifier
                         .background(color = bubbleColor, shape = RoundedCornerShape(16.dp))
@@ -273,22 +274,20 @@ fun ChatItemBubble(
                 ) {
                     Text(
                         text = message.message ?: "",
-                        fontSize = 16.sp, // 텍스트 크기 조정
+                        fontSize = 16.sp,
                         color = if (isCurrentUserMessage) Color.Black else Color.Black
                     )
                 }
             }
             Text(
                 text = message.uploadDate ?: "",
-                fontSize = 10.sp, // 텍스트 크기 조정
+                fontSize = 10.sp,
                 color = Color.Black,
                 modifier = Modifier.padding(top = 6.dp)
             )
         }
     }
 }
-
-
 
 
 @Preview(showBackground = true)

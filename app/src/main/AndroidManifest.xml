@@ -13,6 +13,26 @@
         android:theme="@style/Theme.FitSync"
         tools:targetApi="31">
         <activity
+            android:name=".LoginActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.FitSync">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".CalenderActivity"
+            android:label="Calendar Activity" />
+        <activity
+            android:name=".ScheduleActivity"
+            android:label="Schedule Activity" />
+        <activity
+            android:name=".BookActivity"
+            android:label="Book Activity" />
+        <activity
             android:name=".UsersActivity"
             android:exported="false" />
         <activity
@@ -32,14 +52,14 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".CalenderActivity"
-            android:label="Calendar Activity" />
+            android:name=".MemberProfile"
+            android:exported="false" />
         <activity
-            android:name=".ScheduleActivity"
-            android:label="Schedule Activity" />
+            android:name=".MemberRegistration"
+            android:exported="false" />
         <activity
-            android:name=".BookActivity"
-            android:label="Book Activity" />
+            android:name=".Membership"
+            android:exported="false" />
     </application>
 
 </manifest>
