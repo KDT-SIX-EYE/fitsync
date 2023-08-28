@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,8 +13,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -37,9 +41,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -56,6 +63,7 @@ import com.google.firebase.database.ktx.database
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+
 
 class MessengerActivity : ComponentActivity() {
     private lateinit var firebaseAuth: FirebaseAuth
@@ -140,10 +148,8 @@ private fun ChatScreen(firebaseAuth: FirebaseAuth) {
                                         // data class에 맞춰 바꾸기 (로그인)
                                         message = composingMessage,
                                         userId = user?.uid,
-//                                        userName = user?.displayName,
-                                        userName = "상은",
+                                        userName = user?.displayName,
                                         uploadDate = currentDate)
-//                                sentMessages += composingMessage
                                 saveChatMessage(newChatMessage)
                                 composingMessage = ""
                             }
@@ -162,15 +168,16 @@ private fun ChatScreen(firebaseAuth: FirebaseAuth) {
             items(sentMessages.reversed()) { message ->
                 ChatItemBubble(
                     message = message,
-                    UserId = user?.uid
-                )
+                    userId = user?.uid
+//                    userName = user?.displayName,
+                    )
             }
         }
     }
 }
 
 fun loadChatMessages(listener: (List<ChatMessage>) -> Unit) {
-    val database = getInstance("https://fit-sync-76834-default-rtdb.asia-southeast1.firebasedatabase.app/")
+    val database = getInstance("https://fitsyncproject-default-rtdb.asia-southeast1.firebasedatabase.app/")
     val chatRef = database.getReference("chat")
 
     chatRef.addValueEventListener(object : ValueEventListener {
@@ -191,7 +198,7 @@ fun loadChatMessages(listener: (List<ChatMessage>) -> Unit) {
 }
 
 fun saveChatMessage(chatMessage: ChatMessage) {
-    val database = getInstance("https://fit-sync-76834-default-rtdb.asia-southeast1.firebasedatabase.app/")
+    val database = getInstance("https://fitsyncproject-default-rtdb.asia-southeast1.firebasedatabase.app/")
     val chatRef = database.getReference("chat")
     val newMessageRef = chatRef.push()
     newMessageRef.setValue(chatMessage)
@@ -228,37 +235,60 @@ fun CustomTextField(
     }
 }
 
+
 @Composable
 fun ChatItemBubble(
     message: ChatMessage,
-    UserId: String?
+    userId: String?,
+//    userName: String?,
 ) {
-    val isCurrentUserMessage = UserId == message.userId
-    val bubbleColor = if (isCurrentUserMessage) Color.Transparent else Color.Yellow // 사용자와 상대방 메시지에 다른 색 지정
-    val alignment = if (isCurrentUserMessage) Alignment.BottomEnd else Alignment.BottomStart
+    val isCurrentUserMessage = userId == message.userId
+    val bubbleColor = if (isCurrentUserMessage) Color(0xFFE2F2FF) else Color(0xFFFCE4EC)
 
-    Column {
-        if (!isCurrentUserMessage) {
-            Text(text = message.userName ?: "")
-        }
-        Row {
-            if (isCurrentUserMessage){
-                Text(text = message.uploadDate ?: "")
-            }
-            Box(
+    Column(
+        modifier = Modifier.padding(8.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.userimage),
+                contentDescription = "Profile Picture",
                 modifier = Modifier
-                    .padding(7.dp)
-                    .background(bubbleColor),
-                contentAlignment = alignment
-            ) {
-                Text(text = message.message ?: "")
+                    .size(24.dp)
+                    .clip(CircleShape)
+            )
+            Column {
+                Text(
+                    text = message.userName ?: "Unknown User", // userName이 null일 경우 기본 값 표시
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 12.sp,
+                    color = Color.Black
+                )
+                Box(
+                    modifier = Modifier
+                        .background(color = bubbleColor, shape = RoundedCornerShape(16.dp))
+                        .padding(6.dp)
+                ) {
+                    Text(
+                        text = message.message ?: "",
+                        fontSize = 16.sp,
+                        color = if (isCurrentUserMessage) Color.Black else Color.Black
+                    )
+                }
             }
-            if (!isCurrentUserMessage) {
-                Text(text = message.uploadDate ?: "")
-            }
+            Text(
+                text = message.uploadDate ?: "",
+                fontSize = 10.sp,
+                color = Color.Black,
+                modifier = Modifier.padding(top = 6.dp)
+            )
         }
     }
 }
+
+
 
 
 @Preview(showBackground = true)

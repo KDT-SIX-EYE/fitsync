@@ -21,6 +21,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
@@ -52,14 +53,17 @@ class LoginActivity : ComponentActivity() {
 fun LoginScreen(viewModel: LoginViewModel, onLoginSuccess: (Boolean) -> Unit) {
     val emailState = remember { mutableStateOf("") }
     val passwordState = remember { mutableStateOf("") }
+    val context = LocalContext.current
 
     Column(
+
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+
         OutlinedTextField(
             value = emailState.value,
             onValueChange = { emailState.value = it },
@@ -89,7 +93,17 @@ fun LoginScreen(viewModel: LoginViewModel, onLoginSuccess: (Boolean) -> Unit) {
         ) {
             Text(text = "Log In")
         }
-
+        Button(
+            onClick = {
+                val intent = Intent(context, Membership::class.java)
+                context.startActivity(intent)
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp)
+        ) {
+            Text(text = "회원가입")
+        }
         Button(
             onClick = {
                 val email = emailState.value
@@ -127,24 +141,32 @@ class LoginViewModel : ViewModel() {
     var loginSuccess by mutableStateOf(false)
 
     fun login(email: String, password: String) {
-        auth.signInWithEmailAndPassword(email, password)
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    loginSuccess = true
-                } else {
-                    errorMessage = "로그인에 실패했습니다. 다시 시도해주세요."
+        if (email.isNotBlank() && password.isNotBlank()) {
+            auth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        loginSuccess = true
+                    } else {
+                        errorMessage = "로그인에 실패했습니다. 다시 시도해주세요."
+                    }
                 }
-            }
+        } else {
+            errorMessage = "이메일과 비밀번호를 입력해주세요."
+        }
     }
 
     fun sendPasswordResetEmail(email: String) {
-        auth.sendPasswordResetEmail(email)
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    errorMessage = "비밀번호 재설정 이메일을 보냈습니다. 이메일을 확인해주세요."
-                } else {
-                    errorMessage = "비밀번호 재설정 이메일 전송에 실패했습니다. \n다시 시도해주세요."
+        if (email.isNotBlank()) {
+            auth.sendPasswordResetEmail(email)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        errorMessage = "비밀번호 재설정 이메일을 보냈습니다. 이메일을 확인해주세요."
+                    } else {
+                        errorMessage = "비밀번호 재설정 이메일 전송에 실패했습니다. \n다시 시도해주세요."
+                    }
                 }
-            }
+        } else {
+            errorMessage = "이메일을 입력해주세요."
+        }
     }
 }

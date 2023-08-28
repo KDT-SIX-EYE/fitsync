@@ -29,6 +29,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 
@@ -47,6 +48,7 @@ class Membership : ComponentActivity() {
         var email by remember { mutableStateOf("") }
         var password by remember { mutableStateOf("") }
         var signupErrorMessage by remember { mutableStateOf("") }
+        val auth: FirebaseAuth = Firebase.auth
 
         Column(
             modifier = Modifier
@@ -85,15 +87,24 @@ class Membership : ComponentActivity() {
             Spacer(modifier = Modifier.height(16.dp))
             Button(
                 onClick = {
-                    val auth: FirebaseAuth = Firebase.auth
-                    auth.createUserWithEmailAndPassword(email, password)
-                        .addOnCompleteListener { task ->
-                            if (task.isSuccessful) {
-                                navigateToMainActivity()
-                            } else {
-                                signupErrorMessage = "회원가입에 실패했습니다\n이메일과 비밀번호를 확인하십시오"
+
+                    if (name.isNotBlank() && email.isNotBlank() && password.isNotBlank()) {
+                        val user = FirebaseAuth.getInstance().currentUser
+                        val profileUpdates = UserProfileChangeRequest.Builder()
+                            .setDisplayName(name)
+                            .build()
+
+                        user?.updateProfile(profileUpdates)
+                            ?.addOnCompleteListener { task ->
+                                if (task.isSuccessful) {
+                                    navigateToMainActivity()
+                                } else {
+                                    signupErrorMessage = "회원가입에 실패했습니다\n이메일과 비밀번호를 확인하십시오"
+                                }
                             }
-                        }
+                    } else {
+                        signupErrorMessage = "이름, 이메일, 비밀번호를 모두 입력해주세요."
+                    }
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -109,6 +120,7 @@ class Membership : ComponentActivity() {
             }
         }
     }
+
 
     private fun navigateToMainActivity() {
         val intent = Intent(this, MainActivity::class.java)
