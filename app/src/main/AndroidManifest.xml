@@ -13,10 +13,20 @@
         android:theme="@style/Theme.FitSync"
         tools:targetApi="31">
         <activity
-            android:name=".MessengerActivity"
-            android:exported="false"
-            android:label="@string/title_activity_messenger"
-            android:theme="@style/Theme.FitSync" />
+            android:name=".ScheduleCheckActivity"
+            android:exported="false" />
+        <activity
+            android:name=".CalendarActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ScheduleManagement"
+            android:exported="false" />
+        <activity
+            android:name=".BookActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ScheduleActivity"
+            android:exported="false" />
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -28,15 +38,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".CalenderActivity"
-            android:label="Calendar Activity" />
-        <activity
-            android:name=".ScheduleActivity"
-            android:label="Schedule Activity" />
-        <activity
-            android:name=".BookActivity"
-            android:label="Book Activity" />
     </application>
 
 </manifest>
