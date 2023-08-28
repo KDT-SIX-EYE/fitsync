@@ -31,7 +31,9 @@
             android:exported="false" />
         <activity
             android:name=".MessengerActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:label="@string/title_activity_messenger"
+            android:theme="@style/Theme.FitSync" />
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -52,6 +54,7 @@
         <activity
             android:name=".BookActivity"
             android:label="Book Activity" />
+
     </application>
 
 </manifest>
