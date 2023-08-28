@@ -1,156 +1,124 @@
 package com.example.fitsync
 
-import android.content.Intent
-import android.graphics.Bitmap
+import android.content.ContentValues.TAG
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.unit.dp
 import com.example.fitsync.ui.theme.FitSyncTheme
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.mlkit.vision.text.Text
 import com.google.zxing.BarcodeFormat
-import com.journeyapps.barcodescanner.BarcodeEncoder
-import java.text.SimpleDateFormat
-import java.util.Locale
+import com.google.zxing.qrcode.QRCodeWriter
 
 
 class AttendanceActivity : ComponentActivity() {
     private val db = FirebaseFirestore.getInstance()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             FitSyncTheme {
-                var resultText by remember { mutableStateOf("") }
+
+            }
+        }
+    }
+}
+
+
+class CheckScreenActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            FitSyncTheme {
+                // Your existing code
+
                 Column(
-                    modifier = Modifier.fillMaxSize().padding(16.dp)
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color(0xff40407a)),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    generateBitmapQRCode("안녕하세요")
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Button(onClick = {
-                        val intent = Intent(this@AttendanceActivity, QRcheckActivity::class.java)
-                        startActivity(intent)
-                    }) {
-                        Text(text = "QR스캔")
-                    }
-                        Spacer(modifier = Modifier.height(16.dp))
-                        WriteFirestoreButton(title = "출근", onWrite = {
-                            onQRScanComplete("출근")
-                        })
-                        Spacer(modifier = Modifier.height(16.dp))
-                        ReadFirestoreButton(
-                            title = "출근 시간 확인", type = "출근", onRead = { timestamp ->
-                                val timeText = if (timestamp != null) {
-                                    SimpleDateFormat(
-                                        "yyyy-MM-dd HH:mm:ss", Locale.getDefault()
-                                    ).format(timestamp)
-                                } else {
-                                    "출근 시간이 없습니다."
-                                }
-                                resultText = "출근 시간: $timeText"
-                            }, modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        WriteFirestoreButton(title = "퇴근", onWrite = {
-                            onQRScanComplete("퇴근")
-                        })
-                        Spacer(modifier = Modifier.height(16.dp))
-                        ReadFirestoreButton(
-                            title = "퇴근 시간 확인", type = "퇴근", onRead = { timestamp ->
-                                val timeText = if (timestamp != null) {
-                                    SimpleDateFormat(
-                                        "yyyy-MM-dd HH:mm:ss", Locale.getDefault()
-                                    ).format(timestamp)
-                                } else {
-                                    "퇴근 시간이 없습니다."
-                                }
-                                resultText = "퇴근 시간: $timeText"
-                            }, modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text(text = resultText)
-                        Spacer(modifier = Modifier.height(16.dp))
+                    // Your existing code
 
+                    if (hasCamPermission) {
+                        if (hasReadCode) {
+                            LoadWebUrl(code)
+                            BackHandler {
+                                restartApp()
+                            }
+                        } else {
+                            // Your existing camera setup
 
+                            Button(
+                                onClick = {
+                                    // Generate QR code and save data to Firestore
+                                    val uid = "user_uid"  // Replace with actual user UID
+                                    val currentDate = "2023-08-28"  // Replace with actual date
+                                    val currentTime = "14:30"  // Replace with actual time
+                                    val qrData = "$uid:$currentDate:$currentTime"
+
+                                    val writer = QRCodeWriter()
+                                    val bitMatrix = writer.encode(qrData, BarcodeFormat.QR_CODE, 512, 512)
+                                    val image = ImageBitmap
+                                        .bitmapsFrom(bitMatrix)
+                                        .first()
+
+                                    // Display generated QR code
+                                    this@CheckScreenActivity.GeneratedQRCode(image)
+
+                                    // Save data to Firestore
+                                    val firestore = FirebaseFirestore.getInstance()
+                                    val qrCodeData = hashMapOf(
+                                        "uid" to uid,
+                                        "date" to currentDate,
+                                        "time" to currentTime
+                                    )
+
+                                    firestore.collection("qr_codes")
+                                        .add(qrCodeData)
+                                        .addOnSuccessListener { documentReference ->
+                                            Log.d(TAG, "DocumentSnapshot added with ID: ${documentReference.id}")
+                                        }
+                                        .addOnFailureListener { e ->
+                                            Log.w(TAG, "Error adding document", e)
+                                        }
+                                },
+                                modifier = Modifier.padding(16.dp)
+                            ) {
+                                Text("Generate QR Code")
+                            }
+                        }
                     }
                 }
             }
         }
     }
 
-
     @Composable
-    fun WriteFirestoreButton(
-        title: String,
-        onWrite: () -> Unit,
-        modifier: Modifier = Modifier
-    ) {
-        Button(modifier = modifier, onClick = {
-            onWrite()
-        }) {
-            Text(title)
-        }
-    }
-
-    @Composable
-    fun ReadFirestoreButton(
-        title: String,
-        type: String,
-        onRead: (Long?) -> Unit,
-        modifier: Modifier = Modifier
-    ) {
-        Button(modifier = modifier, onClick = {
-            onRead(type) { timestamp ->
-                onRead(timestamp)
-            }
-        }) {
-            Text(title)
-        }
-    }
-
-    fun onWrite(type: String, timestamp: Long) {
-        val db = FirebaseFirestore.getInstance()
-        val docRef = db.collection("attendance").document(type)
-        docRef.set(
-            mapOf(
-                "timestamp" to timestamp
-            )
+    fun GeneratedQRCode(image: ImageBitmap) {
+        // Display the generated QR code
+        Image(
+            bitmap = image,
+            contentDescription = null,
+            modifier = Modifier.size(200.dp)
         )
     }
 
-    fun onRead(type: String, onResult: (Long?) -> Unit) {
-        val db = FirebaseFirestore.getInstance()
-        val docRef = db.collection("attendance").document(type)
-        docRef.get().addOnSuccessListener { document ->
-            if (document.exists()) {
-                val timestamp = document.getLong("timestamp")
-                onResult(timestamp)
-            } else {
-                onResult(null)
-            }
-        }
-    }
-
-    fun onQRScanComplete(type: String) {
-        val currentTime = System.currentTimeMillis()
-        onWrite(type, currentTime)
-    }
-
-    /** QRCode Bitmap 생성 */
-    private fun generateBitmapQRCode(contents: String): Bitmap {
-        val barcodeEncoder = BarcodeEncoder()
-        return barcodeEncoder.encodeBitmap(contents, BarcodeFormat.QR_CODE, 512, 512)
-    }
+    // Your existing functions
+}
