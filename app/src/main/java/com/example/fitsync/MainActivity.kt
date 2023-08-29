@@ -27,7 +27,7 @@ class MainActivity : ComponentActivity() {
                     Column {
                         val context = LocalContext.current
                         Button(onClick = {
-                            val intent = Intent(context, CalenderActivity::class.java)
+                            val intent = Intent(context, CalendarActivity::class.java)
                             context.startActivity(intent)
                         }) {
                             Text(text = "캘린더")
