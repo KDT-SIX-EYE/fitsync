@@ -304,7 +304,6 @@ fun Header(
                 modifier = Modifier.weight(1f),
                 fontSize = 30.sp
             )
-
             IconButton(onClick = {
                 onPrevClickListener(data.startDate.date)
                 val newMonth = currentMonth.value.minusMonths(1)

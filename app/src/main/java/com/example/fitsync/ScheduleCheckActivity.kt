@@ -5,8 +5,11 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,6 +18,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.ChevronRight
@@ -34,6 +38,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -47,7 +52,6 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.util.Locale
-
 
 
 class ScheduleCheckActivity : ComponentActivity() {
@@ -105,7 +109,6 @@ fun ScheduleCheckScreen(db: FirebaseFirestore) {
                         }
                     )
                     clickedDate = convertLocalDateToInt(calendarUiModel.selectedDate)
-
                 },
                 onTimeListOpen = { timeListOpen = !timeListOpen }
             )
@@ -116,7 +119,7 @@ fun ScheduleCheckScreen(db: FirebaseFirestore) {
 }
 
 @Composable
-fun TimeButton(db: FirebaseFirestore,clickedDate: Int, timeListOpen: Boolean) {
+fun TimeButton(db: FirebaseFirestore, clickedDate: Int, timeListOpen: Boolean) {
     Row {
         if (timeListOpen) {
             LazyColumn {
@@ -157,11 +160,12 @@ fun TimeButton(db: FirebaseFirestore,clickedDate: Int, timeListOpen: Boolean) {
 
                     var selectedButtonTime by remember { mutableStateOf(-1) }
                     for (timeOption in timeOptions) {
-                        val isSelectedAndInAffList = scheduledTImeList.contains(timeOption.toString())
+                        val isSelectedAndInAffList =
+                            scheduledTImeList.contains(timeOption.toString())
                         val buttonBackgroundColor = if (isSelectedAndInAffList) {       // 버튼 배경색
-                            Color.Red // scheduledTImeList에 포함되어 있으면 빨간색
+                            Color.Black // scheduledTImeList에 포함되어 있으면 빨간색
                         } else {
-                            Color.Blue // 포함되어 있지 않으면 파란색
+                            Color.Transparent // 포함되어 있지 않으면 파란색
                         }
 
                         val buttonContentColor = if (isSelectedAndInAffList) {          //버튼 글자색
@@ -171,32 +175,55 @@ fun TimeButton(db: FirebaseFirestore,clickedDate: Int, timeListOpen: Boolean) {
                         }
 
                         Row {
-                            Text(text = "$timeOption")
+                            var time_in_Scedule by remember {
+                                mutableStateOf(false)
+                            }
+                            Column(modifier = Modifier.width(20.dp)) {
+                                Text(text = "$timeOption")
+
+                            }
                             Button(
                                 onClick = {
                                     selectTime = timeOption
-                                    selectedButtonTime = selectTime // 선택된 버튼 시간 저장
+                                    selectedButtonTime = selectTime
+                                    time_in_Scedule = !time_in_Scedule// 선택된 버튼 시간 저장
                                 },
+                                modifier = Modifier.border(1.dp, Color.Black),
                                 colors = ButtonDefaults.buttonColors(
                                     buttonBackgroundColor,              // 버튼 배경색
                                     contentColor = buttonContentColor // 버튼 내용의 글자색
-                                )
+                                ),
+                                shape = RectangleShape
                             ) {
-                                Text(text = "$timeOption")
                             }
 
                             // 오른쪽에 선택된 버튼 정보 표시
-                            if (selectedButtonTime == timeOption) {
-                                val matchingTriples =
-                                    scheduledInfoList.filter { it.first == timeOption.toString() }
-                                if (matchingTriples.isNotEmpty()) {
-                                    Column {
-                                        for (matchingTriple in matchingTriples) {
-                                            Text(text = "Member Name: ${matchingTriple.second}")
-                                            Text(text = "Trainer Name: ${matchingTriple.third}")
+                            if(time_in_Scedule) {
+                                if (selectedButtonTime == timeOption) {
+                                    val matchingTriples =
+                                        scheduledInfoList.filter { it.first == timeOption.toString() }
+                                    if (matchingTriples.isNotEmpty()) {
+                                        LazyRow {
+                                            item {
+                                                for (matchingTriple in matchingTriples) {
+                                                    Box(modifier = Modifier
+                                                        .padding(5.dp)
+                                                        .background(Color.Black)) {
+                                                        Column {
+
+                                                            Text(text = "회원 : ${matchingTriple.second}",
+                                                                color = Color.White)
+                                                            Text(text = "트레이너 : ${matchingTriple.third}", color = Color.White)
+
+                                                        }
+                                                    }
+                                                }
+                                            }
+
                                         }
                                     }
                                 }
+
                             }
                         }
                     }
@@ -335,7 +362,7 @@ fun ContentItem3(
             } else if (date.date.dayOfWeek == DayOfWeek.SATURDAY) {
                 Color.Blue
             } else {
-                MaterialTheme.colorScheme.primary
+                Color.Black
             }
         } else {
             MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
