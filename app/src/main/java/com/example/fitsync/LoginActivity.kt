@@ -27,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -123,11 +124,11 @@ fun LoginScreen(viewModel: LoginViewModel, onLoginSuccess: (Boolean) -> Unit) {
             ) {
                 Text(text = "Sign Up")
             }
-
+        }
             Column(
+                modifier =  Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // 여기서 이메일 입력해주세요 메시지가 보이는 위치가 이상함.
                 Button(
                     onClick = {
                         val email = emailState.value
@@ -158,7 +159,7 @@ fun LoginScreen(viewModel: LoginViewModel, onLoginSuccess: (Boolean) -> Unit) {
             }
         }
     }
-}
+
 
 class LoginViewModel : ViewModel() {
     private val auth = FirebaseAuth.getInstance()
