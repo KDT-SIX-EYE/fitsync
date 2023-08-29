@@ -120,6 +120,15 @@ fun MainScreen() {
                             contentDescription = "예약 액티비티로 이동"
                         )                    }
                     IconButton(onClick = {
+                        val intent = Intent(context, UsersActivity::class.java)
+                        context.startActivity(intent)
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.AccountCircle,
+                            contentDescription = "사용자 목록 액티비티로 이동"
+                        )
+                    }
+                    IconButton(onClick = {
                         val intent = Intent(context, MessengerActivity::class.java)
                         context.startActivity(intent)
                     }) {

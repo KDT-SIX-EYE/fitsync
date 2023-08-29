@@ -43,8 +43,6 @@ class MemberProfile : ComponentActivity() {
 }
 
 data class FirestoreUser(
-    //id == uid
-    val id: String,
     val name: String = "",
     val number: String = "",
     val manager: String = "",
@@ -65,14 +63,12 @@ fun UsersScreen() {
                 //"users" firestore 콘솔 컬렉션 이름
                 val querySnapshot = firestore.collection("users").get().await()
                 querySnapshot.documents.map { document ->
-                    //id == uid
-                    val id = document.id
                     val name = document.getString("name") ?: ""
                     val number = document.getString("number") ?: ""
                     val manager = document.getString("manager") ?: ""
                     val trainer = document.getString("trainer") ?: ""
                     val etc = document.getString("etc") ?: ""
-                    FirestoreUser(id, name, number, manager, trainer, etc)
+                    FirestoreUser(name, number, manager, trainer, etc)
                 }
             }
             users = usersList
@@ -99,7 +95,6 @@ fun UserCard(user: FirestoreUser) {
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
-            Text(text = "ID: ${user.id}")
             Text(text = "Name: ${user.name}")
             Text(text = "Number: ${user.number}")
             Text(text = "Manager: ${user.manager}")
