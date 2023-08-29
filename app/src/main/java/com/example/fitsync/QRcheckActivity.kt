@@ -1,4 +1,5 @@
 package com.example.fitsync
+import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.ImageFormat
@@ -38,6 +39,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import com.example.fitsync.ui.theme.FitSyncTheme
+import com.google.firebase.firestore.SetOptions
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.BinaryBitmap
 import com.google.zxing.DecodeHintType
@@ -45,6 +49,8 @@ import com.google.zxing.MultiFormatReader
 import com.google.zxing.PlanarYUVLuminanceSource
 import com.google.zxing.common.HybridBinarizer
 import java.nio.ByteBuffer
+import java.time.LocalDate
+import java.time.LocalTime
 
 
 class QRcheckActivity : ComponentActivity() {
@@ -52,91 +58,119 @@ class QRcheckActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             FitSyncTheme {
+                QRScreen()
+            }
+        }
+    }
 
-                var code by remember {
-                    mutableStateOf("")
-                }
-                var hasReadCode by remember {
-                    mutableStateOf(false)
-                }
-                val context = LocalContext.current
-                val lifecycleOwner = LocalLifecycleOwner.current
-                val cameraProviderFeature = remember {
-                    ProcessCameraProvider.getInstance(context)
-                }
-                var hasCamPermission by remember {
-                    mutableStateOf(
-                        ContextCompat.checkSelfPermission(
-                            context,
-                            android.Manifest.permission.CAMERA
-                        ) == PackageManager.PERMISSION_GRANTED
-                    )
-                }
-                val launcher = rememberLauncherForActivityResult(
-                    contract = ActivityResultContracts.RequestPermission(),
-                    onResult = { granted ->
-                        hasCamPermission = granted
+    @Composable
+    private fun QRScreen() {
+        val db = Firebase.firestore
+        val code by remember {
+            mutableStateOf("")
+        }
+        var hasReadCode by remember {
+            mutableStateOf(false)
+        }
+        val context = LocalContext.current
+        val lifecycleOwner = LocalLifecycleOwner.current
+        val cameraProviderFeature = remember {
+            ProcessCameraProvider.getInstance(context)
+        }
+        var hasCamPermission by remember {
+            mutableStateOf(
+                ContextCompat.checkSelfPermission(
+                    context, Manifest.permission.CAMERA
+                ) == PackageManager.PERMISSION_GRANTED
+            )
+        }
+        val launcher = rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestPermission(),
+            onResult = { granted ->
+                hasCamPermission = granted
+            })
+        LaunchedEffect(key1 = true) {
+            launcher.launch(Manifest.permission.CAMERA)
+        }
+        Column(
+            modifier = Modifier.fillMaxSize().background(Color.White),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            if (hasCamPermission) {
+                if (hasReadCode) {
+                    LoadWebUrl(code)
+                    BackHandler {
+                        restartApp()
                     }
-                )
-                LaunchedEffect(key1 = true) {
-                    launcher.launch(android.Manifest.permission.CAMERA)
-                }
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color(0xff40407a)),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    if (hasCamPermission) {
-                        if (hasReadCode) {
-                            LoadWebUrl(code)
-                            BackHandler {
-                                restartApp()
-                            }
-                        } else {
-                            AndroidView(
-                                factory = { context ->
-                                    val previewView = PreviewView(context)
-                                    val preview = Preview.Builder().build()
-                                    val selector = CameraSelector.Builder()
-                                        .requireLensFacing(CameraSelector.LENS_FACING_BACK)
-                                        .build()
-                                    preview.setSurfaceProvider(previewView.surfaceProvider)
-                                    val imageAnalysis = ImageAnalysis.Builder()
-                                        .setTargetResolution(
-                                            Size(
-                                                previewView.width,
-                                                previewView.height
-                                            )
-                                        )
-                                        .setBackpressureStrategy(STRATEGY_KEEP_ONLY_LATEST)
-                                        .build()
-                                    imageAnalysis.setAnalyzer(
-                                        ContextCompat.getMainExecutor(context),
-                                        QRCodeAnalyzer { result ->
-                                            code = result
-                                            hasReadCode = true
+                } else {
+                    AndroidView(
+                        factory = { context ->
+                            val previewView = PreviewView(context)
+                            val preview = Preview.Builder().build()
+                            val selector = CameraSelector.Builder().requireLensFacing(CameraSelector.LENS_FACING_BACK).build()
+                            preview.setSurfaceProvider(previewView.surfaceProvider)
+                            val imageAnalysis = ImageAnalysis.Builder().setTargetResolution(
+                                Size(
+                                    previewView.width, previewView.height
+                                )
+                            ).setBackpressureStrategy(STRATEGY_KEEP_ONLY_LATEST).build()
+                            imageAnalysis.setAnalyzer(ContextCompat.getMainExecutor(context),
+                                QRCodeAnalyzer {
+                                    if (!hasReadCode) {
+                                        hasReadCode = true
+                                        val receivedManagerName = intent.getStringExtra("managerName")
+                                        val currentDate = LocalDate.now()
+                                        val currentTime = LocalTime.now()
+                                        val hour = currentTime.hour
+                                        val minute = currentTime.minute
+                                        val second = currentTime.second
+                                        val managerDocumentRef = receivedManagerName?.let {
+                                            db.collection("Attendence").document(currentDate.toString())
+                                                .collection("ManagerName").document(it)
                                         }
-                                    )
-                                    try {
-                                        val cameraProvider = cameraProviderFeature.get()
-                                        cameraProvider.unbindAll() // Release any previous camera sessions
-                                        cameraProvider.bindToLifecycle(
-                                            lifecycleOwner,
-                                            selector,
-                                            preview,
-                                            imageAnalysis
-                                        )
-                                    } catch (e: Exception) {
-                                        e.printStackTrace()
+                                        managerDocumentRef!!.get().addOnCompleteListener { task ->
+                                            if (task.isSuccessful) {
+                                                val document = task.result
+                                                val attendenceValue = document.getString("ATTENDENCE")
+                                                val finishValue = document.getString("FINISH")
+
+                                                if (attendenceValue == null) {
+                                                    val attendenceData = hashMapOf(
+                                                        "ATTENDENCE" to "$hour:$minute:$second"
+                                                    )
+                                                    managerDocumentRef.set(attendenceData)
+                                                } else if (finishValue == null) {
+                                                    val finishWorkTime = hashMapOf(
+                                                        "FINISH" to "$hour:$minute:$second"
+                                                    )
+                                                    managerDocumentRef.set(
+                                                        finishWorkTime, SetOptions.merge()
+                                                    )
+                                                }
+
+                                                val intent =
+                                                    Intent(context, AttendanceActivity::class.java)
+                                                intent.putExtra(
+                                                    "qrScanType", if (finishValue != null) "퇴근" else "출근"
+                                                )
+                                                intent.putExtra("managerName", receivedManagerName)
+                                                context.startActivity(intent)
+                                            }
+                                        }
                                     }
-                                    previewView
-                                },
-                                modifier = Modifier.border(10.dp, color = Color(0xFFD6A2E8))
-                            )
-                        }
-                    }
+                                })
+                            try {
+                                val cameraProvider = cameraProviderFeature.get()
+                                cameraProvider.unbindAll() // Release any previous camera sessions
+                                cameraProvider.bindToLifecycle(
+                                    lifecycleOwner, selector, preview, imageAnalysis
+                                )
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                            }
+                            previewView
+                        }, modifier = Modifier.border(5.dp, color = Color.White.copy(alpha = 0.5f))
+                    )
                 }
             }
         }
@@ -159,6 +193,7 @@ class QRcheckActivity : ComponentActivity() {
     }
 
 }
+
 
 class QRCodeAnalyzer(private val onQrCodeScanned: (String) -> Unit) : ImageAnalysis.Analyzer {
 
@@ -210,5 +245,4 @@ class QRCodeAnalyzer(private val onQrCodeScanned: (String) -> Unit) : ImageAnaly
             get(it)
         }
     }
-
 }
