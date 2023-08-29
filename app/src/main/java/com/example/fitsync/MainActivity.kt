@@ -133,10 +133,10 @@ fun MainScreen(viewModel: KanbanViewModel) {
                             val intent = Intent(context, MainActivity::class.java)
                             context.startActivity(intent)
                         }) {
-//                            Icon(
-//                                painter = painterResource(id = R.drawable.baseline_home_24),
-//                                contentDescription = "메인 액티비티(홈)으로 이동"
-//                            )
+                            Icon(
+                                painter = painterResource(id = R.drawable.baseline_home_24),
+                                contentDescription = "메인 액티비티(홈)으로 이동"
+                            )
                         }
                         Text(
                             text = "Home",
@@ -153,10 +153,10 @@ fun MainScreen(viewModel: KanbanViewModel) {
                             val intent = Intent(context, AttendanceActivity::class.java)
                             context.startActivity(intent)
                         }) {
-//                            Icon(
-//                                painter = painterResource(id = R.drawable.baseline_qr_code_2_24),
-//                                contentDescription = "QR 액티비티로 이동"
-//                            )
+                            Icon(
+                                painter = painterResource(id = R.drawable.baseline_qr_code_2_24),
+                                contentDescription = "QR 액티비티로 이동"
+                            )
                         }
                         Text(
                             text = "QR",
@@ -193,10 +193,10 @@ fun MainScreen(viewModel: KanbanViewModel) {
                             val intent = Intent(context, MessengerActivity::class.java)
                             context.startActivity(intent)
                         }) {
-//                            Icon(
-//                                painter = painterResource(id = R.drawable.baseline_mark_chat_unread_24),
-//                                contentDescription = "메신저 액티비티로 이동"
-//                            )
+                            Icon(
+                                painter = painterResource(id = R.drawable.baseline_mark_chat_unread_24),
+                                contentDescription = "메신저 액티비티로 이동"
+                            )
                         }
                         Text(
                             text = "채팅방",
