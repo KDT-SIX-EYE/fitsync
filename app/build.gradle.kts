@@ -85,6 +85,8 @@ dependencies {
 
     val lifecycleVersion = "2.6.1"
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycleVersion")
+//    implementation("androidx.lifecycle:lifecycle-viewmodel:$lifecycleVersion")
 
     implementation("androidx.compose.material:material:1.5.0")
 }

@@ -27,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -123,42 +124,42 @@ fun LoginScreen(viewModel: LoginViewModel, onLoginSuccess: (Boolean) -> Unit) {
             ) {
                 Text(text = "Sign Up")
             }
-
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally
+        }
+        Column(
+            modifier =  Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Button(
+                onClick = {
+                    val email = emailState.value
+                    if (email.isNotEmpty()) {
+                        viewModel.sendPasswordResetEmail(email)
+                    } else {
+                        viewModel.errorMessage = "이메일을 입력해주세요."
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(
+                    Color.Black,
+                    contentColor = Color.White
+                )
             ) {
-                // 여기서 이메일 입력해주세요 메시지가 보이는 위치가 이상함.
-                Button(
-                    onClick = {
-                        val email = emailState.value
-                        if (email.isNotEmpty()) {
-                            viewModel.sendPasswordResetEmail(email)
-                        } else {
-                            viewModel.errorMessage = "이메일을 입력해주세요."
-                        }
-                    },
-                    colors = ButtonDefaults.buttonColors(
-                        Color.Black,
-                        contentColor = Color.White
-                    )
-                ) {
-                    Text(text = "Forgot Password")
-                }
+                Text(text = "Forgot Password")
             }
+        }
 
-            if (viewModel.errorMessage.isNotEmpty()) {
-                Text(
-                    text = viewModel.errorMessage,
-                    color = Color.Red,
-                    modifier = Modifier.padding(8.dp))
-            }
+        if (viewModel.errorMessage.isNotEmpty()) {
+            Text(
+                text = viewModel.errorMessage,
+                color = Color.Red,
+                modifier = Modifier.padding(8.dp))
+        }
 
-            if (viewModel.loginSuccess) {
-                onLoginSuccess(true)
-            }
+        if (viewModel.loginSuccess) {
+            onLoginSuccess(true)
         }
     }
 }
+
 
 class LoginViewModel : ViewModel() {
     private val auth = FirebaseAuth.getInstance()
@@ -180,7 +181,6 @@ class LoginViewModel : ViewModel() {
             errorMessage = "이메일과 비밀번호를 입력해주세요."
         }
     }
-
     fun sendPasswordResetEmail(email: String) {
         if (email.isNotBlank()) {
             auth.sendPasswordResetEmail(email)

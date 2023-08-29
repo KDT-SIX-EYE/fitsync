@@ -6,6 +6,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -38,9 +39,12 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.fitsync.ViewModel.KanbanViewModel
 import com.example.fitsync.ui.theme.FitSyncTheme
 
 class MainActivity : ComponentActivity() {
+    private val viewModel: KanbanViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -49,7 +53,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    MainScreen()
+                    MainScreen(viewModel)
                 }
             }
         }
@@ -57,7 +61,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun MainScreen() {
+fun MainScreen(viewModel: KanbanViewModel) {
     val context = LocalContext.current
     Scaffold(
         topBar = {
@@ -190,68 +194,8 @@ fun MainScreen() {
                 .padding(innerPadding)
         ) {
             item {
-                MainButtonList()
+                KanbanBoardScreen(viewModel)
             }
         }
-    }
-}
-
-@Composable
-fun MainButtonList() {
-    val context = LocalContext.current
-    Button(
-        onClick = {
-            val intent = Intent(context, MemberProfile::class.java)
-            context.startActivity(intent)
-        },
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-    ) {
-        Text(text = "MemberProfile")
-    }
-    Button(
-        onClick = {
-            val intent = Intent(context, LoginActivity::class.java)
-            context.startActivity(intent)
-        },
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-    ) {
-        Text(text = "LoginActivity")
-    }
-    Button(
-        onClick = {
-            val intent = Intent(context, MemberRegistration::class.java)
-            context.startActivity(intent)
-        },
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-    ) {
-        Text(text = "MemberRegistration")
-    }
-    Button(
-        onClick = {
-            val intent = Intent(context, MessengerActivity::class.java)
-            context.startActivity(intent)
-        },
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-    ) {
-        Text(text = "MessengerActivity")
-    }
-    Button(
-        onClick = {
-            val intent = Intent(context, Membership::class.java)
-            context.startActivity(intent)
-        },
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-    ) {
-        Text(text = "Membership")
     }
 }
