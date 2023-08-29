@@ -4,18 +4,20 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.ArrowBack
@@ -30,12 +32,13 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -46,6 +49,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.firebase.FirebaseApp
@@ -58,26 +63,21 @@ import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-var calendarUiModel: CalendarUiModel? = null
-
-class ScheduleManagement : ComponentActivity() {
-    //    private val calenderViewModel: CalenderViewModel by viewModels()
+class CalendarActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             val db = Firebase.firestore
-            MyProfileScreen(db = db)
+            FinalScreen(db = db)
+
         }
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-// 함수 이름은 본인의 액티비티의 메인 함수를 적으십시오.
-fun MyProfileScreen(db: FirebaseFirestore) {
+fun FinalScreen(db: FirebaseFirestore) {
     val context = LocalContext.current
-
-    // 이 부분은 상단바, 하단바 부분이니까 건들지 마세요.
     Scaffold(
         topBar = {
             TopAppBar(
@@ -87,7 +87,8 @@ fun MyProfileScreen(db: FirebaseFirestore) {
                         text = "My Profile",
                         fontSize = 17.sp,
                         fontFamily = FontFamily.SansSerif
-                    ) },
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = {
                         val intent = Intent(context, MainActivity::class.java)
@@ -218,181 +219,261 @@ fun MyProfileScreen(db: FirebaseFirestore) {
                 .padding(innerPadding)
         ) {
             item {
-                    GymCalendar(db)
+                CalendarActivityScreen(db)
             }
         }
     }
 }
 
-//data class SharedData(val clickedDate: Int)
 
 
-
-
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GymCalendar(db: FirebaseFirestore) {
-    var calendarOpen by remember {
-        mutableStateOf(false)
-    }
-    var clickedDate by remember {
-        mutableStateOf(0)
-    }
-    var timeListOpen by remember {
-        mutableStateOf(false)
-    }
+fun CalendarActivityScreen(db: FirebaseFirestore) {
     Column {
-        var memberName by remember {
-            mutableStateOf("")
+        val dataSource = CalendarDataSource()
+        val calendarUiModel by remember {
+            mutableStateOf(dataSource.getData(lastSelectedDate = dataSource.today))
         }
-        var selectedTime by remember {
-            mutableStateOf(0) // 기본 시간을 선택합니다.
-        }
-        Button(onClick = { calendarOpen = true }) {
-            Text(text = "날짜 $clickedDate")
-        }
-        Button(onClick = { timeListOpen = true }) {
-            Text(text = "시간 $selectedTime")
-        }
-        val startTime = 7
-        val endTime = 23
-        val timeOptions = mutableListOf<Int>()
-
-        for (hour in startTime until endTime) {
-            timeOptions.add(hour)
-        }
-
-        Box {
-
-            Column {
-                TextField(value = memberName, onValueChange = { memberName = it })
-                var trainers = listOf("Trainer 1", "Trainer 2", "Trainer 3")
-                var trainerList by remember {
-                    mutableStateOf(trainers)
-                }
-                var expandedTrainerIndex by remember { mutableStateOf(-1) }
-                var selectedTrainer by remember { mutableStateOf("") }
-
-                Button(onClick = {
-                    expandedTrainerIndex = if (expandedTrainerIndex == -1) 0 else -1
-                }) {
-                    Text(text = "트레이너 선택")
-                }
-                if (expandedTrainerIndex != -1) {
-                    trainerList.forEachIndexed { index, trainer ->
-                        Text(
-                            text = trainer,
-                            modifier = Modifier
-                                .clickable {
-                                    selectedTrainer = trainer
-                                    expandedTrainerIndex = -1
-                                }
-                        )
-                    }
-                }
-                Button(
-                    onClick = {
-                        val userData = hashMapOf(
-                            "Member Name" to memberName,
-                            "Trainer Name" to selectedTrainer,
-                            "Clicked Date" to clickedDate,
-                            "Clicked Time" to selectedTime
-                        )
-                        db.collection("schedule").add(userData)
-                    }
-                )
-                { Text(text = "예약") }
-            }
-            Column(modifier = Modifier.background(Color.LightGray)) {
-                if (timeListOpen) {
-                    timeOptions.forEach { timeOption ->
-                        Text(
-                            text = "$timeOption ~ ${timeOption + 1}",
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    selectedTime = timeOption
-                                    timeListOpen = false
-                                }
-                                .padding(8.dp)
-                        )
-                    }
-                }
-            }
-
-        }
-        Text(text = "$clickedDate")
-    }
-    if (calendarOpen) {
-        fun convertLocalDateToInt(dateModel: CalendarUiModel.Date): Int {
-            val date = dateModel.date
-            return date.year * 10000 + date.monthValue * 100 + date.dayOfMonth
-        }
-
-        CalendarWindow(onClick = {
-            clickedDate = convertLocalDateToInt(calendarUiModel!!.selectedDate)
-        },
-            onClickedDate = { calendarOpen = false },
+        val context = LocalContext.current
+        var eventDate by remember { mutableStateOf("") }
+        var eventName by remember { mutableStateOf("") }
+        var registrant by remember { mutableStateOf("") }
+        var startTime by remember { mutableStateOf("") }
+        var endTime by remember { mutableStateOf("") }
+        var showEventInputFields by remember { mutableStateOf(false) }
+        var showEventCheckFields by remember { mutableStateOf(false) }
+        CalendarWindow2()
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly
         )
-    }
+        {
+            Button(
+                onClick = {
+                    val intent = Intent(context, ScheduleCheckActivity::class.java)
+                    context.startActivity(intent)
+                },
+                modifier = Modifier
+                    .padding(8.dp)
+                    .sizeIn(minHeight = 0.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.bookcheck), // 예약확인 아이콘 리소스 ID로 대체
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Text(text = "예약확인")
+                }
+            }
+            Button(onClick = {
+                val intent = Intent(context, ScheduleManagement::class.java)
+                context.startActivity(intent)
+            },
+                modifier = Modifier
+                    .padding(8.dp)
+                    .sizeIn(minHeight = 0.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.book), // 예약 아이콘 리소스 ID로 대체
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Text(text = "예약하기")
+                }
+            }
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            Button(
+                onClick = {
+                    showEventInputFields = !showEventInputFields
+                },
+                modifier = Modifier
+                    .padding(8.dp)
+                    .sizeIn(minHeight = 0.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.schedule), // 일정등록 아이콘 리소스 ID로 대체
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Text(text = "일정추가")
+                }
+            }
+            Button(
+                onClick = {
+                    showEventCheckFields = !showEventCheckFields
+                },
+                modifier = Modifier
+                    .padding(8.dp)
+                    .sizeIn(minHeight = 0.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.schedulecheck), // 일정확인 아이콘 리소스 ID로 대체
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Text(text = "일정확인")
+                }
+            }
+        }
+        if (showEventInputFields) {
+            Column {
 
+                EventInputFields(date = eventDate,
+                    onDateChange = { eventDate = it },
+                    eventname = eventName,
+                    onNameChange = { eventName = it },
+                    registrant = registrant,
+                    onRegistrantChange = { registrant = it },
+                    startTime = startTime,
+                    onStartTimeChange = { startTime = it },
+                    endTime = endTime,
+                    onEndTimeChange = { endTime = it },
+                    selectedDate = calendarUiModel.selectedDate,
+                    onSaveButtonClick = {
+                        val event = hashMapOf(
+                            "eventDate" to eventDate,
+                            "eventName" to eventName,
+                            "registrant" to registrant,
+                            "startTime" to startTime,
+                            "endTime" to endTime
+                        )
+                        db.collection("EventData").add(event)
+                            .addOnSuccessListener { documentReference ->
+
+                            }.addOnFailureListener { e ->
+
+                            }
+                        showEventInputFields = false
+                    },
+                    onCancelButtonClick = {
+                        showEventInputFields = false
+                    })
+
+
+            }
+        }
+        if (showEventCheckFields) {
+            val eventDataList = remember { mutableStateListOf<EventData>() }
+
+            db.collection("EventData")
+                .get()
+                .addOnSuccessListener { querySnapshot ->
+                    val seenEventDates = HashSet<String>() // 이미 나온 날짜들을 저장할 Set
+                    val newEventDataList = mutableListOf<EventData>()
+                    for (document in querySnapshot) {
+                        val eventDate = document.get("eventDate").toString()
+                        if (eventDate !in seenEventDates) { // 중복이 아닌 경우만 추가
+                            seenEventDates.add(eventDate)
+                            val eventName = document.get("eventName").toString()
+                            val registrant = document.get("registrant").toString()
+                            val startTime = document.get("startTime").toString()
+                            val endTime = document.get("endTime").toString()
+                            newEventDataList.add(
+                                EventData(
+                                    eventDate,
+                                    eventName,
+                                    registrant,
+                                    startTime,
+                                    endTime
+                                )
+                            )
+                        }
+                    }
+                    eventDataList.addAll(newEventDataList)
+                }
+                .addOnFailureListener { exception ->
+                }
+            val distinctEventDataList = eventDataList.distinctBy { it.eventDate }
+            Column {
+
+                Text(
+                    text = "일정 목록",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+                distinctEventDataList.forEach { eventData ->
+                    EventCard(eventData)
+                }
+
+            }
+
+        }
+    }
 }
 
 @Composable
-fun CalendarWindow(
-    onClick: () -> Unit,
-    onClickedDate: () -> Unit,
-) {
+fun CalendarWindow2() {
     val context = LocalContext.current
     FirebaseApp.initializeApp(context)
     Column {
 
         val dataSource = CalendarDataSource()
-        calendarUiModel = dataSource.getData(lastSelectedDate = dataSource.today)
+        var calendarUiModel by remember {
+            mutableStateOf(dataSource.getData(lastSelectedDate = dataSource.today))
+        }
         var currentYearMonth by remember {
             mutableStateOf(YearMonth.now())
         }
-        Header(
-            data = calendarUiModel!!,
+        Header2(
+            data = calendarUiModel,
             onPrevClickListener = { startDate ->
                 val finalStartDate = startDate.minusDays(1)
                 calendarUiModel = dataSource.getData(
                     startDate = finalStartDate,
-                    lastSelectedDate = calendarUiModel!!.selectedDate.date
+                    lastSelectedDate = calendarUiModel.selectedDate.date
                 )
             },
             onNextClickListener = { endDate ->
                 val finalStartDate = endDate.plusDays(2)
                 calendarUiModel = dataSource.getData(
                     startDate = finalStartDate,
-                    lastSelectedDate = calendarUiModel!!.selectedDate.date
+                    lastSelectedDate = calendarUiModel.selectedDate.date
                 )
             },
             onMinusMonth = { currentYearMonth = currentYearMonth.minusMonths(1) },
             onPlusMonth = { currentYearMonth = currentYearMonth.plusMonths(1) }
         )
 
-        Content(
-            currentYearMonth = currentYearMonth, data = calendarUiModel!!,
+        Content2(
+            currentYearMonth = currentYearMonth, data = calendarUiModel,
             onDateClickListener = { date ->
-                calendarUiModel = calendarUiModel!!.copy(
+                calendarUiModel = calendarUiModel.copy(
                     selectedDate = date,
-                    visibleDates = calendarUiModel!!.visibleDates.map {
+                    visibleDates = calendarUiModel.visibleDates.map {
                         it.copy(
                             isSelected = it.date.isEqual(date.date)
                         )
                     }
                 )
-                onClick()
-            },
-            onClickedDate = onClickedDate
+            }
         )
     }
 }
 
 
 @Composable
-fun Header(
+fun Header2(
     data: CalendarUiModel,
     onPrevClickListener: (LocalDate) -> Unit,
     onNextClickListener: (LocalDate) -> Unit,
@@ -442,13 +523,12 @@ fun Header(
 }
 
 @Composable
-fun Content(
+fun Content2(
     currentYearMonth: YearMonth,
     data: CalendarUiModel,
     onDateClickListener: (CalendarUiModel.Date) -> Unit,
-    onClickedDate: () -> Unit,
 
-) {
+    ) {
     Column {
         repeat(6) { rowIndex ->
             Row(
@@ -459,11 +539,11 @@ fun Content(
                 val endIndex = minOf(startIndex + 7, data.visibleDates.size)
                 for (i in startIndex until endIndex) {
                     val date = data.visibleDates[i]
-                    ContentItem(
+                    ContentItem2(
                         currentYearMonth = currentYearMonth,
                         date = date,
-                        onDateClickListener,
-                        onClickedDate = onClickedDate
+                        onDateClickListener
+
                     )
                 }
             }
@@ -472,11 +552,10 @@ fun Content(
 }
 
 @Composable
-fun ContentItem(
+fun ContentItem2(
     currentYearMonth: YearMonth,
     date: CalendarUiModel.Date,
     onClickListener: (CalendarUiModel.Date) -> Unit,
-    onClickedDate: () -> Unit,
 ) {
     val textColor =
         if (date.date.year == currentYearMonth.year && date.date.month == currentYearMonth.month) {
@@ -513,7 +592,7 @@ fun ContentItem(
 
                 lastClickTime = currentTime
                 onClickListener(date)
-                onClickedDate()
+
 
             },
         colors = CardDefaults.cardColors(
@@ -537,6 +616,152 @@ fun ContentItem(
                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
                 color = textColor
             )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun EventInputFields(
+    date: String,
+    onDateChange: (String) -> Unit,
+    eventname: String,
+    onNameChange: (String) -> Unit,
+    registrant: String,
+    onRegistrantChange: (String) -> Unit,
+    startTime: String,
+    onStartTimeChange: (String) -> Unit,
+    endTime: String,
+    onEndTimeChange: (String) -> Unit,
+    selectedDate: CalendarUiModel.Date?,
+    onSaveButtonClick: () -> Unit,
+    onCancelButtonClick: () -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+    ) {
+        OutlinedTextField(
+            value = date,
+            onValueChange = onDateChange,
+            label = { Text(text = "날짜만 입력하세요") },
+            keyboardOptions = KeyboardOptions.Default.copy(
+                imeAction = ImeAction.Done, keyboardType = KeyboardType.Number
+            ),
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        OutlinedTextField(
+            value = eventname,
+            onValueChange = onNameChange,
+            label = { Text(text = "일정이름") },
+            keyboardOptions = KeyboardOptions.Default.copy(
+                imeAction = ImeAction.Done, keyboardType = KeyboardType.Text
+            ),
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+        OutlinedTextField(
+            value = registrant,
+            onValueChange = onRegistrantChange,
+            label = { Text(text = "등록자") },
+            keyboardOptions = KeyboardOptions.Default.copy(
+                imeAction = ImeAction.Done, keyboardType = KeyboardType.Text
+            ),
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            OutlinedTextField(
+                value = startTime,
+                onValueChange = onStartTimeChange,
+                label = { Text(text = "시작시간") },
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    imeAction = ImeAction.Done, keyboardType = KeyboardType.Number
+                ),
+                modifier = Modifier.weight(1f)
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+            OutlinedTextField(
+                value = endTime,
+                onValueChange = onEndTimeChange,
+                label = { Text(text = "종료시간") },
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    imeAction = ImeAction.Done, keyboardType = KeyboardType.Number
+                ),
+                modifier = Modifier.weight(1f)
+            )
+        }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp)
+        ) {
+            Button(
+                onClick = {
+                    if (isInputValid(
+                            date = date,
+                            eventname = eventname,
+                            registrant = registrant,
+                            startTime = startTime,
+                            endTime = endTime
+                        )
+                    ) {
+                        onSaveButtonClick()
+                    }
+                }, modifier = Modifier.weight(1f)
+            ) {
+                Text(text = "일정 등록 완료")
+            }
+            Spacer(modifier = Modifier.width(16.dp))
+            Button(
+                onClick = onCancelButtonClick, modifier = Modifier.weight(1f)
+            ) {
+                Text(text = "취소")
+            }
+        }
+    }
+}
+
+private fun isInputValid(
+    date: String,
+    eventname: String,
+    registrant: String,
+    startTime: String,
+    endTime: String,
+): Boolean {
+    return date.isNotBlank() && eventname.isNotBlank() && registrant.isNotBlank() && startTime.isNotBlank() && endTime.isNotBlank()
+}
+
+///////////////////////////
+/////////////////////////// 일정 확인하기
+data class EventData(
+    val eventDate: String,
+    val eventName: String,
+    val registrant: String,
+    val startTime: String,
+    val endTime: String,
+)
+
+@Composable
+fun EventCard(eventData: EventData) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text(text = "날짜: ${eventData.eventDate}일")
+            Text(text = "일정이름: ${eventData.eventName}")
+            Text(text = "등록자: ${eventData.registrant}")
+            Text(text = "시작시간: ${eventData.startTime}")
+            Text(text = "종료시간: ${eventData.endTime}")
         }
     }
 }
