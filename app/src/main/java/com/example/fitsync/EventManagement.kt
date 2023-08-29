@@ -56,8 +56,6 @@ import java.time.format.DateTimeFormatter
 
 import java.util.Locale
 
-//var calendarUiModel: CalendarUiModel? = null //calendarUiModel 사용시 주석 풀기
-
 class EventManagementActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -77,7 +75,6 @@ class EventManagementActivity : ComponentActivity() {
                 var startTime by remember { mutableStateOf("") }
                 var endTime by remember { mutableStateOf("") }
                 var showEventInputFields by remember { mutableStateOf(false) }
-
                 CalendarWindow(
                     onClick = { /*TODO*/ },
                     onClickedDate = { /*TODO*/ },
@@ -100,8 +97,7 @@ class EventManagementActivity : ComponentActivity() {
                     }
                 }
                 if (showEventInputFields) {
-                    EventInputFields(
-                        date = eventDate,
+                    EventInputFields(date = eventDate,
                         onDateChange = { eventDate = it },
                         eventname = eventName,
                         onNameChange = { eventName = it },
@@ -120,29 +116,24 @@ class EventManagementActivity : ComponentActivity() {
                                 "startTime" to startTime,
                                 "endTime" to endTime
                             )
-                            db.collection("EventData")
-                                .add(event)
+                            db.collection("EventData").add(event)
                                 .addOnSuccessListener { documentReference ->
                                     Log.d(
                                         TAG,
                                         "DocumentSnapshot added with ID: ${documentReference.id}"
                                     )
-                                }
-                                .addOnFailureListener { e ->
+                                }.addOnFailureListener { e ->
                                     Log.w(TAG, "Error adding document", e)
                                 }
                             showEventInputFields = false
                         },
                         onCancelButtonClick = {
                             showEventInputFields = false
-                        }
-                    )
+                        })
                 }
             }
         }
     }
-
-
     @Composable
     fun CalendarWindow(
         onClick: () -> Unit,
@@ -181,8 +172,7 @@ class EventManagementActivity : ComponentActivity() {
                 currentYearMonth = currentYearMonth,
                 data = calendarUiModel!!,
                 onDateClickListener = { date ->
-                    calendarUiModel = calendarUiModel!!.copy(
-                        selectedDate = date,
+                    calendarUiModel = calendarUiModel!!.copy(selectedDate = date,
                         visibleDates = calendarUiModel!!.visibleDates.map {
                             it.copy(
                                 isSelected = it.date.isEqual(date.date)
@@ -196,7 +186,6 @@ class EventManagementActivity : ComponentActivity() {
             )
         }
     }
-
     @Composable
     fun Header(
         data: CalendarUiModel,
@@ -240,7 +229,6 @@ class EventManagementActivity : ComponentActivity() {
             }
         }
     }
-
     @Composable
     fun Content(
         currentYearMonth: YearMonth,
@@ -275,7 +263,6 @@ class EventManagementActivity : ComponentActivity() {
             }
         }
     }
-
     @SuppressLint("UnrememberedMutableState")
     @Composable
     fun ContentItem(
@@ -357,7 +344,6 @@ class EventManagementActivity : ComponentActivity() {
             }
         }
     }
-
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun EventInputFields(
@@ -451,23 +437,19 @@ class EventManagementActivity : ComponentActivity() {
                         ) {
                             onSaveButtonClick()
                         }
-                    },
-                    modifier = Modifier.weight(1f)
+                    }, modifier = Modifier.weight(1f)
                 ) {
                     Text(text = "일정 등록 완료")
                 }
                 Spacer(modifier = Modifier.width(16.dp))
                 Button(
-                    onClick = onCancelButtonClick,
-                    modifier = Modifier.weight(1f)
+                    onClick = onCancelButtonClick, modifier = Modifier.weight(1f)
                 ) {
                     Text(text = "취소")
                 }
-                // 입력한 데이터 저장 버튼
             }
         }
     }
-
     private fun isInputValid(
         date: String,
         eventname: String,
@@ -475,10 +457,6 @@ class EventManagementActivity : ComponentActivity() {
         startTime: String,
         endTime: String,
     ): Boolean {
-        return date.isNotBlank() &&
-                eventname.isNotBlank() &&
-                registrant.isNotBlank() &&
-                startTime.isNotBlank() &&
-                endTime.isNotBlank()
+        return date.isNotBlank() && eventname.isNotBlank() && registrant.isNotBlank() && startTime.isNotBlank() && endTime.isNotBlank()
     }
 }
