@@ -21,6 +21,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.fitsync.data.FirestoreUser
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -42,15 +43,6 @@ class MemberProfile : ComponentActivity() {
     }
 }
 
-data class FirestoreUser(
-    //id == uid
-    val id: String,
-    val name: String = "",
-    val number: String = "",
-    val manager: String = "",
-    val trainer: String = "",
-    val etc: String = ""
-)
 
 @Composable
 fun UsersScreen() {
@@ -72,7 +64,7 @@ fun UsersScreen() {
                     val manager = document.getString("manager") ?: ""
                     val trainer = document.getString("trainer") ?: ""
                     val etc = document.getString("etc") ?: ""
-                    FirestoreUser(id, name, number, manager, trainer, etc)
+                    FirestoreUser(name, number, manager, trainer, etc)
                 }
             }
             users = usersList
@@ -99,7 +91,6 @@ fun UserCard(user: FirestoreUser) {
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
-            Text(text = "ID: ${user.id}")
             Text(text = "Name: ${user.name}")
             Text(text = "Number: ${user.number}")
             Text(text = "Manager: ${user.manager}")

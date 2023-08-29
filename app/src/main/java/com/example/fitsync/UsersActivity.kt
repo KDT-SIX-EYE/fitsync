@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Face
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -83,9 +84,10 @@ fun UserListScreen() {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(
+                title = {
+                    Text(
                     text = "Users",
-                    fontSize = 17.sp,
+                    fontSize = 20.sp,
                     fontFamily = FontFamily.SansSerif
                 )},
                 navigationIcon = {
@@ -125,10 +127,10 @@ fun UserListItem(user: User) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Image(
-            painter = painterResource(id = R.drawable.userimage), // 기본 프로필 이미지 리소스 사용
-            contentDescription = "Profile Picture",
+            imageVector = Icons.Default.Face,
+            contentDescription = "기본 프로필",
             modifier = Modifier
-                .size(40.dp) // 프로필 사진 크기 조정
+                .size(36.dp)
                 .clip(CircleShape)
         )
         Spacer(modifier = Modifier.width(16.dp))
@@ -141,30 +143,29 @@ fun UserListItem(user: User) {
 }
 
 fun loadUserList(listener: (List<User>) -> Unit) {
-    // 여기서 사용자 목록을 불러오는 로직을 구현하세요.
-    // 예를 들어 Firebase Realtime Database나 Firestore를 사용하여 사용자 목록을 가져올 수 있습니다.
-    // 가져온 사용자 목록은 listener에 전달하여 업데이트합니다.
+    val firebaseAuth = FirebaseAuth.getInstance()
+    val currentUser = firebaseAuth.currentUser
 
-    // 이 예시에서는 더미 데이터를 사용하여 사용자 목록을 생성합니다.
-    val dummyUserList = listOf(
-        User(userId = "user1", userName = "민형준"),
-        User(userId = "user2", userName = "박준호"),
-        User(userId = "user3", userName = "김종대"),
-        User(userId = "user4", userName = "김상은"),
-        User(userId = "user5", userName = "신명호"),
-        User(userId = "user6", userName = "안은진"),
-        User(userId = "user1", userName = "민형준"),
-        User(userId = "user2", userName = "박준호"),
-        User(userId = "user3", userName = "김종대"),
-        User(userId = "user4", userName = "김상은"),
-        User(userId = "user5", userName = "신명호"),
-        User(userId = "user6", userName = "안은진"),
-        User(userId = "user1", userName = "민형준"),
-        User(userId = "user2", userName = "박준호"),
-        User(userId = "user3", userName = "김종대"),
-        User(userId = "user4", userName = "김상은"),
-        User(userId = "user5", userName = "신명호"),
-        User(userId = "user6", userName = "안은진")
+    // 현재 사용자 정보가 있을 경우 사용자 목록을 생성
+    currentUser?.let {
+        val userList = listOf(
+            User(
+                userId = it.uid,
+                userName = it.displayName ?: "Unknown"
+            )
         )
-    listener(dummyUserList)
+        listener(userList)
+    }
+
+    // fakeUserList
+    val fakeUserList = listOf(
+        User(userId = "cute", userName = "김상은"),
+        User(userId = "user2", userName = "User 2"),
+        User(userId = "user3", userName = "User 3"),
+        // ... 추가적인 가짜 사용자 데이터를 생성하려면 이어서 추가
+    )
+
+    listener(fakeUserList)
+
 }
+

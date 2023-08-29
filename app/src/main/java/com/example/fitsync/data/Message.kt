@@ -12,3 +12,11 @@ data class User(
     val userId: String,
     val userName: String
 )
+
+data class FirestoreUser(
+    val name: String = "",
+    val number: String = "",
+    val manager: String = "",
+    val trainer: String = "",
+    val etc: String = ""
+)
