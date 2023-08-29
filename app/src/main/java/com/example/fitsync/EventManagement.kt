@@ -17,8 +17,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -35,9 +33,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -48,15 +44,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.firebase.FirebaseApp
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import kotlinx.coroutines.tasks.await
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
@@ -64,7 +56,7 @@ import java.time.format.DateTimeFormatter
 
 import java.util.Locale
 
-var calendarUiModel: CalendarUiModel? = null //calendarUiModel 사용시 주석 풀기
+//var calendarUiModel: CalendarUiModel? = null //calendarUiModel 사용시 주석 풀기
 
 class EventManagementActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -84,49 +76,67 @@ class EventManagementActivity : ComponentActivity() {
                 var registrant by remember { mutableStateOf("") }
                 var startTime by remember { mutableStateOf("") }
                 var endTime by remember { mutableStateOf("") }
+                var showEventInputFields by remember { mutableStateOf(false) }
 
                 CalendarWindow(
                     onClick = { /*TODO*/ },
-                    onClickedDate = { /*TODO*/ }
+                    onClickedDate = { /*TODO*/ },
                 )
-                EventInputFields(
-                    date = eventDate,
-                    onDateChange = { eventDate = it },
-                    eventname = eventName,
-                    onNameChange = { eventName = it },
-                    registrant = registrant,
-                    onRegistrantChange = { registrant = it },
-                    startTime = startTime,
-                    onStartTimeChange = { startTime = it },
-                    endTime = endTime,
-                    onEndTimeChange = { endTime = it },
-                    selectedDate = calendarUiModel?.selectedDate,
-                    onSaveButtonClick = {
-                        val event = hashMapOf(
-                            "eventDate" to eventDate,
-                            "eventName" to eventName,
-                            "registrant" to registrant,
-                            "startTime" to startTime,
-                            "endTime" to endTime
-                        )
-                        db.collection("events")
-                            .add(event)
-                            .addOnSuccessListener { documentReference ->
-                                Log.d(
-                                    TAG,
-                                    "DocumentSnapshot added with ID: ${documentReference.id}"
-                                )
-                            }
-                            .addOnFailureListener { e ->
-                                Log.w(TAG, "Error adding document", e)
-                            }
+                Spacer(modifier = Modifier.height(16.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    Button(onClick = {
+                        showEventInputFields = true // 버튼을 누르면 입력 필드를 보이도록 상태 변경
+                    }) {
+                        Text(text = "일정 등록하기")
                     }
-                )
-                Button(onClick = {
-                    val intent = Intent(context, EventCheckActivity::class.java)
-                    context.startActivity(intent)
-                }) {
-                    Text(text = "등록일정 확인하기")
+                    Button(onClick = {
+                        val intent = Intent(context, EventCheckActivity::class.java)
+                        context.startActivity(intent)
+                    }) {
+                        Text(text = "일정 확인하기")
+                    }
+                }
+                if (showEventInputFields) {
+                    EventInputFields(
+                        date = eventDate,
+                        onDateChange = { eventDate = it },
+                        eventname = eventName,
+                        onNameChange = { eventName = it },
+                        registrant = registrant,
+                        onRegistrantChange = { registrant = it },
+                        startTime = startTime,
+                        onStartTimeChange = { startTime = it },
+                        endTime = endTime,
+                        onEndTimeChange = { endTime = it },
+                        selectedDate = calendarUiModel?.selectedDate,
+                        onSaveButtonClick = {
+                            val event = hashMapOf(
+                                "eventDate" to eventDate,
+                                "eventName" to eventName,
+                                "registrant" to registrant,
+                                "startTime" to startTime,
+                                "endTime" to endTime
+                            )
+                            db.collection("EventData")
+                                .add(event)
+                                .addOnSuccessListener { documentReference ->
+                                    Log.d(
+                                        TAG,
+                                        "DocumentSnapshot added with ID: ${documentReference.id}"
+                                    )
+                                }
+                                .addOnFailureListener { e ->
+                                    Log.w(TAG, "Error adding document", e)
+                                }
+                            showEventInputFields = false
+                        },
+                        onCancelButtonClick = {
+                            showEventInputFields = false
+                        }
+                    )
                 }
             }
         }
@@ -137,6 +147,8 @@ class EventManagementActivity : ComponentActivity() {
     fun CalendarWindow(
         onClick: () -> Unit,
         onClickedDate: () -> Unit,
+        eventDateList: Map<LocalDate, String>,
+        eventNameList: Map<LocalDate, String>,
     ) {
         val context = LocalContext.current
         FirebaseApp.initializeApp(context)
@@ -178,7 +190,9 @@ class EventManagementActivity : ComponentActivity() {
                         })
                     onClick()
                 },
-                onClickedDate = onClickedDate
+                onClickedDate = onClickedDate,
+                eventDateList = eventDateList,
+                eventNameList = eventNameList
             )
         }
     }
@@ -233,6 +247,8 @@ class EventManagementActivity : ComponentActivity() {
         data: CalendarUiModel,
         onDateClickListener: (CalendarUiModel.Date) -> Unit,
         onClickedDate: () -> Unit,
+        eventDateList: Map<LocalDate, String>, // 추가: 날짜와 Event 날짜 맵 , 08280729
+        eventNameList: Map<LocalDate, String>, // 추가: 날짜와 Event 이름 맵 , 08280729
     ) {
         Column {
             repeat(6) { rowIndex ->
@@ -244,9 +260,13 @@ class EventManagementActivity : ComponentActivity() {
                     val endIndex = minOf(startIndex + 7, data.visibleDates.size)
                     for (i in startIndex until endIndex) {
                         val date = data.visibleDates[i]
+                        val eventDate = eventDateList[date.date] ?: "" // Event 날짜 가져오기
+                        val eventName = eventNameList[date.date] ?: "" // Event 이름 가져오기
                         ContentItem(
                             currentYearMonth = currentYearMonth,
                             date = date,
+                            eventDate = eventDate,
+                            eventName = eventName,
                             onDateClickListener,
                             onClickedDate = onClickedDate
                         )
@@ -287,7 +307,6 @@ class EventManagementActivity : ComponentActivity() {
         }
         var lastClickTime by remember { mutableStateOf(0L) }
         var clickCount by remember { mutableStateOf(0) }
-
 
         Card(
             modifier = Modifier
@@ -354,6 +373,7 @@ class EventManagementActivity : ComponentActivity() {
         onEndTimeChange: (String) -> Unit,
         selectedDate: CalendarUiModel.Date?,
         onSaveButtonClick: () -> Unit,
+        onCancelButtonClick: () -> Unit,
     ) {
         Column(
             modifier = Modifier
@@ -363,7 +383,7 @@ class EventManagementActivity : ComponentActivity() {
             OutlinedTextField(
                 value = date,
                 onValueChange = onDateChange,
-                label = { Text(text = "날짜설정") },
+                label = { Text(text = "날짜만 입력하세요") },
                 keyboardOptions = KeyboardOptions.Default.copy(
                     imeAction = ImeAction.Done, keyboardType = KeyboardType.Number
                 ),
@@ -373,7 +393,7 @@ class EventManagementActivity : ComponentActivity() {
             OutlinedTextField(
                 value = eventname,
                 onValueChange = onNameChange,
-                label = { Text(text = "제목설정") },
+                label = { Text(text = "일정이름") },
                 keyboardOptions = KeyboardOptions.Default.copy(
                     imeAction = ImeAction.Done, keyboardType = KeyboardType.Text
                 ),
@@ -414,124 +434,51 @@ class EventManagementActivity : ComponentActivity() {
                     modifier = Modifier.weight(1f)
                 )
             }
-             // 입력한 데이터 저장 버튼
-            Button(
-                onClick = {
-                    val eventData = hashMapOf(
-                        "eventDate" to date,
-                        "eventName" to eventname,
-                        "registrant" to registrant,
-                        "startTime" to startTime,
-                        "endTime" to  endTime
-                    )
-                    db.collection("EventData").
-                    add(eventData)
-                        .addOnSuccessListener {  documentReference ->
-                            Log.d(TAG, "DocumentSnapshot added with ID: ${documentReference.id}")
-                        }
-                        .addOnFailureListener { e ->
-                            Log.w(TAG, "Error adding document", e)
-                        }
-                },
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 16.dp)
             ) {
-                Text(text = "저장")
+                Button(
+                    onClick = {
+                        if (isInputValid(
+                                date = date,
+                                eventname = eventname,
+                                registrant = registrant,
+                                startTime = startTime,
+                                endTime = endTime
+                            )
+                        ) {
+                            onSaveButtonClick()
+                        }
+                    },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(text = "일정 등록 완료")
+                }
+                Spacer(modifier = Modifier.width(16.dp))
+                Button(
+                    onClick = onCancelButtonClick,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(text = "취소")
+                }
+                // 입력한 데이터 저장 버튼
             }
         }
     }
+
+    private fun isInputValid(
+        date: String,
+        eventname: String,
+        registrant: String,
+        startTime: String,
+        endTime: String,
+    ): Boolean {
+        return date.isNotBlank() &&
+                eventname.isNotBlank() &&
+                registrant.isNotBlank() &&
+                startTime.isNotBlank() &&
+                endTime.isNotBlank()
+    }
 }
-
-
-//                if (enteredText.isNotEmpty()) {
-//                    Text(
-//                        text = enteredText,
-//                        modifier = Modifier
-//                            .padding(top = 4.dp)
-//                            .fillMaxWidth()
-//                            .wrapContentWidth(Alignment.CenterHorizontally),
-//                    style = MaterialTheme.typography.displaySmall.copy(fontSize = 8.sp),
-//                    color = textColor
-//                    )
-//                }
-
-//        if (isPopupVisible) {
-//            AlertDialog(
-//                onDismissRequest = closePopup,
-//                title = { Text(text = "일정등록") },
-//                text = {
-//                    Column {
-//                        TextField(
-//                            value = enteredText,
-//                            onValueChange = { enteredText = it },
-//                            label = { Text("일정내용입력") }
-//                        )
-//                        Row(
-//                            verticalAlignment = Alignment.CenterVertically,
-//                            modifier = Modifier.padding(top = 8.dp)
-//                        ) {
-//                            Text("색 선택:", modifier = Modifier.padding(end = 4.dp))
-//                            ColorPicker(selectedColor, colorOptions) { color ->
-//                                selectedColor = color
-//                            }
-//                        }
-//                    }
-//                },
-//                confirmButton = {
-//                    Row(
-//                        modifier = Modifier.fillMaxWidth(),
-//                        horizontalArrangement = Arrangement.End
-//                    ) {
-//                        Button(
-//                            onClick = closePopup,
-//                            modifier = Modifier.padding(12.dp)
-//                        ) {
-//                            Text(text = "닫기")
-//                        }
-//                        Button(
-//                            onClick = {
-//                                val userData = hashMapOf(
-//                                    "EventTitle" to enteredText,
-//                                    "PickedColor" to selectedColor,
-//                                )
-//                                db.collection("Event").add(userData)
-//                            }
-//                        )
-//                        { Text(text = "저장") }
-//                    }
-//                }
-//            )
-//        }
-
-//    @Composable
-//    fun ColorPicker(
-//        selectedColor: Color,
-//        colorOptions: List<Color>,
-//        onColorSelected: (Color) -> Unit,
-//    ) {
-//        Row {
-//            colorOptions.forEach { color ->
-//                Box(
-//                    modifier = Modifier
-//                        .size(24.dp)
-//                        .clickable {
-//                            onColorSelected(color)
-//                        }
-//                        .background(
-//                            color = color,
-//                            shape = CircleShape
-//                        )
-//                        .padding(4.dp)
-//                ) {
-//                    if (color == selectedColor) {
-//                        Icon(
-//                            imageVector = Icons.Default.Done,
-//                            contentDescription = "Selected",
-//                            tint = Color.White
-//                        )
-//                    }
-//                }
-//            }
-//        }
-//    }

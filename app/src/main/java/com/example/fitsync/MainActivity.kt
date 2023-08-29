@@ -38,13 +38,7 @@ class MainActivity : ComponentActivity() {
                             Text(text = "예약")
                         }
                         Button(onClick = {
-                            val intent = Intent(context, CalendarActivity::class.java)
-                            context.startActivity(intent)
-                        }) {
-                            Text(text = "캘린더")
-                        }
-                        Button(onClick = {
-                            val intent = Intent(context, EventActivity::class.java)
+                            val intent = Intent(context, EventManagementActivity::class.java)
                             context.startActivity(intent)
                         }) {
                             Text(text = "헬스장일정관리")

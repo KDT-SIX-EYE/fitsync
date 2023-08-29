@@ -6,18 +6,13 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -26,17 +21,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.firebase.FirebaseApp
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import kotlinx.coroutines.tasks.await
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -46,30 +37,48 @@ class EventCheckActivity : ComponentActivity() {
         setContent {
             // Firestore 초기화
             val db = Firebase.firestore
-
             // 이벤트 데이터 리스트를 가질 mutableStateOf
-            val eventDataList = remember { mutableStateListOf<String>() }
-
+            val eventDataList = remember { mutableStateListOf<EventData>() }
             // Firestore에서 데이터 조회
             db.collection("EventData")
                 .get()
                 .addOnSuccessListener { querySnapshot ->
+                    val seenEventDates = HashSet<String>() // 이미 나온 날짜들을 저장할 Set
+                    val newEventDataList = mutableListOf<EventData>()
                     for (document in querySnapshot) {
                         val eventDate = document.get("eventDate").toString()
-                        val eventName = document.get("eventName").toString()
-                        val registrant = document.get("registrant").toString()
-                        val startTime = document.get("startTime").toString()
-                        val endTime = document.get("endTime").toString()
-                        eventDataList.add(eventDate)
-                        eventDataList.add(eventName)
-                        eventDataList.add(registrant)
-                        eventDataList.add(startTime)
-                        eventDataList.add(endTime)
+                        if (eventDate !in seenEventDates) { // 중복이 아닌 경우만 추가
+                            seenEventDates.add(eventDate)
+                            val eventName = document.get("eventName").toString()
+                            val registrant = document.get("registrant").toString()
+                            val startTime = document.get("startTime").toString()
+                            val endTime = document.get("endTime").toString()
+                            newEventDataList.add(
+                                EventData(
+                                    eventDate,
+                                    eventName,
+                                    registrant,
+                                    startTime,
+                                    endTime
+                                )
+                            )
+                        }
                     }
+                    eventDataList.addAll(newEventDataList)
                 }
                 .addOnFailureListener { exception ->
                     Log.w(TAG, "Error getting documents.", exception)
                 }
+            val initialDate = LocalDate.now()
+            val distinctEventDataList = eventDataList.distinctBy { it.eventDate }
+            val calendarDataSource = CalendarDataSource()
+            var calendarUiModel by remember {
+                mutableStateOf(
+                    calendarDataSource.getData(
+                        lastSelectedDate = initialDate
+                    )
+                )
+            }
 
             Column(
                 modifier = Modifier
@@ -77,190 +86,72 @@ class EventCheckActivity : ComponentActivity() {
                     .padding(8.dp)
                     .verticalScroll(rememberScrollState())
             ) {
-                for (eventData in eventDataList) {
-                    Text(text = eventData, modifier = Modifier.padding(4.dp))
+                CalendarWindow(
+                    data = calendarUiModel,
+                    onClickedDate = { /*TODO*/ },
+                    onPrevClickListener = { startDate ->
+                        val finalStartDate = startDate.minusDays(1)
+                        val newCalendarUiModel = calendarDataSource.getData(
+                            startDate = finalStartDate,
+                            lastSelectedDate = calendarUiModel.selectedDate.date
+                        )
+                        calendarUiModel = newCalendarUiModel
+                    },
+                    onNextClickListener = { endDate ->
+                        val finalStartDate = endDate.plusDays(2)
+                        val newCalendarUiModel = calendarDataSource.getData(
+                            startDate = finalStartDate,
+                            lastSelectedDate = calendarUiModel.selectedDate.date
+                        )
+                        calendarUiModel = newCalendarUiModel
+                    },
+                    onDateClickListener = { date -> }
+                )
+                Text(
+                    text = "일정 목록",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+                distinctEventDataList.forEach { eventData ->
+                    EventCard(eventData)
                 }
             }
-            Text(
-                text = "이벤트 데이터 목록",
-                fontWeight = FontWeight.Bold,
-                fontSize = 20.sp,
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
         }
     }
 }
 
 
-//            LazyColumn {
-//                items(eventDataList) { eventData ->
-//                    Column(
-//                        modifier = Modifier
-//                            .fillMaxWidth()
-//                            .padding(8.dp)
-//                    ) {
-//                        Text("날짜: ${eventData["eventDate"]}")
-//                        Text("제목: ${eventData["eventName"]}")
-//                        Text("등록자: ${eventData["registrant"]}")
-//                        Text("시작시간: ${eventData["startTime"]}")
-//                        Text("종료시간: ${eventData["endTime"]}")
-//                        Spacer(modifier = Modifier.height(8.dp))
-//                    }
-//                }
-//            }
-
-//@Composable
-//fun GetData() {
-//    db.collection("users")
-//        .get()
-//        .addOnSuccessListener { result ->
-//            for (document in result) {
-//                Log.d(TAG, "${document.id} => ${document.data}")
-//            }
-//        }
-//        .addOnFailureListener { exception ->
-//            Log.w(TAG, "Error getting documents.", exception)
-//        }
-//}
-
-
-// setcontent 내부
-//            val context = LocalContext.current
-//            val events by remember { mutableStateOf(mutableListOf<EventData>()) }
-//
-//            Column(
-//                modifier = Modifier
-//                    .fillMaxSize()
-//                    .padding(16.dp)
-//            ) {
-//                Text(
-//                    text = "이벤트 목록",
-//                    style = MaterialTheme.typography.labelSmall,
-//                    fontWeight = FontWeight.Bold,
-//                    modifier = Modifier.padding(bottom = 16.dp)
-//                )
-//                GetData
-//
-//                LazyColumn {
-//                    items(events) { event ->
-//
-//                        Spacer(modifier = Modifier.height(16.dp))
-//                    }
-
-
-//    @Composable
-//    fun EventCard(event: EventData) {
-//        Card(
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .padding(8.dp),
-//        ) {
-//            Column(
-//                modifier = Modifier.padding(16.dp)
-//            ) {
-//                Text(text = "일자: ${event.eventDate}")
-//                Text(text = "이름: ${event.eventName}")
-//                Text(text = "등록자: ${event.registrant}")
-//                Text(text = "시작시간: ${event.startTime}")
-//                Text(text = "종료시간: ${event.endTime}")
-//            }
-//        }
-//    }
-
-
-//@Composable
-//fun EventCheckContent(database: DatabaseReference) {
-//    var eventData by remember { mutableStateOf(EventData()) }
-//
-//    Column {
-//
-//        Spacer(modifier = Modifier.height(16.dp))
-//
-//        Button(onClick = {
-//            // Firebase Realtime Database에 데이터 저장
-//            database.child("events").push().setValue(eventData.toMap())
-//        }) {
-//            Text(text = "저장")
-//        }
-//
-//        Spacer(modifier = Modifier.height(16.dp))
-//
-//    }
-//}
-
-//@Composable
-//fun EventListItem(event: EventData) {
-//    Card(
-//        modifier = Modifier
-//            .fillMaxWidth()
-//            .padding(vertical = 8.dp)
-//    ) {
-//        Column(
-//            modifier = Modifier
-//                .padding(16.dp)
-//                .fillMaxWidth()
-//        ) {
-//            Text(text = "일정 날짜: ${event.eventDate}")
-//            Text(text = "일정 이름: ${event.eventName}")
-//            Text(text = "등록자: ${event.registrant}")
-//            Text(text = "시작 시간: ${event.startTime}")
-//            Text(text = "종료 시간: ${event.endTime}")
-//        }
-//    }
-//}
-//setContent 내 입력
-// 데이터 가져오기
-//            val db = Firebase.firestore
-//            val eventsCollection = db.collection("events")
-//
-//            eventsCollection.get().addOnSuccessListener { result ->
-//                    val events = result.documents.mapNotNull { document ->
-//                        val eventDate = document.getString("eventDate")
-//                        val eventName = document.getString("eventName")
-//                        val registrant = document.getString("registrant")
-//                        val startTime = document.getString("startTime")
-//                        val endTime = document.getString("endTime")
-//                        if (eventDate != null && eventName != null && registrant != null && startTime != null && endTime != null) {
-//                            EventData(eventDate, eventName, registrant, startTime, endTime)
-//                        } else {
-//                            null
-//                        }
-//                    }
-//
-//                    val eventCheckContent = findViewById<ComposeView>(R.id.eventCheckContent)
-//                    eventCheckContent.setContent {
-//                        EventCheckContent(events)
-//                    }
-//                }
-//
-//                .addOnFailureListener { exception ->
-//                    // Error handling
-//                }
-
-
-//@Composable
-//fun EventCheckScreen() {
-//    val context = LocalContext.current
-//    val db = Firebase.firestore
-//
-//    val events = remember { mutableStateListOf<EventData>() } // 가져온 이벤트 데이터를 저장할 변수
-//
-//    Column {
-//        Text(text = "저장된 이벤트 목록")
-//        for (event in events) {
-//            Text(text = "이벤트 날짜: ${event.eventDate}")
-//            Text(text = "이벤트 이름: ${event.eventName}")
-//            Text(text = "등록자: ${event.registrant}")
-//            Text(text = "시작 시간: ${event.startTime}")
-//            Text(text = "종료 시간: ${event.endTime}")
-//            // 이벤트 간의 간격을 위한 간격 조정
-//            Spacer(modifier = Modifier.height(16.dp))
-//        }
-//    }
-//}
+data class EventData(
+    val eventDate: String,
+    val eventName: String,
+    val registrant: String,
+    val startTime: String,
+    val endTime: String,
+)
 
 @Composable
-fun CalendarWindow2(
+fun EventCard(eventData: EventData) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text(text = "날짜: ${eventData.eventDate}일")
+            Text(text = "일정이름: ${eventData.eventName}")
+            Text(text = "등록자: ${eventData.registrant}")
+            Text(text = "시작시간: ${eventData.startTime}")
+            Text(text = "종료시간: ${eventData.endTime}")
+        }
+    }
+}
+
+
+@Composable
+fun CalendarWindow(
     data: CalendarUiModel,
     onClickedDate: () -> Unit,
     onPrevClickListener: (LocalDate) -> Unit,
@@ -285,7 +176,7 @@ fun CalendarWindow2(
             currentYearMonth = currentYearMonth,
             data = data,
             onDateClickListener = onDateClickListener,
-            onClickedDate = onClickedDate
+            onClickedDate = onClickedDate,
         )
     }
 }
