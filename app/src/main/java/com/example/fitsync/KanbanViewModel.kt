@@ -43,13 +43,27 @@ class KanbanViewModel : ViewModel() {
                 )
                 taskRef.update(updateData).await()
 
-                val fetchedTasks = fetchTasks()
-                _tasks.value = fetchedTasks
+                // Update the local tasks list directly
+                val updatedTasks = _tasks.value.map { task ->
+                    if (task.id == taskId) {
+                        task.copy(status = newStatus)
+                    } else {
+                        task
+                    }
+                }
+                _tasks.value = updatedTasks
             } catch (e: Exception) {
                 println("Error updating status of task with ID: $taskId")
             }
         }
     }
+
+    fun updateTaskStatusInViewModel(taskId: String, newStatus: String) {
+        viewModelScope.launch {
+            updateTaskStatus(taskId, newStatus)
+        }
+    }
+
 
     fun addTask(newTask: Task) {
         viewModelScope.launch {
@@ -58,6 +72,7 @@ class KanbanViewModel : ViewModel() {
             _tasks.value = updatedTasks
         }
     }
+
 
     fun deleteTask(taskId: String) {
         viewModelScope.launch {
@@ -73,7 +88,6 @@ class KanbanViewModel : ViewModel() {
             }
         }
     }
-
 
 
     private fun loadTasks() {
