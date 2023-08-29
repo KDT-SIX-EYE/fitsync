@@ -21,7 +21,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.fitsync.data.FirestoreUser
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -43,6 +42,13 @@ class MemberProfile : ComponentActivity() {
     }
 }
 
+data class FirestoreUser(
+    val name: String = "",
+    val number: String = "",
+    val manager: String = "",
+    val trainer: String = "",
+    val etc: String = ""
+)
 
 @Composable
 fun UsersScreen() {
@@ -57,8 +63,6 @@ fun UsersScreen() {
                 //"users" firestore 콘솔 컬렉션 이름
                 val querySnapshot = firestore.collection("users").get().await()
                 querySnapshot.documents.map { document ->
-                    //id == uid
-                    val id = document.id
                     val name = document.getString("name") ?: ""
                     val number = document.getString("number") ?: ""
                     val manager = document.getString("manager") ?: ""

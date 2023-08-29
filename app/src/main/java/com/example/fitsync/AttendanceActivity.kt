@@ -51,7 +51,7 @@ class AttendanceActivity : ComponentActivity() {
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
 
-                    ) {
+                ) {
                     val receivedManagerName = intent.getStringExtra("managerName")
                     val managerName = remember { mutableStateOf(receivedManagerName ?: "") }
 
@@ -62,18 +62,18 @@ class AttendanceActivity : ComponentActivity() {
                     TextField(value = managerName.value, onValueChange = { newValue ->
                         managerName.value = newValue
                     },
-                    placeholder = {Text("이름")},
+                        placeholder = {Text("이름")},
                         singleLine = true,
                         modifier = Modifier
-                        .fillMaxWidth(0.45f)
-                        .align(Alignment.CenterHorizontally)
-                        .border(0.5.dp, Color.DarkGray , RoundedCornerShape(8.dp)),
-                    colors = TextFieldDefaults.textFieldColors(
-                        textColor = Color.Black,
-                        containerColor = Color.Transparent,
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent
-                    ),
+                            .fillMaxWidth(0.45f)
+                            .align(Alignment.CenterHorizontally)
+                            .border(0.5.dp, Color.DarkGray , RoundedCornerShape(8.dp)),
+                        colors = TextFieldDefaults.textFieldColors(
+                            textColor = Color.Black,
+                            containerColor = Color.Transparent,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent
+                        ),
                         textStyle = androidx.compose.ui.text.TextStyle(
                             color = Color.Black, textAlign = TextAlign.Center, fontSize = 20.sp
                         )
@@ -85,13 +85,10 @@ class AttendanceActivity : ComponentActivity() {
                         val intent = Intent(this@AttendanceActivity, QRcheckActivity::class.java)
                         intent.putExtra("managerName", managerName.value)
                         startActivity(intent)
+
                     }, enabled = managerName.value.isNotBlank()) {
                         Text(text = "QR스캔")
                     }
-
-
-
-
                     var startEndInfo by remember {
                         mutableStateOf(false)
                     }
@@ -112,20 +109,8 @@ class AttendanceActivity : ComponentActivity() {
                                 if (documentManagerName == managerName.value) {
                                     val getStartWork = result.getString("ATTENDENCE") ?: "-"
                                     val getEndWork = result.getString("FINISH") ?: "-"
-
-                                    // 변수 초기화 및 변환 처리 부분
-                                    val startParts = getStartWork.split(":")
-                                    val startHour = startParts[0].toInt()
-                                    val startMinute = startParts[1].toInt()
-                                    val startSecond = startParts[2].toInt()
-                                    startWork = "${startHour}시 ${startMinute}분 ${startSecond}초"
-
-                                    val endParts = getEndWork.split(":")
-                                    val endHour = endParts[0].toInt()
-                                    val endMinute = endParts[1].toInt()
-                                    val endSecond = endParts[2].toInt()
-                                    endWork = "${endHour}시 ${endMinute}분 ${endSecond}초"
-
+                                    startWork = getStartWork
+                                    endWork = getEndWork
                                     break
                                 }
                             }
@@ -135,7 +120,7 @@ class AttendanceActivity : ComponentActivity() {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth(),
-                            horizontalAlignment = Alignment.CenterHorizontally
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text("$currentDate")
                         Text("출근 : $startWork")
@@ -189,13 +174,6 @@ class AttendanceActivity : ComponentActivity() {
                         }
                     }
                 }
-
-
-
-
-
-
-
 
 
             }
