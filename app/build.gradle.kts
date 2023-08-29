@@ -74,10 +74,20 @@ dependencies {
     implementation ("com.google.firebase:firebase-firestore-ktx:24.7.1")
     implementation(platform("com.google.firebase:firebase-bom:32.2.3"))
     implementation("com.google.firebase:firebase-firestore-ktx")
+    implementation("com.google.firebase:firebase-database-ktx:20.2.2")
 
     implementation ("androidx.compose.material:material-icons-extended:1.2.0")
 
-    // 뷰모델
-    val lifecycleVersion = "2.6.1"
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion")
+    implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
+    implementation("androidx.camera:camera-core:1.2.3")
+    implementation("com.google.zxing:core:3.4.1")
+
+    val camerax_version = "1.3.0-alpha04"
+    implementation("androidx.camera:camera-camera2:$camerax_version")
+    // If you want to additionally use the CameraX Lifecycle library
+    implementation("androidx.camera:camera-lifecycle:$camerax_version")
+    // If you want to additionally use the CameraX View class
+    implementation("androidx.camera:camera-view:$camerax_version")
+
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:1.1.5")
 }
