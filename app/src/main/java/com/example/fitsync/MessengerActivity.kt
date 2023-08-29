@@ -309,9 +309,6 @@ fun ChatItemBubble(
     }
 }
 
-
-
-
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
@@ -320,3 +317,7 @@ fun GreetingPreview() {
         ChatScreen(firebaseAuth = firebaseAuth)
     }
 }
+
+// LaunchedEffect(메시지를 리스트로 만들어서 그거의 변수의 사이즈) {
+//    scrollState.animateScrollToItem(동일)
+//    }

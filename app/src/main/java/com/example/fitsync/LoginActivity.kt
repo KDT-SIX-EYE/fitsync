@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,9 +14,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Check
+import androidx.compose.material.icons.outlined.Email
+import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,7 +36,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import com.google.firebase.auth.FirebaseAuth
@@ -66,8 +74,8 @@ fun LoginScreen(viewModel: LoginViewModel, onLoginSuccess: (Boolean) -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Center,
+            .padding(top = 76.dp, start = 16.dp, end = 16.dp, bottom = 0.dp),
+        verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Image(
@@ -83,15 +91,22 @@ fun LoginScreen(viewModel: LoginViewModel, onLoginSuccess: (Boolean) -> Unit) {
             value = emailState.value,
             onValueChange = { emailState.value = it },
             label = { Text("Email") },
+            leadingIcon = {
+                Icon(imageVector = Icons.Outlined.Email, contentDescription = null)
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(8.dp)
         )
+
         OutlinedTextField(
             value = passwordState.value,
             onValueChange = { passwordState.value = it },
             label = { Text("Password") },
             visualTransformation = PasswordVisualTransformation(),
+            leadingIcon = {
+                Icon(imageVector = Icons.Outlined.Check, contentDescription = null)
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(8.dp)
@@ -126,7 +141,7 @@ fun LoginScreen(viewModel: LoginViewModel, onLoginSuccess: (Boolean) -> Unit) {
             }
         }
         Column(
-            modifier =  Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Button(
@@ -139,11 +154,15 @@ fun LoginScreen(viewModel: LoginViewModel, onLoginSuccess: (Boolean) -> Unit) {
                     }
                 },
                 colors = ButtonDefaults.buttonColors(
-                    Color.Black,
-                    contentColor = Color.White
+                    Color.Transparent,
+                    contentColor = Color.Gray
                 )
             ) {
-                Text(text = "Forgot Password")
+                Text(
+                    text = "Forgot Password",
+                    textDecoration = TextDecoration.Underline,
+                    fontWeight = FontWeight.Bold
+                )
             }
         }
 
@@ -151,7 +170,8 @@ fun LoginScreen(viewModel: LoginViewModel, onLoginSuccess: (Boolean) -> Unit) {
             Text(
                 text = viewModel.errorMessage,
                 color = Color.Red,
-                modifier = Modifier.padding(8.dp))
+                modifier = Modifier.padding(8.dp)
+            )
         }
 
         if (viewModel.loginSuccess) {
@@ -181,6 +201,7 @@ class LoginViewModel : ViewModel() {
             errorMessage = "이메일과 비밀번호를 입력해주세요."
         }
     }
+
     fun sendPasswordResetEmail(email: String) {
         if (email.isNotBlank()) {
             auth.sendPasswordResetEmail(email)
