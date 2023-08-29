@@ -98,8 +98,8 @@ fun FinalScreen2(db: FirebaseFirestore) {
                 },
                 navigationIcon = {
                     IconButton(onClick = {
-                        val intent = Intent(context, MainActivity::class.java)
-                        context.startActivity(intent)
+//                        val intent = Intent(context, MainActivity::class.java)
+//                        context.startActivity(intent)
                     }) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
@@ -124,7 +124,7 @@ fun FinalScreen2(db: FirebaseFirestore) {
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         IconButton(onClick = {
-                            val intent = Intent(context, CalendarActivity::class.java)
+                            val intent = Intent(context, ScheduleManagement::class.java)
                             context.startActivity(intent)
                         }) {
                             Icon(
@@ -144,7 +144,7 @@ fun FinalScreen2(db: FirebaseFirestore) {
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         IconButton(onClick = {
-                            val intent = Intent(context, ScheduleActivity::class.java)
+                            val intent = Intent(context, ScheduleManagement::class.java)
                             context.startActivity(intent)
                         }) {
                             Icon(
@@ -182,8 +182,8 @@ fun FinalScreen2(db: FirebaseFirestore) {
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         IconButton(onClick = {
-//                            val intent = Intent(context, UsersActivity::class.java)
-//                            context.startActivity(intent)
+                            val intent = Intent(context, UsersActivity::class.java)
+                            context.startActivity(intent)
                         }) {
                             Icon(
                                 imageVector = Icons.Default.AccountCircle,
@@ -201,8 +201,8 @@ fun FinalScreen2(db: FirebaseFirestore) {
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         IconButton(onClick = {
-//                            val intent = Intent(context, MessengerActivity::class.java)
-//                            context.startActivity(intent)
+                            val intent = Intent(context, MessengerActivity::class.java)
+                            context.startActivity(intent)
                         }) {
                             Icon(
                                 painter = painterResource(id = R.drawable.baseline_mark_chat_unread_24),

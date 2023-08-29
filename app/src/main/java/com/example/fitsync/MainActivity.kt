@@ -153,10 +153,10 @@ fun MainScreen(viewModel: KanbanViewModel) {
                             val intent = Intent(context, AttendanceActivity::class.java)
                             context.startActivity(intent)
                         }) {
-//                            Icon(
-//                                painter = painterResource(id = R.drawable.baseline_qr_code_2_24),
-//                                contentDescription = "QR 액티비티로 이동"
-//                            )
+                            Icon(
+                                painter = painterResource(id = R.drawable.baseline_qr_code_2_24),
+                                contentDescription = "QR 액티비티로 이동"
+                            )
                         }
                         Text(
                             text = "QR",

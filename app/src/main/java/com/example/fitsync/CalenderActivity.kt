@@ -1,6 +1,7 @@
 package com.example.fitsync
 
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -25,6 +27,7 @@ import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -52,6 +55,8 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.fitsync.ui.theme.FitSyncTheme
+import com.example.fitsync.ui.theme.Ivory
 import com.google.firebase.FirebaseApp
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
@@ -67,151 +72,143 @@ class CalendarActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             val db = Firebase.firestore
-            FinalScreen(db = db)
-
+            FitSyncTheme {
+                FinalScreen1(db = db)
+            }
         }
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FinalScreen(db: FirebaseFirestore) {
+fun FinalScreen1(db: FirebaseFirestore) {
     val context = LocalContext.current
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        // 상단바 이름 수정하십시오. 그 외 변경 금지
-                        text = "My Profile",
-                        fontSize = 17.sp,
-                        fontFamily = FontFamily.SansSerif
-                    )
-                },
-                navigationIcon = {
+    Scaffold(topBar = {
+        TopAppBar(title = {
+            Text(
+                // 상단바 이름 수정하십시오. 그 외 변경 금지
+                text = "My Profile", fontSize = 17.sp, fontFamily = FontFamily.SansSerif
+            )
+        }, navigationIcon = {
+            IconButton(onClick = {
+                val intent = Intent(context, MainActivity::class.java)
+                context.startActivity(intent)
+            }) {
+                Icon(
+                    imageVector = Icons.Default.ArrowBack, contentDescription = "뒤로 가기"
+                )
+            }
+        })
+    }, bottomBar = {
+        BottomAppBar(
+            containerColor = Color.White
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                val context = LocalContext.current
+
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
                     IconButton(onClick = {
-                        val intent = Intent(context, MainActivity::class.java)
+//                            val intent = Intent(context, CalenderActivity::class.java)
+//                            context.startActivity(intent)
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.DateRange,
+                            contentDescription = "캘린더 액티비티로 이동"
+                        )
+                    }
+                    Text(
+                        text = "캘린더",
+                        fontSize = 10.sp,
+                        fontFamily = FontFamily.SansSerif,
+                        modifier = Modifier.padding(top = 0.dp)
+                    )
+                }
+
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    IconButton(onClick = {
+                        val intent = Intent(context, ScheduleActivity::class.java)
                         context.startActivity(intent)
                     }) {
                         Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "뒤로 가기"
+                            painter = painterResource(id = R.drawable.baseline_schedule_24),
+                            contentDescription = "스케쥴 액티비티로 이동"
                         )
                     }
+                    Text(
+                        text = "스케줄",
+                        fontSize = 10.sp,
+                        fontFamily = FontFamily.SansSerif,
+                        modifier = Modifier.padding(top = 0.dp)
+                    )
                 }
-            )
-        },
-        bottomBar = {
-            BottomAppBar(
-                containerColor = Color.White
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier.fillMaxWidth()
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    val context = LocalContext.current
-
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        IconButton(onClick = {
-//                            val intent = Intent(context, CalenderActivity::class.java)
-//                            context.startActivity(intent)
-                        }) {
-                            Icon(
-                                imageVector = Icons.Default.DateRange,
-                                contentDescription = "캘린더 액티비티로 이동"
-                            )
-                        }
-                        Text(
-                            text = "캘린더",
-                            fontSize = 10.sp,
-                            fontFamily = FontFamily.SansSerif,
-                            modifier = Modifier.padding(top = 0.dp)
+                    IconButton(onClick = {
+                        val intent = Intent(context, BookActivity::class.java)
+                        context.startActivity(intent)
+                    }) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.baseline_call_24),
+                            contentDescription = "예약 액티비티로 이동"
                         )
                     }
-
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        IconButton(onClick = {
-                            val intent = Intent(context, ScheduleActivity::class.java)
-                            context.startActivity(intent)
-                        }) {
-//                            Icon(
-//                                painter = painterResource(id = R.drawable.baseline_schedule_24),
-//                                contentDescription = "스케쥴 액티비티로 이동"
-//                            )
-                        }
-                        Text(
-                            text = "스케줄",
-                            fontSize = 10.sp,
-                            fontFamily = FontFamily.SansSerif,
-                            modifier = Modifier.padding(top = 0.dp)
-                        )
-                    }
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        IconButton(onClick = {
-                            val intent = Intent(context, BookActivity::class.java)
-                            context.startActivity(intent)
-                        }) {
-//                            Icon(
-//                                painter = painterResource(id = R.drawable.baseline_call_24),
-//                                contentDescription = "예약 액티비티로 이동"
-//                            )
-                        }
-                        Text(
-                            text = "예약",
-                            fontSize = 10.sp,
-                            fontFamily = FontFamily.SansSerif,
-                            modifier = Modifier.padding(top = 0.dp)
-                        )
-                    }
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        IconButton(onClick = {
+                    Text(
+                        text = "예약",
+                        fontSize = 10.sp,
+                        fontFamily = FontFamily.SansSerif,
+                        modifier = Modifier.padding(top = 0.dp)
+                    )
+                }
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    IconButton(onClick = {
 //                            val intent = Intent(context, UsersActivity::class.java)
 //                            context.startActivity(intent)
-                        }) {
-                            Icon(
-                                imageVector = Icons.Default.AccountCircle,
-                                contentDescription = "사용자 목록 액티비티로 이동"
-                            )
-                        }
-                        Text(
-                            text = "프로필",
-                            fontSize = 10.sp,
-                            fontFamily = FontFamily.SansSerif,
-                            modifier = Modifier.padding(top = 0.dp)
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.AccountCircle,
+                            contentDescription = "사용자 목록 액티비티로 이동"
                         )
                     }
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        IconButton(onClick = {
+                    Text(
+                        text = "프로필",
+                        fontSize = 10.sp,
+                        fontFamily = FontFamily.SansSerif,
+                        modifier = Modifier.padding(top = 0.dp)
+                    )
+                }
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    IconButton(onClick = {
 //                            val intent = Intent(context, MessengerActivity::class.java)
 //                            context.startActivity(intent)
-                        }) {
-//                            Icon(
-//                                painter = painterResource(id = R.drawable.baseline_mark_chat_unread_24),
-//                                contentDescription = "메신저 액티비티로 이동"
-//                            )
-                        }
-                        Text(
-                            text = "채팅방",
-                            fontSize = 10.sp,
-                            fontFamily = FontFamily.SansSerif,
-                            modifier = Modifier.padding(top = 0.dp)
+                    }) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.baseline_mark_chat_unread_24),
+                            contentDescription = "메신저 액티비티로 이동"
                         )
                     }
+                    Text(
+                        text = "채팅방",
+                        fontSize = 10.sp,
+                        fontFamily = FontFamily.SansSerif,
+                        modifier = Modifier.padding(top = 0.dp)
+                    )
                 }
             }
         }
-    ) { innerPadding ->
+    }) { innerPadding ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -223,6 +220,7 @@ fun FinalScreen(db: FirebaseFirestore) {
         }
     }
 }
+
 
 @Composable
 fun CalendarActivityScreen(db: FirebaseFirestore) {
@@ -238,35 +236,32 @@ fun CalendarActivityScreen(db: FirebaseFirestore) {
         var startTime by remember { mutableStateOf("") }
         var endTime by remember { mutableStateOf("") }
         var showEventInputFields by remember { mutableStateOf(false) }
-        var showEventCheckFields by remember {
-            mutableStateOf(false)
-        }
-        val eventDataList = remember { mutableStateListOf<EventData>() }
-
-        CalendarWindow2(eventDataList)
+        var showEventCheckFields by remember { mutableStateOf(false) }
+        CalendarWindow2()
         Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        )
-        {
+            modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
             Button(
                 onClick = {
                     val intent = Intent(context, ScheduleCheckActivity::class.java)
                     context.startActivity(intent)
                 },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Black, // 버튼의 배경색을 검정색으로 설정합니다.
+                    contentColor = Color.White // 버튼 내용의 색을 흰색으로 설정합니다.
+                ),
                 modifier = Modifier
                     .padding(8.dp)
-                    .sizeIn(minHeight = 0.dp)
+                    .sizeIn(minHeight = 0.dp),
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-//                Icon(
-//                    painter = painterResource(id = R.drawable.bookcheck), // 예약확인 아이콘 리소스 ID로 대체
-//                    contentDescription = null,
-//                    modifier = Modifier.size(24.dp)
-//                )
+                    Icon(
+                        painter = painterResource(id = R.drawable.baseline_edit_calendar_24), // 예약확인 아이콘 리소스 ID로 대체
+                        contentDescription = null, modifier = Modifier.size(24.dp)
+                    )
                     Text(text = "예약확인")
                 }
             }
@@ -274,8 +269,10 @@ fun CalendarActivityScreen(db: FirebaseFirestore) {
                 onClick = {
                     val intent = Intent(context, ScheduleManagement::class.java)
                     context.startActivity(intent)
-                },
-                modifier = Modifier
+                }, colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Black, // 버튼의 배경색을 검정색으로 설정합니다.
+                    contentColor = Color.White // 버튼 내용의 색을 흰색으로 설정합니다.
+                ), modifier = Modifier
                     .padding(8.dp)
                     .sizeIn(minHeight = 0.dp)
             ) {
@@ -283,36 +280,48 @@ fun CalendarActivityScreen(db: FirebaseFirestore) {
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-//                Icon(
-//                    painter = painterResource(id = R.drawable.book), // 예약 아이콘 리소스 ID로 대체
-//                    contentDescription = null,
-//                    modifier = Modifier.size(24.dp)
-//                )
+                    Icon(
+                        painter = painterResource(id = R.drawable.baseline_check_circle_outline_24), // 예약 아이콘 리소스 ID로 대체
+                        contentDescription = null, modifier = Modifier.size(24.dp)
+                    )
                     Text(text = "예약하기")
                 }
             }
         }
         Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
+            modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             Button(
                 onClick = {
-                    showEventInputFields = !showEventInputFields // 버튼을 누르면 입력 필드를 보이도록 상태 변경
+                    showEventInputFields = !showEventInputFields
                 },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Black, // 버튼의 배경색을 검정색으로 설정합니다.
+                    contentColor = Color.White // 버튼 내용의 색을 흰색으로 설정합니다.
+                ),
                 modifier = Modifier
                     .padding(8.dp)
-                    .sizeIn(minHeight = 0.dp)
+                    .sizeIn(minHeight = 0.dp),
             ) {
-                Text(text = "일정 등록하기")
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.baseline_edit_calendar_24), // 일정등록 아이콘 리소스 ID로 대체
+                        contentDescription = null, modifier = Modifier.size(24.dp)
+                    )
+                    Text(text = "일정추가")
+                }
             }
             Button(
                 onClick = {
-//                        val intent = Intent(context, EventCheckActivity::class.java)
-//                        context.startActivity(intent)
                     showEventCheckFields = !showEventCheckFields
                 },
-                modifier = Modifier
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Black, // 버튼의 배경색을 검정색으로 설정합니다.
+                    contentColor = Color.White // 버튼 내용의 색을 흰색으로 설정합니다.
+                ),modifier = Modifier
                     .padding(8.dp)
                     .sizeIn(minHeight = 0.dp)
             ) {
@@ -320,17 +329,17 @@ fun CalendarActivityScreen(db: FirebaseFirestore) {
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-//                    Icon(
-//                        painter = painterResource(id = R.drawable.schedule), // 일정등록 아이콘 리소스 ID로 대체
-//                        contentDescription = null,
-//                        modifier = Modifier.size(24.dp)
-//                    )
+                    Icon(
+                        painter = painterResource(id = R.drawable.baseline_calendar_month_24), // 일정확인 아이콘 리소스 ID로 대체
+                        contentDescription = null, modifier = Modifier.size(24.dp)
+                    )
                     Text(text = "일정확인")
                 }
             }
         }
         if (showEventInputFields) {
             Column {
+
                 EventInputFields(date = eventDate,
                     onDateChange = { eventDate = it },
                     eventname = eventName,
@@ -360,41 +369,36 @@ fun CalendarActivityScreen(db: FirebaseFirestore) {
                     },
                     onCancelButtonClick = {
                         showEventInputFields = false
-                    })
+                    },)
+
+
             }
         }
-
-        db.collection("EventData")
-            .get()
-            .addOnSuccessListener { querySnapshot ->
-                val seenEventDates = HashSet<String>() // 이미 나온 날짜들을 저장할 Set
-                val newEventDataList = mutableListOf<EventData>()
-                for (document in querySnapshot) {
-                    val eventDate = document.get("eventDate").toString()
-                    if (eventDate !in seenEventDates) { // 중복이 아닌 경우만 추가
-                        seenEventDates.add(eventDate)
-                        val eventName = document.get("eventName").toString()
-                        val registrant = document.get("registrant").toString()
-                        val startTime = document.get("startTime").toString()
-                        val endTime = document.get("endTime").toString()
-                        newEventDataList.add(
-                            EventData(
-                                eventDate,
-                                eventName,
-                                registrant,
-                                startTime,
-                                endTime
-                            )
-                        )
-                    }
-                }
-                eventDataList.addAll(newEventDataList)
-            }
-            .addOnFailureListener { exception ->
-            }
         if (showEventCheckFields) {
-            val distinctEventDataList = eventDataList.distinctBy { it.eventDate }
+            val eventDataList = remember { mutableStateListOf<EventData>() }
 
+            db.collection("EventData").get().addOnSuccessListener { querySnapshot ->
+                    val seenEventDates = HashSet<String>() // 이미 나온 날짜들을 저장할 Set
+                    val newEventDataList = mutableListOf<EventData>()
+                    for (document in querySnapshot) {
+                        val eventDate = document.get("eventDate").toString()
+                        if (eventDate !in seenEventDates) { // 중복이 아닌 경우만 추가
+                            seenEventDates.add(eventDate)
+                            val eventName = document.get("eventName").toString()
+                            val registrant = document.get("registrant").toString()
+                            val startTime = document.get("startTime").toString()
+                            val endTime = document.get("endTime").toString()
+                            newEventDataList.add(
+                                EventData(
+                                    eventDate, eventName, registrant, startTime, endTime
+                                )
+                            )
+                        }
+                    }
+                    eventDataList.addAll(newEventDataList)
+                }.addOnFailureListener { exception ->
+                }
+            val distinctEventDataList = eventDataList.distinctBy { it.eventDate }
             Column {
 
                 Text(
@@ -414,7 +418,7 @@ fun CalendarActivityScreen(db: FirebaseFirestore) {
 }
 
 @Composable
-fun CalendarWindow2(eventDataList: List<EventData>) {
+fun CalendarWindow2() {
     val context = LocalContext.current
     FirebaseApp.initializeApp(context)
     Column {
@@ -426,48 +430,32 @@ fun CalendarWindow2(eventDataList: List<EventData>) {
         var currentYearMonth by remember {
             mutableStateOf(YearMonth.now())
         }
-        Header2(
-            data = calendarUiModel,
+        Header2(data = calendarUiModel,
             onPrevClickListener = { startDate ->
                 val finalStartDate = startDate.minusDays(1)
                 calendarUiModel = dataSource.getData(
-                    startDate = finalStartDate,
-                    lastSelectedDate = calendarUiModel.selectedDate.date
+                    startDate = finalStartDate, lastSelectedDate = calendarUiModel.selectedDate.date
                 )
             },
             onNextClickListener = { endDate ->
                 val finalStartDate = endDate.plusDays(2)
                 calendarUiModel = dataSource.getData(
-                    startDate = finalStartDate,
-                    lastSelectedDate = calendarUiModel.selectedDate.date
+                    startDate = finalStartDate, lastSelectedDate = calendarUiModel.selectedDate.date
                 )
             },
             onMinusMonth = { currentYearMonth = currentYearMonth.minusMonths(1) },
-            onPlusMonth = { currentYearMonth = currentYearMonth.plusMonths(1) }
-        )
-        fun convertLocalDateToInt(dateModel: CalendarUiModel.Date): Int {
-            val date = dateModel.date
-            return date.year * 10000 + date.monthValue * 100 + date.dayOfMonth
-        }
+            onPlusMonth = { currentYearMonth = currentYearMonth.plusMonths(1) })
 
-        var clickedDate by remember {
-            mutableStateOf(0)
-        }
-        Content2(
-            currentYearMonth = currentYearMonth, data = calendarUiModel,
+        Content2(currentYearMonth = currentYearMonth,
+            data = calendarUiModel,
             onDateClickListener = { date ->
-                calendarUiModel = calendarUiModel.copy(
-                    selectedDate = date,
+                calendarUiModel = calendarUiModel.copy(selectedDate = date,
                     visibleDates = calendarUiModel.visibleDates.map {
                         it.copy(
                             isSelected = it.date.isEqual(date.date)
                         )
-                    }
-                )
-                clickedDate = convertLocalDateToInt(calendarUiModel.selectedDate)
-
-            }, eventDataList = eventDataList
-        )
+                    })
+            })
     }
 }
 
@@ -479,22 +467,17 @@ fun Header2(
     onNextClickListener: (LocalDate) -> Unit,
     onMinusMonth: () -> Unit,
     onPlusMonth: () -> Unit,
-
-    ) {
+) {
     val currentYearMonth = YearMonth.now()
     val currentMonth = remember { mutableStateOf(currentYearMonth) }
     Column(modifier = Modifier.padding(10.dp)) {
         Row {
             Text(
-                text =
-                currentMonth.value.format(
+                text = currentMonth.value.format(
                     DateTimeFormatter.ofPattern(
-                        "yyyy년 MMMM",
-                        Locale("ko")
+                        "yyyy년 MMMM", Locale("ko")
                     )
-                ),
-                modifier = Modifier.weight(1f),
-                fontSize = 30.sp
+                ), modifier = Modifier.weight(1f), fontSize = 30.sp
             )
 
             IconButton(onClick = {
@@ -505,7 +488,7 @@ fun Header2(
             }) {
                 Icon(
                     imageVector = Icons.Filled.ChevronLeft,
-                    contentDescription = "Back"
+                    contentDescription = "Back",
                 )
             }
             IconButton(onClick = {
@@ -515,8 +498,7 @@ fun Header2(
                 onPlusMonth()
             }) {
                 Icon(
-                    imageVector = Icons.Filled.ChevronRight,
-                    contentDescription = "Next"
+                    imageVector = Icons.Filled.ChevronRight, contentDescription = "Next"
                 )
             }
         }
@@ -528,24 +510,19 @@ fun Content2(
     currentYearMonth: YearMonth,
     data: CalendarUiModel,
     onDateClickListener: (CalendarUiModel.Date) -> Unit,
-    eventDataList: List<EventData>
 
-) {
+    ) {
     Column {
         repeat(6) { rowIndex ->
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 val startIndex = rowIndex * 7
                 val endIndex = minOf(startIndex + 7, data.visibleDates.size)
                 for (i in startIndex until endIndex) {
                     val date = data.visibleDates[i]
                     ContentItem2(
-                        currentYearMonth = currentYearMonth,
-                        date = date,
-                        onDateClickListener,
-                        eventDataList = eventDataList
+                        currentYearMonth = currentYearMonth, date = date, onDateClickListener
 
                     )
                 }
@@ -559,7 +536,6 @@ fun ContentItem2(
     currentYearMonth: YearMonth,
     date: CalendarUiModel.Date,
     onClickListener: (CalendarUiModel.Date) -> Unit,
-    eventDataList: List<EventData>
 ) {
     val textColor =
         if (date.date.year == currentYearMonth.year && date.date.month == currentYearMonth.month) {
@@ -576,12 +552,8 @@ fun ContentItem2(
     val backgroundColor = if (date.isToday && !date.isSelected) {
         Color.LightGray
     } else if (date.isSelected) {
-        Color(0xFFF781F3).copy(alpha = 0.7f)
-    }
-//    else if (isDateInEventDataList(date, eventDataList)) {
-//        Color.Yellow // eventDataList에 해당 날짜의 데이터가 있으면 검은색 배경색
-//    }
-    else {
+        Ivory.copy(alpha = 0.7f)
+    } else {
         Color.White
     }
     var lastClickTime by remember {
@@ -593,7 +565,7 @@ fun ContentItem2(
     Card(
         modifier = Modifier
             .width(45.dp)
-            .height(75.dp)
+            .height(45.dp)
             .clickable {
                 clickCount++
                 val currentTime = System.currentTimeMillis()
@@ -608,9 +580,7 @@ fun ContentItem2(
         ),
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 text = date.day,
@@ -624,25 +594,8 @@ fun ContentItem2(
                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
                 color = textColor
             )
-            if (isDateInEventDataList(date, eventDataList)) {
-                val matchingEventData = getEventDataForDate(date, eventDataList)
-                Text(
-                    text = matchingEventData?.eventName ?: "",
-                    fontSize = 12.sp
-                )
-            }
         }
     }
-}
-
-fun getEventDataForDate(date: CalendarUiModel.Date, eventDataList: List<EventData>): EventData? {
-    val dateString = date.date.format(DateTimeFormatter.ISO_DATE)
-    return eventDataList.find { it.eventDate == dateString }
-}
-
-fun isDateInEventDataList(date: CalendarUiModel.Date, eventDataList: List<EventData>): Boolean {
-    val dateString = date.date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-    return eventDataList.any { it.eventDate == dateString }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -738,13 +691,22 @@ fun EventInputFields(
                     ) {
                         onSaveButtonClick()
                     }
-                }, modifier = Modifier.weight(1f)
+                },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Black, // 버튼의 배경색을 검정색으로 설정합니다.
+                    contentColor = Color.White // 버튼 내용의 색을 흰색으로 설정합니다.
+                ),modifier = Modifier.weight(1f)
             ) {
                 Text(text = "일정 등록 완료")
             }
             Spacer(modifier = Modifier.width(16.dp))
             Button(
-                onClick = onCancelButtonClick, modifier = Modifier.weight(1f)
+                onClick = onCancelButtonClick,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Black, // 버튼의 배경색을 검정색으로 설정합니다.
+                    contentColor = Color.White // 버튼 내용의 색을 흰색으로 설정합니다.
+                ),
+                modifier = Modifier.weight(1f)
             ) {
                 Text(text = "취소")
             }
@@ -778,6 +740,7 @@ fun EventCard(eventData: EventData) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp)
+
     ) {
         Column(
             modifier = Modifier.padding(16.dp)
