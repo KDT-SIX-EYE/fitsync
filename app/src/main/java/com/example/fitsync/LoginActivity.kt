@@ -13,9 +13,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Check
+import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -83,15 +87,22 @@ fun LoginScreen(viewModel: LoginViewModel, onLoginSuccess: (Boolean) -> Unit) {
             value = emailState.value,
             onValueChange = { emailState.value = it },
             label = { Text("Email") },
-            modifier = Modifier
+            leadingIcon = {
+                Icon(imageVector = Icons.Outlined.Email, contentDescription = null)
+            },
+        modifier = Modifier
                 .fillMaxWidth()
                 .padding(8.dp)
         )
+
         OutlinedTextField(
             value = passwordState.value,
             onValueChange = { passwordState.value = it },
             label = { Text("Password") },
             visualTransformation = PasswordVisualTransformation(),
+            leadingIcon = {
+                Icon(imageVector = Icons.Outlined.Check, contentDescription = null)
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(8.dp)
