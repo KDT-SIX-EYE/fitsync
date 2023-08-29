@@ -1,55 +1,54 @@
 package com.example.fitsync
 
-import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Face
+import androidx.compose.material3.Card
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.example.fitsync.data.User
+import com.example.fitsync.data.Firestorerole
 import com.example.fitsync.ui.theme.FitSyncTheme
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.firestore.CollectionReference
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 
 class UsersActivity : ComponentActivity() {
     private lateinit var firebaseAuth: FirebaseAuth
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val db = Firebase.firestore
+        val trainer = db.collection("trainer")
+        val manager = db.collection("manager")
+        val Arbeit = db.collection("Arbeit")
 
         firebaseAuth = FirebaseAuth.getInstance()
 
@@ -59,113 +58,115 @@ class UsersActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    UserListScreen()
+                    MembersScreen(listOf(trainer, manager, Arbeit))
                 }
             }
         }
     }
 }
 
-// 사용자 목록 만들기 (채팅을 위한)
+
+@Composable
+fun MembersScreen(memberCollections: List<CollectionReference>) {
+    var selectedRole by remember { mutableStateOf("") }
+    val scope = rememberCoroutineScope()
+    var member by remember { mutableStateOf(emptyList<Firestorerole>()) }
+
+    LaunchedEffect(selectedRole) {
+        val firestore = Firebase.firestore
+
+        scope.launch {
+            val memberList = withContext(Dispatchers.IO) {
+                val combinedMemberList = memberCollections.flatMap { collection ->
+                    val querySnapshot = collection.whereEqualTo("role", selectedRole).get().await()
+                    querySnapshot.documents.map { document ->
+                        val name = document.getString("name") ?: ""
+                        val email = document.getString("email") ?: ""
+                        Firestorerole(name, email, selectedRole)
+                    }
+                }
+                combinedMemberList
+            }
+            member = memberList
+        }
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        DropDownMenued(selectedRole, onChangeItem = { selectedRole = it })
+        Spacer(modifier = Modifier.height(16.dp))
+        LazyColumn(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            items(member) { member ->
+                MemberCard(member)
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+        }
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UserListScreen() {
-    val context = LocalContext.current
-    val firebaseAuth = FirebaseAuth.getInstance()
-    val currentUser: FirebaseUser? = firebaseAuth.currentUser
-    var userList by remember { mutableStateOf(listOf<User>()) }
+fun DropDownMenued(selectedItem: String, onChangeItem: (String) -> Unit) {
+    var expanded by remember { mutableStateOf(false) }
+    val listed = listOf("trainer", "manager", "Arbeit")
 
-    // 사용자 목록 불러오기
-    loadUserList { users ->
-        userList = users
-    }
-
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                    text = "Users",
-                    fontSize = 20.sp,
-                    fontFamily = FontFamily.SansSerif
-                )},
-                navigationIcon = {
-                    IconButton(onClick = {
-                        // 메인 액티비티로 이동
-                        val intent = Intent(context, MainActivity::class.java)
-                        context.startActivity(intent)
-                    }) {
-                        Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "뒤로 가기")
+    Column(modifier = Modifier.padding(20.dp)) {
+        ExposedDropdownMenuBox(
+            expanded = expanded,
+            onExpandedChange = { expanded = !expanded },
+            content = {
+                OutlinedTextField(
+                    readOnly = true,
+                    value = selectedItem,
+                    onValueChange = { },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .menuAnchor(),
+                    label = { Text(text = "Select Role") },
+                    trailingIcon = {
+                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
                     }
-                }
-            )
-        }
-    ) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-        ) {
-            items(userList) { user ->
-                UserListItem(
-                    user = user
+                )
+                ExposedDropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false },
+                    content = {
+                        listed.forEach { role ->
+                            DropdownMenuItem(
+                                text = {
+                                    Text(text = role)
+                                },
+                                onClick = {
+                                    onChangeItem(role)
+                                    expanded = false
+                                },
+                            )
+                        }
+                    }
                 )
             }
-        }
+        )
     }
 }
 
 @Composable
-fun UserListItem(user: User) {
-    Row(
+fun MemberCard(user: Firestorerole) {
+    Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(25.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .padding(8.dp),
     ) {
-        Image(
-            imageVector = Icons.Default.Face,
-            contentDescription = "기본 프로필",
-            modifier = Modifier
-                .size(36.dp)
-                .clip(CircleShape)
-        )
-        Spacer(modifier = Modifier.width(16.dp))
-        Text(
-            text = user.userName,
-            fontSize = 20.sp,
-            color = Color.Black
-        )
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text(text = "Name: ${user.name}")
+            Text(text = "Email: ${user.email}")
+            Text(text = "Role: ${user.role}")
+        }
     }
 }
-
-fun loadUserList(listener: (List<User>) -> Unit) {
-    val firebaseAuth = FirebaseAuth.getInstance()
-    val currentUser = firebaseAuth.currentUser
-
-    // 현재 사용자 정보가 있을 경우 사용자 목록을 생성
-    currentUser?.let {
-        val userList = listOf(
-            User(
-                userId = it.uid,
-                userName = it.displayName ?: "Unknown"
-            )
-        )
-        listener(userList)
-    }
-
-    // fakeUserList
-    val fakeUserList = listOf(
-        User(userId = "cute", userName = "김상은"),
-        User(userId = "user2", userName = "User 2"),
-        User(userId = "user3", userName = "User 3"),
-        // ... 추가적인 가짜 사용자 데이터를 생성하려면 이어서 추가
-    )
-
-    listener(fakeUserList)
-
-}
-

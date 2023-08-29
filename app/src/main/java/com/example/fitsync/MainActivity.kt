@@ -126,40 +126,22 @@ fun MainScreen() {
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         IconButton(onClick = {
-                            val intent = Intent(context, ScheduleActivity::class.java)
+                            val intent = Intent(context, MainActivity::class.java)
                             context.startActivity(intent)
                         }) {
                             Icon(
-                                painter = painterResource(id = R.drawable.baseline_schedule_24),
-                                contentDescription = "스케쥴 액티비티로 이동"
+                                painter = painterResource(id = R.drawable.baseline_home_24),
+                                contentDescription = "메인 액티비티(홈)으로 이동"
                             )
                         }
                         Text(
-                            text = "스케줄",
+                            text = "Home",
                             fontSize = 10.sp,
                             fontFamily = FontFamily.SansSerif,
                             modifier = Modifier.padding(top = 0.dp)
                         )
                     }
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        IconButton(onClick = {
-                            val intent = Intent(context, BookActivity::class.java)
-                            context.startActivity(intent)
-                        }) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.baseline_call_24),
-                                contentDescription = "예약 액티비티로 이동"
-                            )
-                        }
-                        Text(
-                            text = "예약",
-                            fontSize = 10.sp,
-                            fontFamily = FontFamily.SansSerif,
-                            modifier = Modifier.padding(top = 0.dp)
-                        )
-                    }
+
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
@@ -179,6 +161,7 @@ fun MainScreen() {
                             modifier = Modifier.padding(top = 0.dp)
                         )
                     }
+
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
@@ -207,63 +190,68 @@ fun MainScreen() {
                 .padding(innerPadding)
         ) {
             item {
-                val context = LocalContext.current
-                Button(
-                    onClick = {
-                        val intent = Intent(context, MemberProfile::class.java)
-                        context.startActivity(intent)
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                ) {
-                    Text(text = "MemberProfile")
-                }
-                Button(
-                    onClick = {
-                        val intent = Intent(context, LoginActivity::class.java)
-                        context.startActivity(intent)
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                ) {
-                    Text(text = "LoginActivity")
-                }
-                Button(
-                    onClick = {
-                        val intent = Intent(context, MemberRegistration::class.java)
-                        context.startActivity(intent)
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                ) {
-                    Text(text = "MemberRegistration")
-                }
-                Button(
-                    onClick = {
-                        val intent = Intent(context, MessengerActivity::class.java)
-                        context.startActivity(intent)
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                ) {
-                    Text(text = "MessengerActivity")
-                }
-                Button(
-                    onClick = {
-                        val intent = Intent(context, Membership::class.java)
-                        context.startActivity(intent)
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                ) {
-                    Text(text = "Membership")
-                }
+                MainButtonList()
             }
         }
+    }
+}
+
+@Composable
+fun MainButtonList() {
+    val context = LocalContext.current
+    Button(
+        onClick = {
+            val intent = Intent(context, MemberProfile::class.java)
+            context.startActivity(intent)
+        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+    ) {
+        Text(text = "MemberProfile")
+    }
+    Button(
+        onClick = {
+            val intent = Intent(context, LoginActivity::class.java)
+            context.startActivity(intent)
+        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+    ) {
+        Text(text = "LoginActivity")
+    }
+    Button(
+        onClick = {
+            val intent = Intent(context, MemberRegistration::class.java)
+            context.startActivity(intent)
+        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+    ) {
+        Text(text = "MemberRegistration")
+    }
+    Button(
+        onClick = {
+            val intent = Intent(context, MessengerActivity::class.java)
+            context.startActivity(intent)
+        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+    ) {
+        Text(text = "MessengerActivity")
+    }
+    Button(
+        onClick = {
+            val intent = Intent(context, Membership::class.java)
+            context.startActivity(intent)
+        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+    ) {
+        Text(text = "Membership")
     }
 }

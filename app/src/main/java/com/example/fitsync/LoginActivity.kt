@@ -4,12 +4,17 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -20,8 +25,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
@@ -56,13 +63,20 @@ fun LoginScreen(viewModel: LoginViewModel, onLoginSuccess: (Boolean) -> Unit) {
     val context = LocalContext.current
 
     Column(
-
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Image(
+            painter = painterResource(id = R.drawable.fitsync),
+            contentDescription = "Profile Image",
+            modifier = Modifier
+                .size(200.dp)
+                .clip(CircleShape)
+                .align(Alignment.CenterHorizontally)
+        )
 
         OutlinedTextField(
             value = emailState.value,
@@ -72,7 +86,6 @@ fun LoginScreen(viewModel: LoginViewModel, onLoginSuccess: (Boolean) -> Unit) {
                 .fillMaxWidth()
                 .padding(8.dp)
         )
-
         OutlinedTextField(
             value = passwordState.value,
             onValueChange = { passwordState.value = it },
@@ -83,53 +96,66 @@ fun LoginScreen(viewModel: LoginViewModel, onLoginSuccess: (Boolean) -> Unit) {
                 .padding(8.dp)
         )
 
-        Button(
-            onClick = {
-                viewModel.login(emailState.value, passwordState.value)
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp)
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            Text(text = "Log In")
-        }
-        Button(
-            onClick = {
-                val intent = Intent(context, Membership::class.java)
-                context.startActivity(intent)
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp)
-        ) {
-            Text(text = "회원가입")
-        }
-        Button(
-            onClick = {
-                val email = emailState.value
-                if (email.isNotEmpty()) {
-                    viewModel.sendPasswordResetEmail(email)
-                } else {
-                    viewModel.errorMessage = "이메일을 입력해주세요."
+            Button(
+                onClick = {
+                    viewModel.login(emailState.value, passwordState.value)
+                },
+                colors = ButtonDefaults.buttonColors(
+                    Color.Black,
+                    contentColor = Color.White
+                )
+            ) {
+                Text(text = "Sign In")
+            }
+
+            Button(
+                onClick = {
+                    val intent = Intent(context, Membership::class.java)
+                    context.startActivity(intent)
+                },
+                colors = ButtonDefaults.buttonColors(
+                    Color.Black,
+                    contentColor = Color.White
+                )
+            ) {
+                Text(text = "Sign Up")
+            }
+
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // 여기서 이메일 입력해주세요 메시지가 보이는 위치가 이상함.
+                Button(
+                    onClick = {
+                        val email = emailState.value
+                        if (email.isNotEmpty()) {
+                            viewModel.sendPasswordResetEmail(email)
+                        } else {
+                            viewModel.errorMessage = "이메일을 입력해주세요."
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        Color.Black,
+                        contentColor = Color.White
+                    )
+                ) {
+                    Text(text = "Forgot Password")
                 }
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp)
-        ) {
-            Text(text = "비밀번호 재설정")
-        }
+            }
 
-        if (viewModel.errorMessage.isNotEmpty()) {
-            Text(
-                text = viewModel.errorMessage,
-                color = Color.Red,
-                modifier = Modifier.padding(8.dp)
-            )
-        }
+            if (viewModel.errorMessage.isNotEmpty()) {
+                Text(
+                    text = viewModel.errorMessage,
+                    color = Color.Red,
+                    modifier = Modifier.padding(8.dp))
+            }
 
-        if (viewModel.loginSuccess) {
-            onLoginSuccess(true)
+            if (viewModel.loginSuccess) {
+                onLoginSuccess(true)
+            }
         }
     }
 }

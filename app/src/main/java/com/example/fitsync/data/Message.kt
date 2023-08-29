@@ -20,3 +20,16 @@ data class FirestoreUser(
     val trainer: String = "",
     val etc: String = ""
 )
+
+data class Firestorerole(
+    val name: String = "",
+    val email: String = "",
+    val role: String = ""
+)
+
+data class Task(
+    val id: String = "",
+    var title: String = "",
+    var description: String = "",
+    var status: String = "",
+)
