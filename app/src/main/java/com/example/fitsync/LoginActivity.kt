@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,6 +17,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Email
+import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -34,7 +36,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import com.google.firebase.auth.FirebaseAuth
@@ -70,8 +74,8 @@ fun LoginScreen(viewModel: LoginViewModel, onLoginSuccess: (Boolean) -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Center,
+            .padding(top = 76.dp, start = 16.dp, end = 16.dp, bottom = 0.dp),
+        verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Image(
@@ -90,7 +94,7 @@ fun LoginScreen(viewModel: LoginViewModel, onLoginSuccess: (Boolean) -> Unit) {
             leadingIcon = {
                 Icon(imageVector = Icons.Outlined.Email, contentDescription = null)
             },
-        modifier = Modifier
+            modifier = Modifier
                 .fillMaxWidth()
                 .padding(8.dp)
         )
@@ -136,40 +140,45 @@ fun LoginScreen(viewModel: LoginViewModel, onLoginSuccess: (Boolean) -> Unit) {
                 Text(text = "Sign Up")
             }
         }
-            Column(
-                modifier =  Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Button(
+                onClick = {
+                    val email = emailState.value
+                    if (email.isNotEmpty()) {
+                        viewModel.sendPasswordResetEmail(email)
+                    } else {
+                        viewModel.errorMessage = "이메일을 입력해주세요."
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(
+                    Color.Transparent,
+                    contentColor = Color.Gray
+                )
             ) {
-                Button(
-                    onClick = {
-                        val email = emailState.value
-                        if (email.isNotEmpty()) {
-                            viewModel.sendPasswordResetEmail(email)
-                        } else {
-                            viewModel.errorMessage = "이메일을 입력해주세요."
-                        }
-                    },
-                    colors = ButtonDefaults.buttonColors(
-                        Color.Black,
-                        contentColor = Color.White
-                    )
-                ) {
-                    Text(text = "Forgot Password")
-                }
-            }
-
-            if (viewModel.errorMessage.isNotEmpty()) {
                 Text(
-                    text = viewModel.errorMessage,
-                    color = Color.Red,
-                    modifier = Modifier.padding(8.dp))
-            }
-
-            if (viewModel.loginSuccess) {
-                onLoginSuccess(true)
+                    text = "Forgot Password",
+                    textDecoration = TextDecoration.Underline,
+                    fontWeight = FontWeight.Bold
+                )
             }
         }
+
+        if (viewModel.errorMessage.isNotEmpty()) {
+            Text(
+                text = viewModel.errorMessage,
+                color = Color.Red,
+                modifier = Modifier.padding(8.dp)
+            )
+        }
+
+        if (viewModel.loginSuccess) {
+            onLoginSuccess(true)
+        }
     }
+}
 
 
 class LoginViewModel : ViewModel() {
@@ -192,6 +201,7 @@ class LoginViewModel : ViewModel() {
             errorMessage = "이메일과 비밀번호를 입력해주세요."
         }
     }
+
     fun sendPasswordResetEmail(email: String) {
         if (email.isNotBlank()) {
             auth.sendPasswordResetEmail(email)

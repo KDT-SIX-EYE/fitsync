@@ -60,12 +60,14 @@ fun MainScreen() {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(
-                    text = "Fit Sync",
-                    fontSize = 24.sp,
-                    fontFamily = FontFamily.SansSerif,
-                    fontWeight = FontWeight.ExtraBold
-                ) },
+                title = {
+                    Text(
+                        text = "Fit Sync",
+                        fontSize = 24.sp,
+                        fontFamily = FontFamily.SansSerif,
+                        fontWeight = FontWeight.ExtraBold
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = { /* 메뉴 아이콘 */ }) {
                         Icon(
@@ -110,7 +112,8 @@ fun MainScreen() {
                         Icon(
                             painter = painterResource(id = R.drawable.baseline_schedule_24),
                             contentDescription = "스케쥴 액티비티로 이동"
-                        )                    }
+                        )
+                    }
                     IconButton(onClick = {
                         val intent = Intent(context, BookActivity::class.java)
                         context.startActivity(intent)
@@ -118,7 +121,8 @@ fun MainScreen() {
                         Icon(
                             painter = painterResource(id = R.drawable.baseline_call_24),
                             contentDescription = "예약 액티비티로 이동"
-                        )                    }
+                        )
+                    }
                     IconButton(onClick = {
                         val intent = Intent(context, UsersActivity::class.java)
                         context.startActivity(intent)
