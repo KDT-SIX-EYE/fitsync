@@ -113,7 +113,7 @@ fun MyProfileScreen(firebaseAuth: FirebaseAuth) {
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         IconButton(onClick = {
-                            val intent = Intent(context, CalenderActivity::class.java)
+                            val intent = Intent(context, CalendarActivity::class.java)
                             context.startActivity(intent)
                         }) {
                             Icon(
@@ -133,16 +133,16 @@ fun MyProfileScreen(firebaseAuth: FirebaseAuth) {
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         IconButton(onClick = {
-                            val intent = Intent(context, ScheduleActivity::class.java)
+                            val intent = Intent(context, QRcheckActivity::class.java)
                             context.startActivity(intent)
                         }) {
                             Icon(
                                 painter = painterResource(id = R.drawable.baseline_schedule_24),
-                                contentDescription = "스케쥴 액티비티로 이동"
+                                contentDescription = "QR 액티비티로 이동"
                             )
                         }
                         Text(
-                            text = "스케줄",
+                            text = "QR",
                             fontSize = 10.sp,
                             fontFamily = FontFamily.SansSerif,
                             modifier = Modifier.padding(top = 0.dp)
@@ -152,16 +152,16 @@ fun MyProfileScreen(firebaseAuth: FirebaseAuth) {
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         IconButton(onClick = {
-                            val intent = Intent(context, BookActivity::class.java)
+                            val intent = Intent(context, MainActivity::class.java)
                             context.startActivity(intent)
                         }) {
                             Icon(
                                 painter = painterResource(id = R.drawable.baseline_call_24),
-                                contentDescription = "예약 액티비티로 이동"
+                                contentDescription = "메인 액티비티로 이동"
                             )
                         }
                         Text(
-                            text = "예약",
+                            text = "Home",
                             fontSize = 10.sp,
                             fontFamily = FontFamily.SansSerif,
                             modifier = Modifier.padding(top = 0.dp)

@@ -110,7 +110,7 @@ fun MainScreen(viewModel: KanbanViewModel) {
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         IconButton(onClick = {
-                            val intent = Intent(context, CalenderActivity::class.java)
+                            val intent = Intent(context, CalendarActivity::class.java)
                             context.startActivity(intent)
                         }) {
                             Icon(
@@ -140,6 +140,26 @@ fun MainScreen(viewModel: KanbanViewModel) {
                         }
                         Text(
                             text = "Home",
+                            fontSize = 10.sp,
+                            fontFamily = FontFamily.SansSerif,
+                            modifier = Modifier.padding(top = 0.dp)
+                        )
+                    }
+
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        IconButton(onClick = {
+                            val intent = Intent(context, AttendanceActivity::class.java)
+                            context.startActivity(intent)
+                        }) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.baseline_qr_code_2_24),
+                                contentDescription = "QR 액티비티로 이동"
+                            )
+                        }
+                        Text(
+                            text = "QR",
                             fontSize = 10.sp,
                             fontFamily = FontFamily.SansSerif,
                             modifier = Modifier.padding(top = 0.dp)

@@ -2,6 +2,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("com.google.gms.google-services")
+    id("kotlin-android")
 }
 
 android {
@@ -86,7 +87,21 @@ dependencies {
     val lifecycleVersion = "2.6.1"
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycleVersion")
-//    implementation("androidx.lifecycle:lifecycle-viewmodel:$lifecycleVersion")
-
     implementation("androidx.compose.material:material:1.5.0")
+
+    val camerax_version = "1.3.0-alpha04"
+//    val camerax_version = "1.2.1"
+    implementation("androidx.camera:camera-camera2:$camerax_version")
+    implementation("androidx.camera:camera-lifecycle:$camerax_version")
+    implementation("androidx.camera:camera-view:$camerax_version")
+    implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
+    implementation("androidx.camera:camera-core:1.2.3")
+    implementation("com.google.zxing:core:3.4.1")
+    /**
+     * ZXing 3.4+ uses Java 8 language features, so it is required to enable core library desugaring
+     * in order to use the Zxing on API < 23
+     */
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:1.1.5")
+
+    implementation ("androidx.compose.material:material-icons-extended:1.2.0")
 }
