@@ -1,6 +1,5 @@
 package com.example.fitsync
 
-import android.content.ContentValues
 import android.content.ContentValues.TAG
 import android.os.Bundle
 import android.util.Log
@@ -21,6 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -51,6 +51,12 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.runtime.*
+import androidx.compose.ui.text.input.TextFieldValue
 
 class ScheduleManagement : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -78,172 +84,325 @@ fun Asd(db: FirebaseFirestore) {
     var timeListOpen by remember {
         mutableStateOf(false)
     }
-    Column {
+    val startTime = 7
+    val endTime = 23
+    val timeOptions = mutableListOf<Int>()
+
+    for (hour in startTime until endTime) {
+        timeOptions.add(hour)
+    }
+    var selectedTime by remember {
+        mutableStateOf(0) // 기본 시간을 선택합니다.
+    }
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(top = 200.dp), // Center align the contents
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         var memberName by remember {
             mutableStateOf("")
         }
-        var selectedTime by remember {
-            mutableStateOf(0) // 기본 시간을 선택합니다.
-        }
-        Button(onClick = { calendarOpen = true }) {
+
+        Button(
+            onClick = { calendarOpen = true },
+            colors = ButtonDefaults.buttonColors(Color.Black),
+            modifier = Modifier.width(180.dp)
+        ) {
             Text(text = "날짜 $clickedDate")
         }
-        Button(onClick = { timeListOpen = true }) {
+        Button(
+            onClick = { timeListOpen = true },
+            colors = ButtonDefaults.buttonColors(Color.Black),
+            modifier = Modifier.width(180.dp)
+        ) {
             Text(text = "시간 $selectedTime")
         }
-        val startTime = 7
-        val endTime = 23
-        val timeOptions = mutableListOf<Int>()
 
-        for (hour in startTime until endTime) {
-            timeOptions.add(hour)
-        }
 
-        Box {
 
-            Column {
-                TextField(value = memberName, onValueChange = { memberName = it })
-                var trainers = listOf("Trainer 1", "Trainer 2", "Trainer 3")
-                var trainerList by remember {
-                    mutableStateOf(trainers)
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            var trainerList by remember { mutableStateOf(listOf<String>()) }
+            var memberList by remember { mutableStateOf(listOf<String>()) }
+//                TextField(value = memberName, onValueChange = { memberName = it })
+            var members = mutableListOf<String>()
+            db.collection("users").get().addOnSuccessListener { field ->
+                for (memberName in field) {
+                    var member = memberName.get("name").toString()
+                    members.add(member)
                 }
-                var expandedTrainerIndex by remember { mutableStateOf(-1) }
-                var selectedTrainer by remember { mutableStateOf("") }
-
-                Button(onClick = {
-                    expandedTrainerIndex = if (expandedTrainerIndex == -1) 0 else -1
-                }) {
-                    Text(text = "트레이너 선택")
+                memberList = members
+            }
+            var trainers = mutableListOf<String>()
+            db.collection("trainer").get().addOnSuccessListener { field ->
+                for (trainerName in field) {
+                    var trainer = trainerName.get("name").toString()
+                    trainers.add(trainer)
                 }
-                if (expandedTrainerIndex != -1) {
-                    trainerList.forEachIndexed { index, trainer ->
+                trainerList = trainers
+            }
+//                var trainers = listOf("Trainer 1", "Trainer 2", "Trainer 3")
+//                var trainerList by remember {
+//                    mutableStateOf(trainers)
+//                }
+            var expandedTrainerIndex by remember { mutableStateOf(-1) }
+            var selectedTrainer by remember { mutableStateOf("") }
+
+//                Button(
+//                    onClick = {
+//                        expandedTrainerIndex = if (expandedTrainerIndex == -1) 0 else -1
+//                    },
+//                    colors = ButtonDefaults.buttonColors(Color.Black)
+//                ) {
+//                    Text(text = "트레이너 선택")
+//                }
+//                TrainerListWithSearch(trainerList)
+            var searchQuery by remember { mutableStateOf(TextFieldValue()) }
+//    var selectedTrainer by remember { mutableStateOf("") }
+
+            Column(modifier = Modifier.padding(16.dp)) {
+                OutlinedTextField(
+                    value = searchQuery.text,
+                    onValueChange = { newValue ->
+                        searchQuery = TextFieldValue(newValue)
+                    },
+                    placeholder = { Text("Search for a trainer") },
+                    modifier = Modifier
+                        .width(200.dp),
+                    colors = TextFieldDefaults.textFieldColors(containerColor = Color.Transparent)
+
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Filtered trainer list based on search query
+                val filteredTrainers =
+                    trainerList.filter { it.contains(searchQuery.text, ignoreCase = true) }
+
+                // Display the filtered trainers only if search query is not empty
+                if (searchQuery.text.isNotBlank()) {
+                    for (trainer in filteredTrainers) {
                         Text(
                             text = trainer,
-                            modifier = Modifier
-                                .clickable {
-                                    selectedTrainer = trainer
-                                    expandedTrainerIndex = -1
-                                }
+                            modifier = Modifier.clickable {
+                                // Set the selected trainer when clicked
+                                selectedTrainer = trainer
+                            }
                         )
                     }
+                } else {
+                    Text("Enter a search query to see the list.")
                 }
-                Button(
-                    onClick = {
-                        val userData = hashMapOf(
-                            "Member Name" to memberName,
-                            "Trainer Name" to selectedTrainer,
-                            "Clicked Date" to clickedDate,
-                            "Selected Time" to selectedTime
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Display the selected trainer
+                if (selectedTrainer.isNotBlank()) {
+                    Text("Selected Trainer: $selectedTrainer")
+                }
+            }
+//                MemberListWithSearch(memberList)
+            var searchQuery2 by remember { mutableStateOf(TextFieldValue()) }
+//    var memberName by remember { mutableStateOf("") }
+
+            Column(modifier = Modifier.padding(16.dp)) {
+                OutlinedTextField(
+                    value = searchQuery2.text,
+                    onValueChange = { newValue ->
+                        searchQuery2 = TextFieldValue(newValue)
+                    },
+                    placeholder = { Text("Search for a member") },
+                    modifier = Modifier
+                        .width(200.dp),
+                    colors = TextFieldDefaults.textFieldColors(containerColor = Color.Transparent)
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Filtered trainer list based on search query
+                val filteredMembers =
+                    memberList.filter { it.contains(searchQuery2.text, ignoreCase = true) }
+
+                // Display the filtered trainers only if search query is not empty
+                if (searchQuery2.text.isNotBlank()) {
+                    for (member in filteredMembers) {
+                        Text(
+                            text = member,
+                            modifier = Modifier.clickable {
+                                // Set the selected trainer when clicked
+                                memberName = member
+                            }
                         )
-                        val baseDocumentRef =
-                            db.collection("schedule").document("$clickedDate")
+                    }
+                } else {
+                    Text("Enter a search query to see the list.")
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Display the selected trainer
+                if (memberName.isNotBlank()) {
+                    Text("Selected Member: $memberName")
+                }
+            }
+
+            if (expandedTrainerIndex != -1) {
+                trainerList.forEachIndexed { index, trainer ->
+                    Text(
+                        text = trainer,
+                        modifier = Modifier
+                            .clickable {
+                                selectedTrainer = trainer
+                                expandedTrainerIndex = -1
+                            }
+                    )
+                }
+            }
+            Button(
+                onClick = {
+                    val userData = hashMapOf(
+                        "Member Name" to memberName,
+                        "Trainer Name" to selectedTrainer,
+                        "Clicked Date" to clickedDate,
+                        "Selected Time" to selectedTime
+                    )
+                    val baseDocumentRef =
+                        db.collection("schedule").document("$clickedDate")
 //                                .collection("Time").document("$selectedTime")
 
-                        fun findAvailableDocumentName(
-                            documentRef: DocumentReference,
-                            candidateName: String,
-                            attempt: Int = 1,
-                            maxAttempts: Int = 3
-                        ) {
-                            val newDocumentCandidate =
-                                if (attempt == 1) candidateName else "${candidateName}_$attempt"
-                            documentRef.collection("Time").document(newDocumentCandidate).get()
-                                .addOnCompleteListener { task ->
-                                    if (task.isSuccessful) {
-                                        val documentSnapshot = task.result
-                                        if (!documentSnapshot.exists()) {
-                                            val newDocumentRef = documentRef.collection("Time")
-                                                .document(newDocumentCandidate)
-                                            newDocumentRef.set(userData)
-                                        } else {
-                                            if (attempt < maxAttempts) {
-                                                findAvailableDocumentName(
-                                                    documentRef,
-                                                    candidateName,
-                                                    attempt + 1,
-                                                    maxAttempts
-                                                )
-                                            } else {
-                                                Log.w(
-                                                    TAG,
-                                                    "Maximum additional documents reached for this time."
-                                                )
-                                            }
-                                        }
+                    fun findAvailableDocumentName(
+                        documentRef: DocumentReference,
+                        candidateName: String,
+                        attempt: Int = 1,
+                        maxAttempts: Int = 3
+                    ) {
+                        val newDocumentCandidate =
+                            if (attempt == 1) candidateName else "${candidateName}_$attempt"
+                        documentRef.collection("Time").document(newDocumentCandidate).get()
+                            .addOnCompleteListener { task ->
+                                if (task.isSuccessful) {
+                                    val documentSnapshot = task.result
+                                    if (!documentSnapshot.exists()) {
+                                        val newDocumentRef = documentRef.collection("Time")
+                                            .document(newDocumentCandidate)
+                                        newDocumentRef.set(userData)
                                     } else {
-                                        Log.w(
-                                            TAG,
-                                            "Error checking document existence: ",
-                                            task.exception
-                                        )
+                                        if (attempt < maxAttempts) {
+                                            findAvailableDocumentName(
+                                                documentRef,
+                                                candidateName,
+                                                attempt + 1,
+                                                maxAttempts
+                                            )
+                                        } else {
+                                            Log.w(
+                                                TAG,
+                                                "Maximum additional documents reached for this time."
+                                            )
+                                        }
                                     }
+                                } else {
+                                    Log.w(
+                                        TAG,
+                                        "Error checking document existence: ",
+                                        task.exception
+                                    )
                                 }
-                        }
-
-                        findAvailableDocumentName(baseDocumentRef, "$selectedTime")
-
+                            }
                     }
-                )
-                { Text(text = "예약") }
+
+                    findAvailableDocumentName(baseDocumentRef, "$selectedTime")
+
+                }, colors = ButtonDefaults.buttonColors(Color.Black)
+            )
+            { Text(text = "예약") }
+        }
+
+    }
+    if (calendarOpen) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = 250.dp), // Center align the contents
+        ) {
+            val dataSource = CalendarDataSource()
+            var calendarUiModel by remember {
+                mutableStateOf(dataSource.getData(lastSelectedDate = dataSource.today))
             }
 
-            Column(modifier = Modifier.background(Color.LightGray)) {
-                if (timeListOpen) {
-                    timeOptions.forEach { timeOption ->
-                        Text(
-                            text = "$timeOption ~ ${timeOption + 1}",
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    selectedTime = timeOption
-                                    timeListOpen = false
-                                }
-                                .padding(8.dp)
-                        )
-                    }
+            fun convertLocalDateToInt(dateModel: CalendarUiModel.Date): Int {
+                val date = dateModel.date
+                return date.year * 10000 + date.monthValue * 100 + date.dayOfMonth
+            }
+            CalendarWindow(data = calendarUiModel, onClickedDate = { calendarOpen = false },
+                onPrevClickListener = { startDate ->
+                    val finalStartDate = startDate.minusDays(1)
+                    calendarUiModel = dataSource.getData(
+                        startDate = finalStartDate,
+                        lastSelectedDate = calendarUiModel.selectedDate.date
+                    )
+                }, onNextClickListener = { endDate ->
+                    val finalStartDate = endDate.plusDays(2)
+                    calendarUiModel = dataSource.getData(
+                        startDate = finalStartDate,
+                        lastSelectedDate = calendarUiModel.selectedDate.date
+                    )
+                }, onDateClickListener = { date ->
+                    calendarUiModel = calendarUiModel.copy(
+                        selectedDate = date,
+                        visibleDates = calendarUiModel.visibleDates.map {
+                            it.copy(
+                                isSelected = it.date.isEqual(date.date)
+                            )
+                        }
+                    )
+                    clickedDate = convertLocalDateToInt(calendarUiModel.selectedDate)
+
+                }
+            )
+        }
+
+    }
+
+    if (timeListOpen) {
+        LazyColumn(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .padding(top = 300.dp)
+                .height(250.dp)
+                .width(150.dp)
+                .background(Color.White)
+        ) {
+            item {
+                timeOptions.forEach { timeOption ->
+                    Text(
+                        text = "$timeOption ~ ${timeOption + 1}",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                selectedTime = timeOption
+                                timeListOpen = false
+                            }
+                            .padding(8.dp)
+                    )
                 }
             }
         }
-        Text(text = "$clickedDate")
-    }
-    if (calendarOpen) {
-        val dataSource = CalendarDataSource()
-        var calendarUiModel by remember {
-            mutableStateOf(dataSource.getData(lastSelectedDate = dataSource.today))
-        }
-
-        fun convertLocalDateToInt(dateModel: CalendarUiModel.Date): Int {
-            val date = dateModel.date
-            return date.year * 10000 + date.monthValue * 100 + date.dayOfMonth
-        }
-        CalendarWindow(data = calendarUiModel, onClickedDate = { calendarOpen = false },
-            onPrevClickListener = { startDate ->
-                val finalStartDate = startDate.minusDays(1)
-                calendarUiModel = dataSource.getData(
-                    startDate = finalStartDate,
-                    lastSelectedDate = calendarUiModel.selectedDate.date
-                )
-            }, onNextClickListener = { endDate ->
-                val finalStartDate = endDate.plusDays(2)
-                calendarUiModel = dataSource.getData(
-                    startDate = finalStartDate,
-                    lastSelectedDate = calendarUiModel.selectedDate.date
-                )
-            }, onDateClickListener = { date ->
-                calendarUiModel = calendarUiModel.copy(
-                    selectedDate = date,
-                    visibleDates = calendarUiModel.visibleDates.map {
-                        it.copy(
-                            isSelected = it.date.isEqual(date.date)
-                        )
-                    }
-                )
-                clickedDate = convertLocalDateToInt(calendarUiModel.selectedDate)
-
-            }
-        )
     }
 }
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MemberListWithSearch(members: List<String>) {
+}
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TrainerListWithSearch(trainers: List<String>) {
+}
+
 
 @Composable
 fun CalendarWindow(
@@ -255,7 +414,13 @@ fun CalendarWindow(
 ) {
     val context = LocalContext.current
     FirebaseApp.initializeApp(context)
-    Column {
+
+    Column(
+        modifier = Modifier
+            .width(250.dp)
+            .height(250.dp)
+            .background(Color.White)
+    ) {
         var currentYearMonth by remember {
             mutableStateOf(YearMonth.now())
         }
@@ -302,7 +467,7 @@ fun Header(
                     )
                 ),
                 modifier = Modifier.weight(1f),
-                fontSize = 30.sp
+                fontSize = 20.sp
             )
             IconButton(onClick = {
                 onPrevClickListener(data.startDate.date)
@@ -393,8 +558,8 @@ fun ContentItem(
 
     Card(
         modifier = Modifier
-            .width(45.dp)
-            .height(45.dp)
+            .width(30.dp)
+            .height(30.dp)
             .clickable {
                 clickCount++
                 val currentTime = System.currentTimeMillis()
@@ -417,13 +582,15 @@ fun ContentItem(
                 text = date.day,
                 modifier = Modifier.align(Alignment.CenterHorizontally),
                 style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold),
-                color = textColor
+                color = textColor,
+                fontSize = 10.sp
             )
             Text(
                 text = date.date.dayOfMonth.toString(),
                 modifier = Modifier.align(Alignment.CenterHorizontally),
                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-                color = textColor
+                color = textColor,
+                fontSize = 10.sp
             )
         }
     }

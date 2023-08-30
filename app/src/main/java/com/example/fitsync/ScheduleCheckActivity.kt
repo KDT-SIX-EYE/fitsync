@@ -327,7 +327,7 @@ fun ScheduleCheckScreen(db: FirebaseFirestore) {
                 modifier = Modifier
                     .width(400.dp)
                     .height(45.dp)
-                    .background(Color(0xFFF781F3))
+                    .background(Color.LightGray)
                     .border(1.dp, Color.Black), // 테두리 추가
                 contentAlignment = Alignment.Center
             )
@@ -405,8 +405,9 @@ fun TimeButton(db: FirebaseFirestore, clickedDate: Int, timeListOpen: Boolean) {
                         var time_in_Scedule by remember {
                             mutableStateOf(false)
                         }
-                        Column(modifier = Modifier.width(20.dp)) {
-                            Text(text = "$timeOption")
+                        Column(modifier = Modifier.width(20.dp).padding(start = 5.dp)) {
+                            Text(text = "$timeOption",
+                                style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold))
 
                         }
                         Button(
@@ -593,22 +594,31 @@ fun ContentItem3(
     onTimeListOpen: () -> Unit,
 ) {
     val textColor =
-        if (date.date.year == currentYearMonth.year && date.date.month == currentYearMonth.month) {
+        if (date.isSelected) {
+            Color.White
+        } else if (date.date.year == currentYearMonth.year && date.date.month == currentYearMonth.month) {
             if (date.date.dayOfWeek == DayOfWeek.SUNDAY) {
-                Color.Red
+                Color.Black
             } else if (date.date.dayOfWeek == DayOfWeek.SATURDAY) {
-                Color.Blue
+                Color.Black
             } else {
                 Color.Black
             }
         } else {
-            MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
+            MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)
+        }
+    val textStyle =
+        if (date.date.dayOfWeek == DayOfWeek.SUNDAY || date.date.dayOfWeek == DayOfWeek.SATURDAY) {
+            MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Black)
+        } else {
+            MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold)
         }
     val backgroundColor = if (date.isToday && !date.isSelected) {
         Color.LightGray
     } else if (date.isSelected) {
-        Color(0xFFF781F3).copy(alpha = 0.7f)
-    } else {
+        Color.Black
+    }
+    else {
         Color.White
     }
     var lastClickTime by remember { mutableStateOf(0L) }
@@ -638,13 +648,13 @@ fun ContentItem3(
             Text(
                 text = date.day,
                 modifier = Modifier.align(Alignment.CenterHorizontally),
-                style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold),
+                style = textStyle,
                 color = textColor
             )
             Text(
                 text = date.date.dayOfMonth.toString(),
                 modifier = Modifier.align(Alignment.CenterHorizontally),
-                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                style = textStyle,
                 color = textColor
             )
         }
