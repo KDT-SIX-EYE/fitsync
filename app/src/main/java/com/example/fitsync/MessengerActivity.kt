@@ -4,16 +4,22 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -37,22 +43,23 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.fitsync.Message.ChatMessage
+import com.example.fitsync.data.ChatMessage
 import com.example.fitsync.ui.theme.FitSyncTheme
-import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase.getInstance
 import com.google.firebase.database.ValueEventListener
-import com.google.firebase.database.ktx.database
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -133,17 +140,15 @@ private fun ChatScreen(firebaseAuth: FirebaseAuth) {
                         value = composingMessage,
                         onValueChange = { composingMessage = it },
                         onSendClick = {
-                            if (composingMessage.isNotEmpty()) {
+                            if (composingMessage.isNotEmpty() && user?.displayName != null) {
                                 val currentDate = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date())
                                 val newChatMessage =
                                     ChatMessage(
-                                        // data class에 맞춰 바꾸기 (로그인)
                                         message = composingMessage,
                                         userId = user?.uid,
-//                                        userName = user?.displayName,
-                                        userName = "상은",
-                                        uploadDate = currentDate)
-//                                sentMessages += composingMessage
+                                        userName = user?.displayName,
+                                        uploadDate = currentDate
+                                    )
                                 saveChatMessage(newChatMessage)
                                 composingMessage = ""
                             }
@@ -170,7 +175,7 @@ private fun ChatScreen(firebaseAuth: FirebaseAuth) {
 }
 
 fun loadChatMessages(listener: (List<ChatMessage>) -> Unit) {
-    val database = getInstance("https://fit-sync-76834-default-rtdb.asia-southeast1.firebasedatabase.app/")
+    val database = getInstance("https://fitsyncproject-default-rtdb.asia-southeast1.firebasedatabase.app/")
     val chatRef = database.getReference("chat")
 
     chatRef.addValueEventListener(object : ValueEventListener {
@@ -191,7 +196,7 @@ fun loadChatMessages(listener: (List<ChatMessage>) -> Unit) {
 }
 
 fun saveChatMessage(chatMessage: ChatMessage) {
-    val database = getInstance("https://fit-sync-76834-default-rtdb.asia-southeast1.firebasedatabase.app/")
+    val database = getInstance("https://fitsyncproject-default-rtdb.asia-southeast1.firebasedatabase.app/")
     val chatRef = database.getReference("chat")
     val newMessageRef = chatRef.push()
     newMessageRef.setValue(chatMessage)
@@ -213,8 +218,8 @@ fun CustomTextField(
             onValueChange = onValueChange,
             modifier = Modifier
                 .weight(1f) // 여기서 비율을 조정
-                .padding(horizontal = 16.dp, vertical = 8.dp)
-                .background(Color.White),
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+//                .background(Color.White),
             textStyle = LocalTextStyle.current.copy(fontSize = 16.sp)
         )
         IconButton(
@@ -234,38 +239,85 @@ fun ChatItemBubble(
     UserId: String?
 ) {
     val isCurrentUserMessage = UserId == message.userId
-    val bubbleColor = if (isCurrentUserMessage) Color.Transparent else Color.Yellow // 사용자와 상대방 메시지에 다른 색 지정
-    val alignment = if (isCurrentUserMessage) Alignment.BottomEnd else Alignment.BottomStart
+    val bubbleColor = if (isCurrentUserMessage) Color(0xFFE2F2FF) else Color(0xFFFCE4EC)
+    val horizontalArrangement = if (isCurrentUserMessage) Arrangement.End else Arrangement.Start
 
-    Column {
-        if (!isCurrentUserMessage) {
-            Text(text = message.userName ?: "")
-        }
-        Row {
-            if (isCurrentUserMessage){
-                Text(text = message.uploadDate ?: "")
+    if (!isCurrentUserMessage) {
+        Column(
+            modifier = Modifier.padding(8.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = horizontalArrangement,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.userimage),
+                    contentDescription = "Profile Picture",
+                    modifier = Modifier
+                        .size(24.dp)
+                        .clip(CircleShape)
+                )
+                Column {
+                    Text(
+                        text = message.userName ?: "",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 12.sp
+                    )
+                    Box(
+                        modifier = Modifier
+                            .background(color = bubbleColor, shape = RoundedCornerShape(16.dp))
+                            .padding(6.dp)
+                    ) {
+                        Text(
+                            text = message.message ?: "",
+                            fontSize = 16.sp
+                        )
+                    }
+                }
+                Text(
+                    text = message.uploadDate ?: "",
+                    fontSize = 9.sp,
+                    modifier = Modifier.padding(top = 6.dp)
+                )
             }
+        }
+    }
+
+    if (isCurrentUserMessage) {
+        Spacer(modifier = Modifier.padding(4.dp))
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = horizontalArrangement,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(
+                text = message.uploadDate ?: "",
+                fontSize = 9.sp,
+                modifier = Modifier.padding(top = 6.dp)
+            )
             Box(
                 modifier = Modifier
-                    .padding(7.dp)
-                    .background(bubbleColor),
-                contentAlignment = alignment
+                    .background(color = bubbleColor, shape = RoundedCornerShape(16.dp))
+                    .padding(6.dp)
             ) {
-                Text(text = message.message ?: "")
-            }
-            if (!isCurrentUserMessage) {
-                Text(text = message.uploadDate ?: "")
+                Text(
+                    text = message.message ?: "",
+                    fontSize = 16.sp)
             }
         }
     }
 }
-
 
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
-    val firebaseAuth = FirebaseAuth.getInstance() // Firebase 초기화 및 인스턴스 생성
+    val firebaseAuth = FirebaseAuth.getInstance()
     FitSyncTheme {
         ChatScreen(firebaseAuth = firebaseAuth)
     }
 }
+
+// LaunchedEffect(메시지를 리스트로 만들어서 그거의 변수의 사이즈) {
+//    scrollState.animateScrollToItem(동일)
+//    }

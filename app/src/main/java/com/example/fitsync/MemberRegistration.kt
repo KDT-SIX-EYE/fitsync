@@ -34,7 +34,6 @@ import com.google.firebase.ktx.Firebase
 class MemberRegistration : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_membership)
         setContent {
             val db = Firebase.firestore
             SaveToFirestore(db)
@@ -125,4 +124,3 @@ fun SaveToFirestore(db: FirebaseFirestore) {
 
     }
 }
-
