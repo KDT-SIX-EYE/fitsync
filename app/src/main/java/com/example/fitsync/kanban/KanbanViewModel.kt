@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
-// Delete시 firebase에서 삭제
 class KanbanViewModel : ViewModel() {
     private val firestore = Firebase.firestore
 
@@ -21,6 +20,7 @@ class KanbanViewModel : ViewModel() {
     init {
         loadTasks()
     }
+
 
     private suspend fun fetchTasks(): List<Task> {
         val tasksSnapshot = firestore.collection("tasks").get().await()
@@ -40,34 +40,52 @@ class KanbanViewModel : ViewModel() {
         }
     }
 
-    suspend fun updateTaskStatus(taskId: String, newStatus: String) {
-        val taskRef = firestore.collection("tasks").document(taskId)
+    fun updateTaskStatus(taskId: String, newStatus: String) {
+        viewModelScope.launch {
+            val taskRef = firestore.collection("tasks").document(taskId)
 
-        try {
-            val updateData = mapOf(
-                "status" to newStatus
-            )
-            // 데이터베이스 업데이트
-            taskRef.update(updateData).await()
-        } catch (e: Exception) {
-            println("Error updating status of task with ID: $taskId")
+            try {
+                val updateData = mapOf(
+                    "status" to newStatus
+                )
+                taskRef.update(updateData).await()
+
+                // Update the local tasks list directly
+                val updatedTasks = _tasks.value.map { task ->
+                    if (task.id == taskId) {
+                        task.copy(status = newStatus)
+                    } else {
+                        task
+                    }
+                }
+                _tasks.value = updatedTasks
+            } catch (e: Exception) {
+                println("Error updating status of task with ID: $taskId")
+            }
         }
     }
 
-    suspend fun updateTaskInFirestore(editedTask: Task) {
-        val taskRef = firestore.collection("tasks").document(editedTask.id)
 
-        try {
-            val updateData = mapOf(
-                "title" to editedTask.title,
-                "description" to editedTask.description,
-                "status" to editedTask.status
-            )
-            taskRef.update(updateData).await()
-        } catch (e: Exception) {
-            println("Error updating task with ID: ${editedTask.id}")
+    fun updateTaskStatusInViewModel(taskId: String, newStatus: String) {
+        viewModelScope.launch {
+            updateTaskStatus(taskId, newStatus)
         }
     }
+
+
+    fun addTask(newTask: Task) {
+        viewModelScope.launch {
+            // Add the new task to Firestore and get the generated document reference
+            val taskDocument = firestore.collection("tasks").add(newTask).await()
+
+            // Update the task's ID in the newTask instance
+            val updatedTask = newTask.copy(id = taskDocument.id)
+
+            // Update the local tasks list directly
+            _tasks.value = _tasks.value + updatedTask
+        }
+    }
+
 
     fun deleteTask(taskId: String) {
         viewModelScope.launch {
@@ -76,23 +94,14 @@ class KanbanViewModel : ViewModel() {
             try {
                 taskRef.delete().await()
 
-                val fetchedTasks = fetchTasks()
-                _tasks.value = fetchedTasks
+                val updatedTasks = _tasks.value.filter { it.id != taskId }
+                _tasks.value = updatedTasks
             } catch (e: Exception) {
                 println("Error deleting task with ID: $taskId")
             }
         }
     }
 
-
-    fun addTask(newTask: Task) {
-        viewModelScope.launch {
-            firestore.collection("tasks").add(newTask).await()
-
-            // 데이터가 추가된 후에 즉시 상태 업데이트
-            _tasks.value = _tasks.value + newTask
-        }
-    }
 
     private fun loadTasks() {
         viewModelScope.launch {
@@ -101,3 +110,4 @@ class KanbanViewModel : ViewModel() {
         }
     }
 }
+
