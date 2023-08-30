@@ -22,23 +22,20 @@ class KanbanViewModel : ViewModel() {
     }
 
 
+
     private suspend fun fetchTasks(): List<Task> {
         val tasksSnapshot = firestore.collection("tasks").get().await()
         return tasksSnapshot.documents.mapNotNull { doc ->
             val data = doc.data
             val id = doc.id
             if (data != null) {
-                Task(
-                    id,
-                    data["title"] as String,
-                    data["description"] as String,
-                    data["status"] as String
-                )
+                Task(id, data["title"] as String, data["description"] as String, data["status"] as String)
             } else {
                 null
             }
         }
     }
+
 
     fun updateTaskStatus(taskId: String, newStatus: String) {
         viewModelScope.launch {
@@ -65,12 +62,41 @@ class KanbanViewModel : ViewModel() {
         }
     }
 
+    fun updateTask(taskId: String, updatedTask: Task) {
+        viewModelScope.launch {
+            val taskRef = firestore.collection("tasks").document(taskId)
+
+            try {
+                val updateData = mapOf(
+                    "title" to updatedTask.title,
+                    "description" to updatedTask.description,
+                    "status" to updatedTask.status
+                    // You can include other fields as needed
+                )
+                taskRef.update(updateData).await()
+
+                // Update the local tasks list directly
+                val updatedTasks = _tasks.value.map { task ->
+                    if (task.id == taskId) {
+                        updatedTask
+                    } else {
+                        task
+                    }
+                }
+                _tasks.value = updatedTasks
+            } catch (e: Exception) {
+                println("Error updating task with ID: $taskId")
+            }
+        }
+    }
+
 
     fun updateTaskStatusInViewModel(taskId: String, newStatus: String) {
         viewModelScope.launch {
             updateTaskStatus(taskId, newStatus)
         }
     }
+
 
 
     fun addTask(newTask: Task) {
@@ -85,6 +111,7 @@ class KanbanViewModel : ViewModel() {
             _tasks.value = _tasks.value + updatedTask
         }
     }
+
 
 
     fun deleteTask(taskId: String) {
@@ -110,4 +137,3 @@ class KanbanViewModel : ViewModel() {
         }
     }
 }
-
