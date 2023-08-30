@@ -53,7 +53,6 @@ import java.nio.ByteBuffer
 import java.time.LocalDate
 import java.time.LocalTime
 
-
 class QRcheckActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -176,7 +175,6 @@ class QRcheckActivity : ComponentActivity() {
             }
         }
     }
-
     @Composable
     fun LoadWebUrl(url: String) {
         AndroidView(factory = {
@@ -186,25 +184,20 @@ class QRcheckActivity : ComponentActivity() {
             }
         })
     }
-
     private fun restartApp() {
         val intent = Intent(this, MainActivity::class.java)
         this.startActivity(intent)
         finishAffinity()
     }
-
 }
 
-
 class QRCodeAnalyzer(private val onQrCodeScanned: (String) -> Unit) : ImageAnalysis.Analyzer {
-
 
     private val supportedImageFormats = listOf(
         ImageFormat.YUV_420_888,
         ImageFormat.YUV_422_888,
         ImageFormat.YUV_444_888
     )
-
 
     override fun analyze(image: ImageProxy) {
         if (image.format in supportedImageFormats) {
@@ -239,7 +232,6 @@ class QRCodeAnalyzer(private val onQrCodeScanned: (String) -> Unit) : ImageAnaly
             }
         }
     }
-
     private fun ByteBuffer.toByteArray(): ByteArray {
         rewind()
         return ByteArray(remaining()).also {
