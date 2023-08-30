@@ -43,14 +43,16 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.fitsync.data.ChatMessage
+import com.example.fitsync.Message.ChatMessage
 import com.example.fitsync.ui.theme.FitSyncTheme
+import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase.getInstance
 import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.ktx.database
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -168,7 +170,7 @@ private fun ChatScreen(firebaseAuth: FirebaseAuth) {
 }
 
 fun loadChatMessages(listener: (List<ChatMessage>) -> Unit) {
-    val database = getInstance("https://fit-sync-d2f86-default-rtdb.asia-southeast1.firebasedatabase.app/")
+    val database = getInstance("https://fit-sync-76834-default-rtdb.asia-southeast1.firebasedatabase.app/")
     val chatRef = database.getReference("chat")
 
     chatRef.addValueEventListener(object : ValueEventListener {
@@ -189,7 +191,7 @@ fun loadChatMessages(listener: (List<ChatMessage>) -> Unit) {
 }
 
 fun saveChatMessage(chatMessage: ChatMessage) {
-    val database = getInstance("https://fit-sync-d2f86-default-rtdb.asia-southeast1.firebasedatabase.app/")
+    val database = getInstance("https://fit-sync-76834-default-rtdb.asia-southeast1.firebasedatabase.app/")
     val chatRef = database.getReference("chat")
     val newMessageRef = chatRef.push()
     newMessageRef.setValue(chatMessage)
@@ -267,4 +269,3 @@ fun GreetingPreview() {
         ChatScreen(firebaseAuth = firebaseAuth)
     }
 }
-
