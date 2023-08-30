@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -11,8 +12,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -26,7 +30,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
@@ -57,10 +63,19 @@ class Membership : ComponentActivity() {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.Center,
+                .padding(top = 76.dp, start = 16.dp, end = 16.dp, bottom = 0.dp),
+            verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+
+            Image(
+                painter = painterResource(id = R.drawable.fitsync),
+                contentDescription = "Profile Image",
+                modifier = Modifier
+                    .size(200.dp)
+                    .clip(CircleShape)
+                    .align(Alignment.CenterHorizontally)
+            )
             var selectedRole by remember { mutableStateOf("") }
             DropDownMenued(selectedRole) { role ->
                 selectedRole = role
@@ -69,7 +84,10 @@ class Membership : ComponentActivity() {
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it },
-                label = { Text("이름") },
+                label = { Text("이름을 입력하세요") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
                 keyboardOptions = KeyboardOptions.Default.copy(
                     imeAction = ImeAction.Next
                 ),
@@ -78,7 +96,10 @@ class Membership : ComponentActivity() {
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
-                label = { Text("이메일") },
+                label = { Text("이메일을 입력하세요") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
                 keyboardOptions = KeyboardOptions.Default.copy(
                     imeAction = ImeAction.Next
                 ),
@@ -87,7 +108,10 @@ class Membership : ComponentActivity() {
             OutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
-                label = { Text("비밀번호") },
+                label = { Text("비밀번호를 입력하세요") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
                 visualTransformation = PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions.Default.copy(
                     imeAction = ImeAction.Done
@@ -128,7 +152,13 @@ class Membership : ComponentActivity() {
                         signupErrorMessage = "이름, 이메일, 비밀번호, 근로 종류를 모두 입력해주세요."
                     }
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                colors = ButtonDefaults.buttonColors(
+                    Color.Black,
+                    contentColor = Color.White
+                )
             ) {
                 Text("회원가입")
             }
@@ -143,6 +173,7 @@ class Membership : ComponentActivity() {
         }
     }
 
+
     private fun navigateToMainActivity() {
         val intent = Intent(this, MainActivity::class.java)
         startActivity(intent)
@@ -156,7 +187,7 @@ fun DropDownMenu(selectedItem: String, onChangeItem: (String) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
     val list = listOf("trainer", "manager", "Arbeit")
 
-    Column(modifier = Modifier.padding(20.dp)) {
+    Column(modifier = Modifier.padding(20.dp).fillMaxWidth()) {
         ExposedDropdownMenuBox(
             expanded = expanded,
             onExpandedChange = { expanded = !expanded }
