@@ -85,6 +85,7 @@ class AttendanceActivity : ComponentActivity() {
                     Spacer(modifier = Modifier.height(16.dp))
                     Button(
                         onClick = {
+//                        if (managerName.isNotBlank()) { // 또는 if (managerName != null && managerName.isNotEmpty())
                             val intent =
                                 Intent(this@AttendanceActivity, QRcheckActivity::class.java)
                             intent.putExtra("managerName", managerName.value)
@@ -200,9 +201,11 @@ class AttendanceActivity : ComponentActivity() {
                                             Text("퇴근 : ${info.third}", color = Color.Black)
                                         }
                                     }
+
                                 }
                             }
                         }
+
                     }
                 }
             }

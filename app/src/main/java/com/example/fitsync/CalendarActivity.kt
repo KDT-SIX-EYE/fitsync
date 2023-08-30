@@ -7,6 +7,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
@@ -26,6 +28,7 @@ import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -37,6 +40,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -53,7 +57,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.fitsync.data.EventData
 import com.google.firebase.FirebaseApp
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
@@ -84,8 +87,8 @@ fun FinalScreen(db: FirebaseFirestore) {
             TopAppBar(
                 title = {
                     Text(
-                        // 상단바 이름 수정하십시오. 그 외 변경 금지
-                        text = "캘린더",
+
+                        text = "Calendar",
                         fontSize = 17.sp,
                         fontFamily = FontFamily.SansSerif
                     )
@@ -173,7 +176,6 @@ fun FinalScreen(db: FirebaseFirestore) {
                             modifier = Modifier.padding(top = 0.dp)
                         )
                     }
-
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
@@ -216,200 +218,237 @@ fun FinalScreen(db: FirebaseFirestore) {
             }
         }
     ) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-        ) {
-            item {
-                CalendarActivityScreen(db)
-            }
-        }
+
+        CalendarActivityScreen(db, innerPadding)
+
     }
 }
 
 @Composable
-fun CalendarActivityScreen(db: FirebaseFirestore) {
-    Column {
-        val dataSource = CalendarDataSource()
-        val calendarUiModel by remember {
-            mutableStateOf(dataSource.getData(lastSelectedDate = dataSource.today))
-        }
-        val context = LocalContext.current
-        var eventDate by remember { mutableStateOf("") }
-        var eventName by remember { mutableStateOf("") }
-        var registrant by remember { mutableStateOf("") }
-        var startTime by remember { mutableStateOf("") }
-        var endTime by remember { mutableStateOf("") }
-        var showEventInputFields by remember { mutableStateOf(false) }
-        var showEventCheckFields by remember {
-            mutableStateOf(false)
-        }
-        val eventDataList = remember { mutableStateListOf<EventData>() }
+fun CalendarActivityScreen(db: FirebaseFirestore, innerPadding: PaddingValues) {
+    val scrollState = rememberLazyListState()
+    var showEventInputFields by remember { mutableStateOf(false) }
+    var showEventCheckFields by remember {
+        mutableStateOf(false)
+    }
+    val eventDataList = remember { mutableStateListOf<EventData>() }
 
-        CalendarWindow2(eventDataList)
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        )
-        {
-            Button(
-                onClick = {
-                    val intent = Intent(context, ScheduleCheckActivity::class.java)
-                    context.startActivity(intent)
-                },
-                modifier = Modifier
-                    .padding(8.dp)
-                    .sizeIn(minHeight = 0.dp)
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.baseline_edit_calendar_24), // 예약확인 아이콘 리소스 ID로 대체
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp)
-                )
-                    Text(text = "예약확인")
+    LazyColumn(
+        state = scrollState,
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(innerPadding)
+    ) {
+        item {
+            LaunchedEffect(showEventInputFields || showEventCheckFields) {
+                if (showEventInputFields || showEventCheckFields) {
+                    // Scroll to the last added item (assuming you are adding an item)
+                    scrollState.animateScrollToItem(eventDataList.size + 1)
                 }
             }
-            Button(
-                onClick = {
-                    val intent = Intent(context, ScheduleManagement::class.java)
-                    context.startActivity(intent)
-                },
-                modifier = Modifier
-                    .padding(8.dp)
-                    .sizeIn(minHeight = 0.dp)
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.baseline_check_circle_outline_24),
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp)
-                )
-                    Text(text = "예약하기")
-                }
+            val dataSource = CalendarDataSource()
+            val calendarUiModel by remember {
+                mutableStateOf(dataSource.getData(lastSelectedDate = dataSource.today))
             }
-        }
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            Button(
-                onClick = {
-                    showEventInputFields = !showEventInputFields // 버튼을 누르면 입력 필드를 보이도록 상태 변경
-                },
-                modifier = Modifier
-                    .padding(8.dp)
-                    .sizeIn(minHeight = 0.dp)
-            ) {
-                Text(text = "일정 등록하기")
-            }
+            val context = LocalContext.current
+            var eventDate by remember { mutableStateOf("") }
+            var eventName by remember { mutableStateOf("") }
+            var registrant by remember { mutableStateOf("") }
+            var startTime by remember { mutableStateOf("") }
+            var endTime by remember { mutableStateOf("") }
 
-            Button(
-                onClick = { showEventCheckFields = !showEventCheckFields },
-                modifier = Modifier
-                    .padding(8.dp)
-                    .sizeIn(minHeight = 0.dp)
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+            CalendarWindow2(eventDataList)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            )
+            {
+                Button(
+                    onClick = {
+                        val intent = Intent(context, ScheduleManagement::class.java)
+                        context.startActivity(intent)
+                    }, colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Black, // 버튼의 배경색을 검정색으로 설정합니다.
+                        contentColor = Color.White // 버튼 내용의 색을 흰색으로 설정합니다.
+                    ), modifier = Modifier
+                        .padding(8.dp)
+                        .sizeIn(minHeight = 0.dp)
+                        .width(130.dp),
+                    contentPadding = PaddingValues(0.dp)
                 ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.baseline_edit_calendar_24), // 일정등록 아이콘 리소스 ID로 대체
-                        contentDescription = null,
-                        modifier = Modifier.size(24.dp)
-                    )
-                    Text(text = "일정확인")
-                }
-            }
-        }
-        if (showEventInputFields) {
-            Column {
-                EventInputFields(date = eventDate,
-                    onDateChange = { eventDate = it },
-                    eventname = eventName,
-                    onNameChange = { eventName = it },
-                    registrant = registrant,
-                    onRegistrantChange = { registrant = it },
-                    startTime = startTime,
-                    onStartTimeChange = { startTime = it },
-                    endTime = endTime,
-                    onEndTimeChange = { endTime = it },
-                    selectedDate = calendarUiModel.selectedDate,
-                    onSaveButtonClick = {
-                        val event = hashMapOf(
-                            "eventDate" to eventDate,
-                            "eventName" to eventName,
-                            "registrant" to registrant,
-                            "startTime" to startTime,
-                            "endTime" to endTime
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.baseline_check_circle_outline_24), // 예약 아이콘 리소스 ID로 대체
+                            contentDescription = null, modifier = Modifier.size(24.dp)
                         )
-                        db.collection("EventData").add(event)
-                            .addOnSuccessListener { documentReference ->
-
-                            }.addOnFailureListener { e ->
-
-                            }
-                        showEventInputFields = false
-                    },
-                    onCancelButtonClick = {
-                        showEventInputFields = false
-                    })
-            }
-        }
-
-        db.collection("EventData")
-            .get()
-            .addOnSuccessListener { querySnapshot ->
-                val seenEventDates = HashSet<String>() // 이미 나온 날짜들을 저장할 Set
-                val newEventDataList = mutableListOf<EventData>()
-                for (document in querySnapshot) {
-                    val eventDate = document.get("eventDate").toString()
-                    if (eventDate !in seenEventDates) { // 중복이 아닌 경우만 추가
-                        seenEventDates.add(eventDate)
-                        val eventName = document.get("eventName").toString()
-                        val registrant = document.get("registrant").toString()
-                        val startTime = document.get("startTime").toString()
-                        val endTime = document.get("endTime").toString()
-                        newEventDataList.add(
-                            EventData(
-                                eventDate,
-                                eventName,
-                                registrant,
-                                startTime,
-                                endTime
-                            )
-                        )
+                        Text(text = "예약하기")
                     }
                 }
-                eventDataList.addAll(newEventDataList)
+                Button(
+                    onClick = {
+                        val intent = Intent(context, ScheduleCheckActivity::class.java)
+                        context.startActivity(intent)
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Black, // 버튼의 배경색을 검정색으로 설정합니다.
+                        contentColor = Color.White // 버튼 내용의 색을 흰색으로 설정합니다.
+                    ),
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .sizeIn(minHeight = 0.dp)
+                        .width(130.dp),
+                    contentPadding = PaddingValues(0.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.baseline_edit_calendar_24), // 예약확인 아이콘 리소스 ID로 대체
+                            contentDescription = null, modifier = Modifier.size(24.dp)
+                        )
+                        Text(text = "예약확인")
+                    }
+                }
             }
-            .addOnFailureListener { exception ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                Button(
+                    onClick = {
+                        showEventInputFields = !showEventInputFields
+                        showEventCheckFields = false
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Black, // 버튼의 배경색을 검정색으로 설정합니다.
+                        contentColor = Color.White // 버튼 내용의 색을 흰색으로 설정합니다.
+                    ),
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .sizeIn(minHeight = 0.dp)
+                        .width(130.dp),
+                    contentPadding = PaddingValues(0.dp),
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.baseline_edit_calendar_24), // 일정등록 아이콘 리소스 ID로 대체
+                            contentDescription = null, modifier = Modifier.size(24.dp)
+                        )
+                        Text(text = "일정추가")
+                    }
+                }
+                Button(
+                    onClick = {
+                        showEventCheckFields = !showEventCheckFields
+                        showEventInputFields = false
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Black, // 버튼의 배경색을 검정색으로 설정합니다.
+                        contentColor = Color.White // 버튼 내용의 색을 흰색으로 설정합니다.
+                    ), modifier = Modifier
+                        .padding(8.dp)
+                        .sizeIn(minHeight = 0.dp)
+                        .width(130.dp),
+                    contentPadding = PaddingValues(0.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.baseline_calendar_month_24), // 일정확인 아이콘 리소스 ID로 대체
+                            contentDescription = null, modifier = Modifier.size(24.dp)
+                        )
+                        Text(text = "일정확인")
+                    }
+                }
             }
-        if (showEventCheckFields) {
-            val distinctEventDataList = eventDataList.distinctBy { it.eventDate }
+            if (showEventInputFields) {
+                Column {
+                    EventInputFields(date = eventDate,
+                        onDateChange = { eventDate = it },
+                        eventname = eventName,
+                        onNameChange = { eventName = it },
+                        registrant = registrant,
+                        onRegistrantChange = { registrant = it },
+                        startTime = startTime,
+                        onStartTimeChange = { startTime = it },
+                        endTime = endTime,
+                        onEndTimeChange = { endTime = it },
+                        selectedDate = calendarUiModel.selectedDate,
+                        onSaveButtonClick = {
+                            val event = hashMapOf(
+                                "eventDate" to eventDate,
+                                "eventName" to eventName,
+                                "registrant" to registrant,
+                                "startTime" to startTime,
+                                "endTime" to endTime
+                            )
+                            db.collection("EventData").add(event)
+                                .addOnSuccessListener { documentReference ->
 
-            Column {
+                                }.addOnFailureListener { e ->
 
-                Text(
-                    text = "일정 목록",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp,
-                    modifier = Modifier.padding(bottom = 16.dp)
-                )
-                distinctEventDataList.forEach { eventData ->
-                    EventCard(eventData)
+                                }
+                            showEventInputFields = false
+                        },
+                        onCancelButtonClick = {
+                            showEventInputFields = false
+                        })
+                }
+            }
+
+            db.collection("EventData")
+                .get()
+                .addOnSuccessListener { querySnapshot ->
+                    val seenEventDates = HashSet<String>() // 이미 나온 날짜들을 저장할 Set
+                    val newEventDataList = mutableListOf<EventData>()
+                    for (document in querySnapshot) {
+                        val eventDate = document.get("eventDate").toString()
+                        if (eventDate !in seenEventDates) { // 중복이 아닌 경우만 추가
+                            seenEventDates.add(eventDate)
+                            val eventName = document.get("eventName").toString()
+                            val registrant = document.get("registrant").toString()
+                            val startTime = document.get("startTime").toString()
+                            val endTime = document.get("endTime").toString()
+                            newEventDataList.add(
+                                EventData(
+                                    eventDate,
+                                    eventName,
+                                    registrant,
+                                    startTime,
+                                    endTime
+                                )
+                            )
+                        }
+                    }
+                    eventDataList.addAll(newEventDataList)
+                }
+                .addOnFailureListener { exception ->
+                }
+            if (showEventCheckFields) {
+                val distinctEventDataList = eventDataList.distinctBy { it.eventDate }
+                Column {
+                    Text(
+                        text = "일정 목록",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 20.sp,
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+                    distinctEventDataList.forEach { eventData ->
+                        EventCard(eventData)
+                    }
+
                 }
 
             }
-
         }
     }
 }
@@ -472,7 +511,6 @@ fun CalendarWindow2(eventDataList: List<EventData>) {
     }
 }
 
-
 @Composable
 fun Header2(
     data: CalendarUiModel,
@@ -480,8 +518,7 @@ fun Header2(
     onNextClickListener: (LocalDate) -> Unit,
     onMinusMonth: () -> Unit,
     onPlusMonth: () -> Unit,
-
-    ) {
+) {
     val currentYearMonth = YearMonth.now()
     val currentMonth = remember { mutableStateOf(currentYearMonth) }
     Column(modifier = Modifier.padding(10.dp)) {
@@ -563,34 +600,36 @@ fun ContentItem2(
     eventDataList: List<EventData>
 ) {
     val textColor =
-        if (date.date.year == currentYearMonth.year && date.date.month == currentYearMonth.month) {
+        if (date.isSelected) {
+            Color.White
+        } else if (date.date.year == currentYearMonth.year && date.date.month == currentYearMonth.month) {
             if (date.date.dayOfWeek == DayOfWeek.SUNDAY) {
-                Color.Red
+                Color.Black
             } else if (date.date.dayOfWeek == DayOfWeek.SATURDAY) {
-                Color.Blue
+                Color.Black
             } else {
-                MaterialTheme.colorScheme.primary
+                Color.Black
             }
         } else {
-            MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
+            MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)
+        }
+    val textStyle =
+        if (date.date.dayOfWeek == DayOfWeek.SUNDAY || date.date.dayOfWeek == DayOfWeek.SATURDAY) {
+            MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Black)
+        } else {
+            MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold)
         }
     val backgroundColor = if (date.isToday && !date.isSelected) {
         Color.LightGray
     } else if (date.isSelected) {
-        Color(0xFFF781F3).copy(alpha = 0.7f)
-    }
-//    else if (isDateInEventDataList(date, eventDataList)) {
-//        Color.Yellow // eventDataList에 해당 날짜의 데이터가 있으면 검은색 배경색
-//    }
-    else {
+        Color.Black
+    } else {
         Color.White
     }
     var lastClickTime by remember {
         mutableStateOf(0L)
     }
     var clickCount by remember { mutableStateOf(0) }
-
-
     Card(
         modifier = Modifier
             .width(45.dp)
@@ -598,11 +637,8 @@ fun ContentItem2(
             .clickable {
                 clickCount++
                 val currentTime = System.currentTimeMillis()
-
                 lastClickTime = currentTime
                 onClickListener(date)
-
-
             },
         colors = CardDefaults.cardColors(
             backgroundColor
@@ -616,20 +652,21 @@ fun ContentItem2(
             Text(
                 text = date.day,
                 modifier = Modifier.align(Alignment.CenterHorizontally),
-                style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold),
+                style = textStyle,
                 color = textColor
             )
             Text(
                 text = date.date.dayOfMonth.toString(),
                 modifier = Modifier.align(Alignment.CenterHorizontally),
-                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                style = textStyle,
                 color = textColor
             )
             if (isDateInEventDataList(date, eventDataList)) {
                 val matchingEventData = getEventDataForDate(date, eventDataList)
                 Text(
                     text = matchingEventData?.eventName ?: "",
-                    fontSize = 12.sp
+                    fontSize = 12.sp,
+                    color = textColor
                 )
             }
         }
@@ -677,7 +714,6 @@ fun EventInputFields(
             ),
             modifier = Modifier.fillMaxWidth()
         )
-
         Spacer(modifier = Modifier.height(16.dp))
         OutlinedTextField(
             value = eventname,
@@ -699,7 +735,6 @@ fun EventInputFields(
             ),
             modifier = Modifier.fillMaxWidth()
         )
-
         Spacer(modifier = Modifier.height(16.dp))
         Row(
             modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
@@ -713,7 +748,6 @@ fun EventInputFields(
                 ),
                 modifier = Modifier.weight(1f)
             )
-
             Spacer(modifier = Modifier.width(16.dp))
             OutlinedTextField(
                 value = endTime,
@@ -725,7 +759,6 @@ fun EventInputFields(
                 modifier = Modifier.weight(1f)
             )
         }
-
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -743,14 +776,15 @@ fun EventInputFields(
                     ) {
                         onSaveButtonClick()
                     }
-                }, modifier = Modifier.weight(1f)
+                }, modifier = Modifier.weight(1f),
+                colors = ButtonDefaults.buttonColors(Color.Black)
             ) {
                 Text(text = "일정 등록 완료")
             }
-
             Spacer(modifier = Modifier.width(16.dp))
             Button(
-                onClick = onCancelButtonClick, modifier = Modifier.weight(1f)
+                onClick = onCancelButtonClick, modifier = Modifier.weight(1f),
+                colors = ButtonDefaults.buttonColors(Color.Black)
             ) {
                 Text(text = "취소")
             }
@@ -769,14 +803,21 @@ private fun isInputValid(
 }
 
 
-// 일정 확인하기
+data class EventData(
+    val eventDate: String,
+    val eventName: String,
+    val registrant: String,
+    val startTime: String,
+    val endTime: String,
+)
 
 @Composable
 fun EventCard(eventData: EventData) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp)
+            .padding(8.dp),
+        colors = CardDefaults.cardColors(Color(0xFFB4C8BB))
     ) {
         Column(
             modifier = Modifier.padding(16.dp)

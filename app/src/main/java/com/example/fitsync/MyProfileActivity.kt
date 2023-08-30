@@ -228,16 +228,6 @@ fun ProfileComponent(userName: String) {
             .fillMaxWidth()
             .padding(16.dp)
     ) {
-        // 사용자 프로필 이미지
-        Image(
-            painter = painterResource(id = R.drawable.fitsync),
-            contentDescription = "Profile Image",
-            modifier = Modifier
-                .size(200.dp)
-                .clip(CircleShape)
-                .align(Alignment.CenterHorizontally)
-        )
-
         Spacer(modifier = Modifier.height(16.dp))
 
         // 사용자 이름
@@ -247,9 +237,7 @@ fun ProfileComponent(userName: String) {
             fontWeight = FontWeight.Bold,
             modifier = Modifier.align(Alignment.CenterHorizontally)
         )
-
         Spacer(modifier = Modifier.height(8.dp))
-
         // 사용자 소개
         Text(
             text = "Fitness enthusiast | Yoga lover | Runner",
