@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -52,6 +53,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.fitsync.data.EventData
 import com.google.firebase.FirebaseApp
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
@@ -83,7 +85,7 @@ fun FinalScreen(db: FirebaseFirestore) {
                 title = {
                     Text(
                         // 상단바 이름 수정하십시오. 그 외 변경 금지
-                        text = "My Profile",
+                        text = "캘린더",
                         fontSize = 17.sp,
                         fontFamily = FontFamily.SansSerif
                     )
@@ -116,8 +118,8 @@ fun FinalScreen(db: FirebaseFirestore) {
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         IconButton(onClick = {
-//                            val intent = Intent(context, CalenderActivity::class.java)
-//                            context.startActivity(intent)
+                            val intent = Intent(context, CalendarActivity::class.java)
+                            context.startActivity(intent)
                         }) {
                             Icon(
                                 imageVector = Icons.Default.DateRange,
@@ -264,11 +266,11 @@ fun CalendarActivityScreen(db: FirebaseFirestore) {
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-//                Icon(
-//                    painter = painterResource(id = R.drawable.bookcheck), // 예약확인 아이콘 리소스 ID로 대체
-//                    contentDescription = null,
-//                    modifier = Modifier.size(24.dp)
-//                )
+                Icon(
+                    painter = painterResource(id = R.drawable.baseline_edit_calendar_24), // 예약확인 아이콘 리소스 ID로 대체
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp)
+                )
                     Text(text = "예약확인")
                 }
             }
@@ -285,11 +287,11 @@ fun CalendarActivityScreen(db: FirebaseFirestore) {
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-//                Icon(
-//                    painter = painterResource(id = R.drawable.book), // 예약 아이콘 리소스 ID로 대체
-//                    contentDescription = null,
-//                    modifier = Modifier.size(24.dp)
-//                )
+                Icon(
+                    painter = painterResource(id = R.drawable.baseline_check_circle_outline_24),
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp)
+                )
                     Text(text = "예약하기")
                 }
             }
@@ -308,12 +310,9 @@ fun CalendarActivityScreen(db: FirebaseFirestore) {
             ) {
                 Text(text = "일정 등록하기")
             }
+
             Button(
-                onClick = {
-//                        val intent = Intent(context, EventCheckActivity::class.java)
-//                        context.startActivity(intent)
-                    showEventCheckFields = !showEventCheckFields
-                },
+                onClick = { showEventCheckFields = !showEventCheckFields },
                 modifier = Modifier
                     .padding(8.dp)
                     .sizeIn(minHeight = 0.dp)
@@ -322,11 +321,11 @@ fun CalendarActivityScreen(db: FirebaseFirestore) {
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-//                    Icon(
-//                        painter = painterResource(id = R.drawable.schedule), // 일정등록 아이콘 리소스 ID로 대체
-//                        contentDescription = null,
-//                        modifier = Modifier.size(24.dp)
-//                    )
+                    Icon(
+                        painter = painterResource(id = R.drawable.baseline_edit_calendar_24), // 일정등록 아이콘 리소스 ID로 대체
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp)
+                    )
                     Text(text = "일정확인")
                 }
             }
@@ -678,6 +677,7 @@ fun EventInputFields(
             ),
             modifier = Modifier.fillMaxWidth()
         )
+
         Spacer(modifier = Modifier.height(16.dp))
         OutlinedTextField(
             value = eventname,
@@ -699,6 +699,7 @@ fun EventInputFields(
             ),
             modifier = Modifier.fillMaxWidth()
         )
+
         Spacer(modifier = Modifier.height(16.dp))
         Row(
             modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
@@ -712,6 +713,7 @@ fun EventInputFields(
                 ),
                 modifier = Modifier.weight(1f)
             )
+
             Spacer(modifier = Modifier.width(16.dp))
             OutlinedTextField(
                 value = endTime,
@@ -723,6 +725,7 @@ fun EventInputFields(
                 modifier = Modifier.weight(1f)
             )
         }
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -744,6 +747,7 @@ fun EventInputFields(
             ) {
                 Text(text = "일정 등록 완료")
             }
+
             Spacer(modifier = Modifier.width(16.dp))
             Button(
                 onClick = onCancelButtonClick, modifier = Modifier.weight(1f)
@@ -764,15 +768,8 @@ private fun isInputValid(
     return date.isNotBlank() && eventname.isNotBlank() && registrant.isNotBlank() && startTime.isNotBlank() && endTime.isNotBlank()
 }
 
-///////////////////////////
-/////////////////////////// 일정 확인하기
-data class EventData(
-    val eventDate: String,
-    val eventName: String,
-    val registrant: String,
-    val startTime: String,
-    val endTime: String,
-)
+
+// 일정 확인하기
 
 @Composable
 fun EventCard(eventData: EventData) {
