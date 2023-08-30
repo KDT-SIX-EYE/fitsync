@@ -74,14 +74,14 @@ fun MainScreen(viewModel: KanbanViewModel) {
                         fontWeight = FontWeight.ExtraBold
                     )
                 },
-//                navigationIcon = {
-//                    IconButton(onClick = { /* 메뉴 아이콘 */ }) {
-//                        Icon(
-//                            imageVector = Icons.Default.Menu,
-//                            contentDescription = "메뉴 아이콘"
-//                        )
-//                    }
-//                },
+                navigationIcon = {
+                    IconButton(onClick = { /* 메뉴 아이콘 */ }) {
+                        Icon(
+                            imageVector = Icons.Default.Menu,
+                            contentDescription = "메뉴 아이콘"
+                        )
+                    }
+                },
                 actions = {
                     IconButton(onClick = {
                         val intent = Intent(context, MyProfileActivity::class.java)
@@ -199,7 +199,7 @@ fun MainScreen(viewModel: KanbanViewModel) {
                             )
                         }
                         Text(
-                            text = "메신저",
+                            text = "채팅방",
                             fontSize = 10.sp,
                             fontFamily = FontFamily.SansSerif,
                             modifier = Modifier.padding(top = 0.dp)

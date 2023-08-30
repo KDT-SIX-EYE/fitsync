@@ -229,14 +229,14 @@ fun ProfileComponent(userName: String) {
             .padding(16.dp)
     ) {
         // 사용자 프로필 이미지
-//        Image(
-//            painter = painterResource(id = R.drawable.fitsync),
-//            contentDescription = "Profile Image",
-//            modifier = Modifier
-//                .size(200.dp)
-//                .clip(CircleShape)
-//                .align(Alignment.CenterHorizontally)
-//        )
+        Image(
+            painter = painterResource(id = R.drawable.fitsync),
+            contentDescription = "Profile Image",
+            modifier = Modifier
+                .size(200.dp)
+                .clip(CircleShape)
+                .align(Alignment.CenterHorizontally)
+        )
 
         Spacer(modifier = Modifier.height(16.dp))
 

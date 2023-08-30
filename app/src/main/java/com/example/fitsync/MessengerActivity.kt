@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -251,7 +252,7 @@ fun ChatItemBubble(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Image(
-                    painter = painterResource(id = R.drawable.aaaa),
+                    painter = painterResource(id = R.drawable.userimage),
                     contentDescription = "Profile Picture",
                     modifier = Modifier
                         .size(24.dp)
@@ -308,9 +309,6 @@ fun ChatItemBubble(
     }
 }
 
-
-
-
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
@@ -319,3 +317,7 @@ fun GreetingPreview() {
         ChatScreen(firebaseAuth = firebaseAuth)
     }
 }
+
+// LaunchedEffect(메시지를 리스트로 만들어서 그거의 변수의 사이즈) {
+//    scrollState.animateScrollToItem(동일)
+//    }

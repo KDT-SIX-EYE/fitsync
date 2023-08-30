@@ -40,7 +40,6 @@ class MemberRegistration : ComponentActivity() {
 
         }
     }
-
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
