@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.AlertDialog
@@ -161,16 +162,14 @@ fun AddTaskForm(viewModel: KanbanViewModel) {
             label = { Text("할 일 (ex : 워크인 상담)", color = Color.Gray) },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(80.dp)
                 .padding(8.dp)
         )
         TextField(
             value = description,
             onValueChange = { description = it },
-            label = { Text("설명 (ex : 담당 매니저/pm 2~4)", color = Color.Gray) },
+            label = { Text("설명 (ex : 담당자/pm 2~4)", color = Color.Gray) },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(80.dp)
                 .padding(horizontal = 8.dp, vertical = 8.dp)
         )
         Button(
@@ -188,9 +187,7 @@ fun AddTaskForm(viewModel: KanbanViewModel) {
             colors = ButtonDefaults.buttonColors(Color.Black),
             modifier = Modifier
                 .align(Alignment.End)
-                .wrapContentWidth()
-                .height(50.dp)
-                .padding(bottom = 8.dp)
+
         ) {
             Text("할 일 추가", color = Color.White)
         }
@@ -211,7 +208,7 @@ fun StatusColumn(
     ) {
         Text(
             text = status,
-            color = Color.Black, // 글씨 색을 검정으로 설정
+            color = Color.Black,
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier
@@ -236,72 +233,132 @@ fun StatusColumn(
     }
 }
 
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TaskCard(
     task: Task,
     viewModel: KanbanViewModel,
     onTaskDeleted: (Task) -> Unit
 ) {
+    var isEditDialogVisible by remember { mutableStateOf(false) }
+    var title by remember { mutableStateOf(task.title) }
+    var description by remember { mutableStateOf(task.description) }
+    var status by remember { mutableStateOf(task.status) }
+
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .height(120.dp)
-            .clickable { /* Handle card click if needed */ }
-            .padding(8.dp),
+            .clickable { isEditDialogVisible = true },
         shape = RoundedCornerShape(8.dp),
     ) {
-        Column(
-            modifier = Modifier.padding(8.dp)
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(8.dp)
         ) {
-            Text(
-                text = task.title,
-                fontWeight = FontWeight.Bold,
-                color = Color.Black
-            )
-            Text(
-                text = task.description,
-                color = Color.Gray,
-                modifier = Modifier.padding(top = 4.dp)
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Row(
-                modifier = Modifier.fillMaxSize(),
-                horizontalArrangement = Arrangement.End,
-                verticalAlignment = Alignment.Bottom
+            Column(
+                modifier = Modifier
+                    .verticalScroll(rememberScrollState())
             ) {
-                Button(
-                    onClick = {
-                        val newStatus = when (task.status) {
-                            "To Do" -> "In Progress"
-                            "In Progress" -> "Done"
-                            "Done" -> {
-                                onTaskDeleted(task)
-                                return@Button
-                            }
-                            else -> task.status
-                        }
-
-                        // Use viewModelScope.launch to run the suspend function in a coroutine
-                        viewModel.updateTaskStatusInViewModel(task.id, newStatus)
-                    },
-                    colors = ButtonDefaults.buttonColors(Color.Black),
-                    modifier = Modifier
-                        .width(100.dp)
-                        .height(40.dp)
-                        .padding(bottom = 8.dp)
-                ) {
-                    Text(
-                        text = when (task.status) {
-                            "To Do" -> "Start"
-                            "In Progress" -> "Complete"
-                            "Done" -> "Delete"
-                            else -> ""
-                        },
-                        color = Color.White
-                    )
-                }
+                Text(
+                    text = title,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black,
+                    fontSize = 20.sp // 여기에서 폰트 크기를 조절합니다.
+                )
+                Text(
+                    text = description,
+                    color = Color.Gray,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+                Spacer(modifier = Modifier.height(8.dp))
             }
+
+            Button(
+                onClick = {
+                    val newStatus = when (status) {
+                        "To Do" -> "In Progress"
+                        "In Progress" -> "Done"
+                        "Done" -> {
+                            onTaskDeleted(task)
+                            return@Button
+                        }
+                        else -> status
+                    }
+
+                    viewModel.updateTaskStatusInViewModel(task.id, newStatus)
+                },
+                colors = ButtonDefaults.buttonColors(Color.Black),
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(8.dp)
+            ) {
+                Text(
+                    text = when (status) {
+                        "To Do" -> "시작"
+                        "In Progress" -> "완료"
+                        "Done" -> "삭제"
+                        else -> ""
+                    },
+                    color = Color.White
+                )
+            }
+        }
+
+
+        if (isEditDialogVisible) {
+            AlertDialog(
+                onDismissRequest = { isEditDialogVisible = false },
+                title = { Text("작업 수정", color = Color.Black) },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            val updatedTask = task.copy(
+                                title = title,
+                                description = description,
+                                status = status
+                            )
+                            viewModel.updateTask(task.id, updatedTask)
+
+                            isEditDialogVisible = false
+                        },
+                        colors = ButtonDefaults.buttonColors(Color.Black)
+                    ) {
+                        Text("수정", color = Color.White)
+                    }
+                },
+                dismissButton = {
+                    Button(
+                        onClick = { isEditDialogVisible = false },
+                        colors = ButtonDefaults.buttonColors(Color.Black)
+                    ) {
+                        Text("취소", color = Color.White)
+                    }
+                },
+                text = {
+                    Column {
+                        TextField(
+                            value = title,
+                            onValueChange = { title = it },
+                            label = { Text("할 일 (ex : 워크인 상담)") },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(8.dp)
+                        )
+                        TextField(
+                            value = description,
+                            onValueChange = { description = it },
+                            label = { Text("설명 (ex : 담당자/pm 2~4)") },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(8.dp)
+                        )
+                    }
+                }
+            )
         }
     }
 }

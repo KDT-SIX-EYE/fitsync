@@ -1,6 +1,7 @@
 package com.example.fitsync
 
 import android.content.ContentValues.TAG
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -8,7 +9,6 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -28,7 +28,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -53,28 +52,195 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Face
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.*
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.TextFieldValue
 
 class ScheduleManagement : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-
-            val db = Firebase.firestore
-            Asd(db)
+            FinalScheduleManagementScreen()
         }
     }
 }
 
-//collection().document(asf) : schedule 컬렉션의 asf라는 문서, 문서 하나를 지정하므로 asf문서의 위 값들이 수정됨.
-//                        db.collection("schedule").document(clickedDate.toString()).collection("asd").document(selectedTime.toString()).set(userData)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Asd(db: FirebaseFirestore) {
+fun FinalScheduleManagementScreen() {
+    val context = LocalContext.current
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        text = "Fit Sync",
+                        fontSize = 24.sp,
+                        fontFamily = FontFamily.SansSerif,
+                        fontWeight = FontWeight.ExtraBold
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = { /* 메뉴 아이콘 */ }) {
+                        Icon(
+                            imageVector = Icons.Default.Menu,
+                            contentDescription = "메뉴 아이콘"
+                        )
+                    }
+                },
+                actions = {
+                    IconButton(onClick = {
+                        val intent = Intent(context, MyProfileActivity::class.java)
+                        context.startActivity(intent)
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.Face,
+                            contentDescription = "사용자 프로필"
+                        )
+                    }
+                }
+            )
+        },
+        bottomBar = {
+            BottomAppBar(
+                containerColor = Color.White
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    val context = LocalContext.current
 
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        IconButton(onClick = {
+                            val intent = Intent(context, CalendarActivity::class.java)
+                            context.startActivity(intent)
+                        }) {
+                            Icon(
+                                imageVector = Icons.Default.DateRange,
+                                contentDescription = "캘린더 액티비티로 이동"
+                            )
+                        }
+                        Text(
+                            text = "캘린더",
+                            fontSize = 10.sp,
+                            fontFamily = FontFamily.SansSerif,
+                            modifier = Modifier.padding(top = 0.dp)
+                        )
+                    }
+
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        IconButton(onClick = {
+                            val intent = Intent(context, MainActivity::class.java)
+                            context.startActivity(intent)
+                        }) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.baseline_home_24),
+                                contentDescription = "메인 액티비티(홈)으로 이동"
+                            )
+                        }
+                        Text(
+                            text = "Home",
+                            fontSize = 10.sp,
+                            fontFamily = FontFamily.SansSerif,
+                            modifier = Modifier.padding(top = 0.dp)
+                        )
+                    }
+
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        IconButton(onClick = {
+                            val intent = Intent(context, AttendanceActivity::class.java)
+                            context.startActivity(intent)
+                        }) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.baseline_qr_code_2_24),
+                                contentDescription = "QR 액티비티로 이동"
+                            )
+                        }
+                        Text(
+                            text = "QR",
+                            fontSize = 10.sp,
+                            fontFamily = FontFamily.SansSerif,
+                            modifier = Modifier.padding(top = 0.dp)
+                        )
+                    }
+
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        IconButton(onClick = {
+                            val intent = Intent(context, UsersActivity::class.java)
+                            context.startActivity(intent)
+                        }) {
+                            Icon(
+                                imageVector = Icons.Default.AccountCircle,
+                                contentDescription = "사용자 목록 액티비티로 이동"
+                            )
+                        }
+                        Text(
+                            text = "프로필",
+                            fontSize = 10.sp,
+                            fontFamily = FontFamily.SansSerif,
+                            modifier = Modifier.padding(top = 0.dp)
+                        )
+                    }
+
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        IconButton(onClick = {
+                            val intent = Intent(context, MessengerActivity::class.java)
+                            context.startActivity(intent)
+                        }) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.baseline_mark_chat_unread_24),
+                                contentDescription = "메신저 액티비티로 이동"
+                            )
+                        }
+                        Text(
+                            text = "채팅방",
+                            fontSize = 10.sp,
+                            fontFamily = FontFamily.SansSerif,
+                            modifier = Modifier.padding(top = 0.dp)
+                        )
+                    }
+                }
+            }
+        }) { innerPadding ->
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+        ) {
+            item {
+                ScheduleManagementScreen()
+            }
+        }
+    }
+
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ScheduleManagementScreen() {
+    val db = Firebase.firestore
     var calendarOpen by remember {
         mutableStateOf(false)
     }
@@ -141,25 +307,9 @@ fun Asd(db: FirebaseFirestore) {
                 }
                 trainerList = trainers
             }
-//                var trainers = listOf("Trainer 1", "Trainer 2", "Trainer 3")
-//                var trainerList by remember {
-//                    mutableStateOf(trainers)
-//                }
             var expandedTrainerIndex by remember { mutableStateOf(-1) }
             var selectedTrainer by remember { mutableStateOf("") }
-
-//                Button(
-//                    onClick = {
-//                        expandedTrainerIndex = if (expandedTrainerIndex == -1) 0 else -1
-//                    },
-//                    colors = ButtonDefaults.buttonColors(Color.Black)
-//                ) {
-//                    Text(text = "트레이너 선택")
-//                }
-//                TrainerListWithSearch(trainerList)
             var searchQuery by remember { mutableStateOf(TextFieldValue()) }
-//    var selectedTrainer by remember { mutableStateOf("") }
-
             Column(modifier = Modifier.padding(16.dp)) {
                 OutlinedTextField(
                     value = searchQuery.text,
@@ -172,20 +322,16 @@ fun Asd(db: FirebaseFirestore) {
                     colors = TextFieldDefaults.textFieldColors(containerColor = Color.Transparent)
 
                 )
-
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Filtered trainer list based on search query
                 val filteredTrainers =
                     trainerList.filter { it.contains(searchQuery.text, ignoreCase = true) }
 
-                // Display the filtered trainers only if search query is not empty
                 if (searchQuery.text.isNotBlank()) {
                     for (trainer in filteredTrainers) {
                         Text(
                             text = trainer,
                             modifier = Modifier.clickable {
-                                // Set the selected trainer when clicked
                                 selectedTrainer = trainer
                             }
                         )
@@ -193,18 +339,12 @@ fun Asd(db: FirebaseFirestore) {
                 } else {
                     Text("Enter a search query to see the list.")
                 }
-
                 Spacer(modifier = Modifier.height(16.dp))
-
-                // Display the selected trainer
                 if (selectedTrainer.isNotBlank()) {
                     Text("Selected Trainer: $selectedTrainer")
                 }
             }
-//                MemberListWithSearch(memberList)
             var searchQuery2 by remember { mutableStateOf(TextFieldValue()) }
-//    var memberName by remember { mutableStateOf("") }
-
             Column(modifier = Modifier.padding(16.dp)) {
                 OutlinedTextField(
                     value = searchQuery2.text,
@@ -392,18 +532,6 @@ fun Asd(db: FirebaseFirestore) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun MemberListWithSearch(members: List<String>) {
-}
-
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun TrainerListWithSearch(trainers: List<String>) {
-}
-
-
 @Composable
 fun CalendarWindow(
     data: CalendarUiModel,
@@ -414,7 +542,6 @@ fun CalendarWindow(
 ) {
     val context = LocalContext.current
     FirebaseApp.initializeApp(context)
-
     Column(
         modifier = Modifier
             .width(250.dp)
@@ -435,7 +562,6 @@ fun CalendarWindow(
             onMinusMonth = { currentYearMonth = currentYearMonth.minusMonths(1) },
             onPlusMonth = { currentYearMonth = currentYearMonth.plusMonths(1) }
         )
-
         Content(
             currentYearMonth = currentYearMonth, data = data,
             onDateClickListener =
@@ -532,21 +658,29 @@ fun ContentItem(
     onClickedDate: () -> Unit
 ) {
     val textColor =
-        if (date.date.year == currentYearMonth.year && date.date.month == currentYearMonth.month) {
+        if (date.isSelected) {
+            Color.White
+        } else if (date.date.year == currentYearMonth.year && date.date.month == currentYearMonth.month) {
             if (date.date.dayOfWeek == DayOfWeek.SUNDAY) {
-                Color.Red
+                Color.Black
             } else if (date.date.dayOfWeek == DayOfWeek.SATURDAY) {
-                Color.Blue
+                Color.Black
             } else {
-                MaterialTheme.colorScheme.primary
+                Color.Black
             }
         } else {
-            MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
+            MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)
+        }
+    val textStyle =
+        if (date.date.dayOfWeek == DayOfWeek.SUNDAY || date.date.dayOfWeek == DayOfWeek.SATURDAY) {
+            MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Black)
+        } else {
+            MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold)
         }
     val backgroundColor = if (date.isToday && !date.isSelected) {
         Color.LightGray
     } else if (date.isSelected) {
-        Color(0xFFF781F3).copy(alpha = 0.7f)
+        Color.Black
     } else {
         Color.White
     }
@@ -581,14 +715,14 @@ fun ContentItem(
             Text(
                 text = date.day,
                 modifier = Modifier.align(Alignment.CenterHorizontally),
-                style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold),
+                style = textStyle,
                 color = textColor,
                 fontSize = 10.sp
             )
             Text(
                 text = date.date.dayOfMonth.toString(),
                 modifier = Modifier.align(Alignment.CenterHorizontally),
-                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                style = textStyle,
                 color = textColor,
                 fontSize = 10.sp
             )

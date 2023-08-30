@@ -243,7 +243,7 @@ fun CalendarActivityScreen(db: FirebaseFirestore, innerPadding: PaddingValues) {
             LaunchedEffect(showEventInputFields || showEventCheckFields) {
                 if (showEventInputFields || showEventCheckFields) {
                     // Scroll to the last added item (assuming you are adding an item)
-                    scrollState.animateScrollToItem(eventDataList.size - 1)
+                    scrollState.animateScrollToItem(eventDataList.size + 1)
                 }
             }
             val dataSource = CalendarDataSource()
@@ -632,8 +632,6 @@ fun ContentItem2(
         mutableStateOf(0L)
     }
     var clickCount by remember { mutableStateOf(0) }
-
-
     Card(
         modifier = Modifier
             .width(45.dp)
@@ -641,11 +639,8 @@ fun ContentItem2(
             .clickable {
                 clickCount++
                 val currentTime = System.currentTimeMillis()
-
                 lastClickTime = currentTime
                 onClickListener(date)
-
-
             },
         colors = CardDefaults.cardColors(
             backgroundColor
@@ -809,8 +804,7 @@ private fun isInputValid(
     return date.isNotBlank() && eventname.isNotBlank() && registrant.isNotBlank() && startTime.isNotBlank() && endTime.isNotBlank()
 }
 
-///////////////////////////
-/////////////////////////// 일정 확인하기
+
 data class EventData(
     val eventDate: String,
     val eventName: String,
