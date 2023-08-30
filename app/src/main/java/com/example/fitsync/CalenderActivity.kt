@@ -265,6 +265,30 @@ fun CalendarActivityScreen(db: FirebaseFirestore, innerPadding: PaddingValues) {
             {
                 Button(
                     onClick = {
+                        val intent = Intent(context, ScheduleManagement::class.java)
+                        context.startActivity(intent)
+                    }, colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Black, // 버튼의 배경색을 검정색으로 설정합니다.
+                        contentColor = Color.White // 버튼 내용의 색을 흰색으로 설정합니다.
+                    ), modifier = Modifier
+                        .padding(8.dp)
+                        .sizeIn(minHeight = 0.dp)
+                        .width(130.dp),
+                    contentPadding = PaddingValues(0.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.baseline_check_circle_outline_24), // 예약 아이콘 리소스 ID로 대체
+                            contentDescription = null, modifier = Modifier.size(24.dp)
+                        )
+                        Text(text = "예약하기")
+                    }
+                }
+                Button(
+                    onClick = {
                         val intent = Intent(context, ScheduleCheckActivity::class.java)
                         context.startActivity(intent)
                     },
@@ -287,30 +311,6 @@ fun CalendarActivityScreen(db: FirebaseFirestore, innerPadding: PaddingValues) {
                             contentDescription = null, modifier = Modifier.size(24.dp)
                         )
                         Text(text = "예약확인")
-                    }
-                }
-                Button(
-                    onClick = {
-                        val intent = Intent(context, ScheduleManagement::class.java)
-                        context.startActivity(intent)
-                    }, colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.Black, // 버튼의 배경색을 검정색으로 설정합니다.
-                        contentColor = Color.White // 버튼 내용의 색을 흰색으로 설정합니다.
-                    ), modifier = Modifier
-                        .padding(8.dp)
-                        .sizeIn(minHeight = 0.dp)
-                        .width(130.dp),
-                    contentPadding = PaddingValues(0.dp)
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.baseline_check_circle_outline_24), // 예약 아이콘 리소스 ID로 대체
-                            contentDescription = null, modifier = Modifier.size(24.dp)
-                        )
-                        Text(text = "예약하기")
                     }
                 }
             }
@@ -511,7 +511,6 @@ fun CalendarWindow2(eventDataList: List<EventData>) {
     }
 }
 
-
 @Composable
 fun Header2(
     data: CalendarUiModel,
@@ -519,8 +518,7 @@ fun Header2(
     onNextClickListener: (LocalDate) -> Unit,
     onMinusMonth: () -> Unit,
     onPlusMonth: () -> Unit,
-
-    ) {
+) {
     val currentYearMonth = YearMonth.now()
     val currentMonth = remember { mutableStateOf(currentYearMonth) }
     Column(modifier = Modifier.padding(10.dp)) {
@@ -818,7 +816,8 @@ fun EventCard(eventData: EventData) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp)
+            .padding(8.dp),
+        colors = CardDefaults.cardColors(Color(0xFFB4C8BB))
     ) {
         Column(
             modifier = Modifier.padding(16.dp)

@@ -1,6 +1,7 @@
 package com.example.fitsync
 
 import android.content.ContentValues.TAG
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -51,24 +52,187 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Face
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.*
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.TextFieldValue
 
 class ScheduleManagement : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            val db = Firebase.firestore
-            ScheduleManagementScreen(db)
+            FinalScheduleManagementScreen()
         }
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ScheduleManagementScreen(db: FirebaseFirestore) {
+fun FinalScheduleManagementScreen() {
+    val context = LocalContext.current
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        text = "Fit Sync",
+                        fontSize = 24.sp,
+                        fontFamily = FontFamily.SansSerif,
+                        fontWeight = FontWeight.ExtraBold
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = { /* 메뉴 아이콘 */ }) {
+                        Icon(
+                            imageVector = Icons.Default.Menu,
+                            contentDescription = "메뉴 아이콘"
+                        )
+                    }
+                },
+                actions = {
+                    IconButton(onClick = {
+                        val intent = Intent(context, MyProfileActivity::class.java)
+                        context.startActivity(intent)
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.Face,
+                            contentDescription = "사용자 프로필"
+                        )
+                    }
+                }
+            )
+        },
+        bottomBar = {
+            BottomAppBar(
+                containerColor = Color.White
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    val context = LocalContext.current
+
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        IconButton(onClick = {
+                            val intent = Intent(context, CalendarActivity::class.java)
+                            context.startActivity(intent)
+                        }) {
+                            Icon(
+                                imageVector = Icons.Default.DateRange,
+                                contentDescription = "캘린더 액티비티로 이동"
+                            )
+                        }
+                        Text(
+                            text = "캘린더",
+                            fontSize = 10.sp,
+                            fontFamily = FontFamily.SansSerif,
+                            modifier = Modifier.padding(top = 0.dp)
+                        )
+                    }
+
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        IconButton(onClick = {
+                            val intent = Intent(context, MainActivity::class.java)
+                            context.startActivity(intent)
+                        }) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.baseline_home_24),
+                                contentDescription = "메인 액티비티(홈)으로 이동"
+                            )
+                        }
+                        Text(
+                            text = "Home",
+                            fontSize = 10.sp,
+                            fontFamily = FontFamily.SansSerif,
+                            modifier = Modifier.padding(top = 0.dp)
+                        )
+                    }
+
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        IconButton(onClick = {
+                            val intent = Intent(context, AttendanceActivity::class.java)
+                            context.startActivity(intent)
+                        }) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.baseline_qr_code_2_24),
+                                contentDescription = "QR 액티비티로 이동"
+                            )
+                        }
+                        Text(
+                            text = "QR",
+                            fontSize = 10.sp,
+                            fontFamily = FontFamily.SansSerif,
+                            modifier = Modifier.padding(top = 0.dp)
+                        )
+                    }
+
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        IconButton(onClick = {
+                            val intent = Intent(context, UsersActivity::class.java)
+                            context.startActivity(intent)
+                        }) {
+                            Icon(
+                                imageVector = Icons.Default.AccountCircle,
+                                contentDescription = "사용자 목록 액티비티로 이동"
+                            )
+                        }
+                        Text(
+                            text = "프로필",
+                            fontSize = 10.sp,
+                            fontFamily = FontFamily.SansSerif,
+                            modifier = Modifier.padding(top = 0.dp)
+                        )
+                    }
+
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        IconButton(onClick = {
+                            val intent = Intent(context, MessengerActivity::class.java)
+                            context.startActivity(intent)
+                        }) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.baseline_mark_chat_unread_24),
+                                contentDescription = "메신저 액티비티로 이동"
+                            )
+                        }
+                        Text(
+                            text = "채팅방",
+                            fontSize = 10.sp,
+                            fontFamily = FontFamily.SansSerif,
+                            modifier = Modifier.padding(top = 0.dp)
+                        )
+                    }
+                }
+            }
+        }) { innerPadding ->
+                ScheduleManagementScreen()
+    }
+
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ScheduleManagementScreen() {
+    val db = Firebase.firestore
     var calendarOpen by remember {
         mutableStateOf(false)
     }
@@ -86,12 +250,12 @@ fun ScheduleManagementScreen(db: FirebaseFirestore) {
         timeOptions.add(hour)
     }
     var selectedTime by remember {
-        mutableStateOf(0) // 기본 시간을 선택합니다.
+        mutableStateOf(0)
     }
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(top = 200.dp), // Center align the contents
+            .padding(top = 200.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         var memberName by remember {
@@ -112,13 +276,9 @@ fun ScheduleManagementScreen(db: FirebaseFirestore) {
         ) {
             Text(text = "시간 $selectedTime")
         }
-
-
-
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             var trainerList by remember { mutableStateOf(listOf<String>()) }
             var memberList by remember { mutableStateOf(listOf<String>()) }
-//                TextField(value = memberName, onValueChange = { memberName = it })
             var members = mutableListOf<String>()
             db.collection("users").get().addOnSuccessListener { field ->
                 for (memberName in field) {
@@ -138,7 +298,7 @@ fun ScheduleManagementScreen(db: FirebaseFirestore) {
             var expandedTrainerIndex by remember { mutableStateOf(-1) }
             var selectedTrainer by remember { mutableStateOf("") }
             var searchQuery by remember { mutableStateOf(TextFieldValue()) }
-            Column(modifier = Modifier.padding(16.dp)) {
+            Column(modifier = Modifier.padding(start = 16.dp, top = 10.dp)) {
                 OutlinedTextField(
                     value = searchQuery.text,
                     onValueChange = { newValue ->
@@ -150,7 +310,7 @@ fun ScheduleManagementScreen(db: FirebaseFirestore) {
                     colors = TextFieldDefaults.textFieldColors(containerColor = Color.Transparent)
 
                 )
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
                 val filteredTrainers =
                     trainerList.filter { it.contains(searchQuery.text, ignoreCase = true) }
@@ -165,7 +325,7 @@ fun ScheduleManagementScreen(db: FirebaseFirestore) {
                         )
                     }
                 } else {
-                    Text("Enter a search query to see the list.")
+                    Text("Enter a trainer name to see the list.   ")
                 }
                 Spacer(modifier = Modifier.height(16.dp))
                 if (selectedTrainer.isNotBlank()) {
@@ -173,7 +333,7 @@ fun ScheduleManagementScreen(db: FirebaseFirestore) {
                 }
             }
             var searchQuery2 by remember { mutableStateOf(TextFieldValue()) }
-            Column(modifier = Modifier.padding(16.dp)) {
+            Column(modifier = Modifier.padding(start = 16.dp, top = 10.dp)) {
                 OutlinedTextField(
                     value = searchQuery2.text,
                     onValueChange = { newValue ->
@@ -185,7 +345,7 @@ fun ScheduleManagementScreen(db: FirebaseFirestore) {
                     colors = TextFieldDefaults.textFieldColors(containerColor = Color.Transparent)
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
                 // Filtered trainer list based on search query
                 val filteredMembers =
@@ -203,7 +363,7 @@ fun ScheduleManagementScreen(db: FirebaseFirestore) {
                         )
                     }
                 } else {
-                    Text("Enter a search query to see the list.")
+                    Text("Enter a member name to see the list.")
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -516,7 +676,6 @@ fun ContentItem(
         mutableStateOf(0L)
     }
     var clickCount by remember { mutableStateOf(0) }
-
 
     Card(
         modifier = Modifier

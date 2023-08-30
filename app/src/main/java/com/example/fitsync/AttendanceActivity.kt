@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -59,15 +61,16 @@ class AttendanceActivity : ComponentActivity() {
                     val dateFormatter = DateTimeFormatter.ofPattern("yyyy년 M월 d일")
                     val currentDate = basicDate.format(dateFormatter)
 
-                    TextField(value = managerName.value, onValueChange = { newValue ->
-                        managerName.value = newValue
-                    },
-                        placeholder = {Text("이름")},
+                    TextField(
+                        value = managerName.value, onValueChange = { newValue ->
+                            managerName.value = newValue
+                        },
+                        placeholder = { Text("이름") },
                         singleLine = true,
                         modifier = Modifier
                             .fillMaxWidth(0.45f)
                             .align(Alignment.CenterHorizontally)
-                            .border(0.5.dp, Color.DarkGray , RoundedCornerShape(8.dp)),
+                            .border(1.dp, Color.Gray, RoundedCornerShape(8.dp)),
                         colors = TextFieldDefaults.textFieldColors(
                             textColor = Color.Black,
                             containerColor = Color.Transparent,
@@ -80,13 +83,17 @@ class AttendanceActivity : ComponentActivity() {
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
-                    Button(onClick = {
+                    Button(
+                        onClick = {
 //                        if (managerName.isNotBlank()) { // 또는 if (managerName != null && managerName.isNotEmpty())
-                        val intent = Intent(this@AttendanceActivity, QRcheckActivity::class.java)
-                        intent.putExtra("managerName", managerName.value)
-                        startActivity(intent)
+                            val intent =
+                                Intent(this@AttendanceActivity, QRcheckActivity::class.java)
+                            intent.putExtra("managerName", managerName.value)
+                            startActivity(intent)
 
-                    }, enabled = managerName.value.isNotBlank()) {
+                        }, enabled = managerName.value.isNotBlank(),
+                        colors = ButtonDefaults.buttonColors(Color.Black)
+                    ) {
                         Text(text = "QR스캔")
                     }
                     var startEndInfo by remember {
@@ -123,13 +130,19 @@ class AttendanceActivity : ComponentActivity() {
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text("$currentDate")
+                        Spacer(modifier = Modifier.height(5.dp))
                         Text("출근 : $startWork")
                         Text("퇴근 : $endWork")
                     }
 
                     Spacer(modifier = Modifier.height(10.dp))
 
-                    Button(onClick = { startEndInfo = !startEndInfo }) {
+                    Button(
+                        onClick = { startEndInfo = !startEndInfo },
+                        colors = ButtonDefaults.buttonColors(
+                            Color.Black
+                        )
+                    ) {
                         Text("출퇴근 직원 확인")
                     }
                     if (startEndInfo) {
@@ -163,19 +176,38 @@ class AttendanceActivity : ComponentActivity() {
                                         managerNameList = tempList
                                         attendenceInfoList = attendenceInfo
                                     }
+
+                                Spacer(modifier = Modifier.height(6.dp))
                                 Text("날짜 : $currentDate")
+                                Spacer(modifier = Modifier.height(4.dp))
                                 for (info in attendenceInfoList) {
-                                    Text("이름 : ${info.first}")
-                                    Text("출근 : ${info.second}")
-                                    Text("퇴근 : ${info.third}")
-                                    Spacer(modifier = Modifier.height(12.dp))
+                                    Card(
+                                        modifier = Modifier
+                                            .fillMaxWidth(0.6f)
+                                            .padding(8.dp)
+                                            .background(Color.White)
+                                            .border(1.dp, Color.Gray, RoundedCornerShape(8.dp)),
+                                    ) {
+                                        Column(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .background(Color.White)
+                                                .padding(8.dp),
+                                            horizontalAlignment = Alignment.CenterHorizontally,
+                                            verticalArrangement = Arrangement.Center
+                                        ) {
+                                            Text("이름 : ${info.first}", color = Color.Black)
+                                            Text("출근 : ${info.second}", color = Color.Black)
+                                            Text("퇴근 : ${info.third}", color = Color.Black)
+                                        }
+                                    }
+
                                 }
                             }
                         }
+
                     }
                 }
-
-
             }
         }
     }

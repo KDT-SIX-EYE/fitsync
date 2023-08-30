@@ -30,6 +30,8 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Face
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -90,20 +92,28 @@ fun FinalScreen2(db: FirebaseFirestore) {
             TopAppBar(
                 title = {
                     Text(
-                        // 상단바 이름 수정하십시오. 그 외 변경 금지
-                        text = "My Profile",
-                        fontSize = 17.sp,
-                        fontFamily = FontFamily.SansSerif
+                        text = "Fit Sync",
+                        fontSize = 24.sp,
+                        fontFamily = FontFamily.SansSerif,
+                        fontWeight = FontWeight.ExtraBold
                     )
                 },
                 navigationIcon = {
+                    IconButton(onClick = { /* 메뉴 아이콘 */ }) {
+                        Icon(
+                            imageVector = Icons.Default.Menu,
+                            contentDescription = "메뉴 아이콘"
+                        )
+                    }
+                },
+                actions = {
                     IconButton(onClick = {
-                        val intent = Intent(context, MainActivity::class.java)
+                        val intent = Intent(context, MyProfileActivity::class.java)
                         context.startActivity(intent)
                     }) {
                         Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "뒤로 가기"
+                            imageVector = Icons.Default.Face,
+                            contentDescription = "사용자 프로필"
                         )
                     }
                 }
@@ -144,46 +154,48 @@ fun FinalScreen2(db: FirebaseFirestore) {
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         IconButton(onClick = {
-                            val intent = Intent(context, ScheduleActivity::class.java)
+                            val intent = Intent(context, MainActivity::class.java)
                             context.startActivity(intent)
                         }) {
                             Icon(
-                                painter = painterResource(id = R.drawable.baseline_schedule_24),
-                                contentDescription = "스케쥴 액티비티로 이동"
+                                painter = painterResource(id = R.drawable.baseline_home_24),
+                                contentDescription = "메인 액티비티(홈)으로 이동"
                             )
                         }
                         Text(
-                            text = "스케줄",
+                            text = "Home",
                             fontSize = 10.sp,
                             fontFamily = FontFamily.SansSerif,
                             modifier = Modifier.padding(top = 0.dp)
                         )
                     }
+
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         IconButton(onClick = {
-                            val intent = Intent(context, BookActivity::class.java)
+                            val intent = Intent(context, AttendanceActivity::class.java)
                             context.startActivity(intent)
                         }) {
                             Icon(
-                                painter = painterResource(id = R.drawable.baseline_call_24),
-                                contentDescription = "예약 액티비티로 이동"
+                                painter = painterResource(id = R.drawable.baseline_qr_code_2_24),
+                                contentDescription = "QR 액티비티로 이동"
                             )
                         }
                         Text(
-                            text = "예약",
+                            text = "QR",
                             fontSize = 10.sp,
                             fontFamily = FontFamily.SansSerif,
                             modifier = Modifier.padding(top = 0.dp)
                         )
                     }
+
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         IconButton(onClick = {
-//                            val intent = Intent(context, UsersActivity::class.java)
-//                            context.startActivity(intent)
+                            val intent = Intent(context, UsersActivity::class.java)
+                            context.startActivity(intent)
                         }) {
                             Icon(
                                 imageVector = Icons.Default.AccountCircle,
@@ -197,12 +209,13 @@ fun FinalScreen2(db: FirebaseFirestore) {
                             modifier = Modifier.padding(top = 0.dp)
                         )
                     }
+
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         IconButton(onClick = {
-//                            val intent = Intent(context, MessengerActivity::class.java)
-//                            context.startActivity(intent)
+                            val intent = Intent(context, MessengerActivity::class.java)
+                            context.startActivity(intent)
                         }) {
                             Icon(
                                 painter = painterResource(id = R.drawable.baseline_mark_chat_unread_24),
@@ -218,8 +231,7 @@ fun FinalScreen2(db: FirebaseFirestore) {
                     }
                 }
             }
-        }
-    ) { innerPadding ->
+        }    ) { innerPadding ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -296,7 +308,7 @@ fun ScheduleCheckScreen(db: FirebaseFirestore) {
                     modifier = Modifier
                         .width(78.dp)
                         .height(23.dp)
-                        .background(PurpleGrey80)
+                        .background(color = Color(android.graphics.Color.parseColor("#B4C8BB")))
                 ) {
                     Text(
                         text = "예약됨",
@@ -389,16 +401,16 @@ fun TimeButton(db: FirebaseFirestore, clickedDate: Int, timeListOpen: Boolean) {
                 for (timeOption in timeOptions) {
                     val isSelectedAndInAffList =
                         scheduledTImeList.contains(timeOption.toString())
-                    val buttonBackgroundColor = if (isSelectedAndInAffList) {       // 버튼 배경색
-                        PurpleGrey80// scheduledTImeList에 포함되어 있으면 빨간색
+                    val buttonBackgroundColor = if (isSelectedAndInAffList) {
+                        Color(0xFFB4C8BB)
                     } else {
-                        Color.Transparent // 포함되어 있지 않으면 파란색
+                        Color.Transparent
                     }
 
-                    val buttonContentColor = if (isSelectedAndInAffList) {          //버튼 글자색
-                        Color.White // scheduledTImeList에 포함되어 있으면 글자색 흰색
+                    val buttonContentColor = if (isSelectedAndInAffList) {
+                        Color.White
                     } else {
-                        Color.Black // 포함되어 있지 않으면 글자색 검은색
+                        Color.Black
                     }
 
                     Row {
@@ -408,24 +420,21 @@ fun TimeButton(db: FirebaseFirestore, clickedDate: Int, timeListOpen: Boolean) {
                         Column(modifier = Modifier.width(20.dp).padding(start = 5.dp)) {
                             Text(text = "$timeOption",
                                 style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold))
-
                         }
                         Button(
                             onClick = {
                                 selectTime = timeOption
                                 selectedButtonTime = selectTime
-                                time_in_Scedule = !time_in_Scedule// 선택된 버튼 시간 저장
+                                time_in_Scedule = !time_in_Scedule
                             },
                             modifier = Modifier.border(0.dp, Color.Black),
                             colors = ButtonDefaults.buttonColors(
-                                buttonBackgroundColor,              // 버튼 배경색
-                                contentColor = buttonContentColor // 버튼 내용의 글자색
+                                buttonBackgroundColor,
+                                contentColor = buttonContentColor
                             ),
                             shape = RectangleShape
                         ) {
                         }
-
-                        // 오른쪽에 선택된 버튼 정보 표시
                         if (time_in_Scedule) {
                             if (selectedButtonTime == timeOption) {
                                 val matchingTriples =
@@ -438,7 +447,7 @@ fun TimeButton(db: FirebaseFirestore, clickedDate: Int, timeListOpen: Boolean) {
                                                     modifier = Modifier
                                                         .padding(5.dp)
                                                         .clip(RoundedCornerShape(4.dp))
-                                                        .background(PurpleGrey80)
+                                                        .background(color = Color(android.graphics.Color.parseColor("#B4C8BB")))
                                                 ) {
                                                     Column {
 

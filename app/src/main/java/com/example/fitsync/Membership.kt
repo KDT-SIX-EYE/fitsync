@@ -32,6 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -53,6 +54,7 @@ class Membership : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun SignupScreen() {
+        val context = LocalContext.current
         var name by remember { mutableStateOf("") }
         var email by remember { mutableStateOf("") }
         var password by remember { mutableStateOf("") }
@@ -151,6 +153,8 @@ class Membership : ComponentActivity() {
                     } else {
                         signupErrorMessage = "이름, 이메일, 비밀번호, 근로 종류를 모두 입력해주세요."
                     }
+                    val intent = Intent(context, MainActivity::class.java)
+                    context.startActivity(intent)
                 },
                 modifier = Modifier
                     .fillMaxWidth()
