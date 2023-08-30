@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -251,13 +250,13 @@ fun ChatItemBubble(
                 horizontalArrangement = horizontalArrangement,
                 modifier = Modifier.fillMaxWidth()
             ) {
-//                Image(
-//                    painter = painterResource(id = R.drawable.userimage),
-//                    contentDescription = "Profile Picture",
-//                    modifier = Modifier
-//                        .size(24.dp)
-//                        .clip(CircleShape)
-//                )
+                Image(
+                    painter = painterResource(id = R.drawable.aaaa),
+                    contentDescription = "Profile Picture",
+                    modifier = Modifier
+                        .size(24.dp)
+                        .clip(CircleShape)
+                )
                 Column {
                     Text(
                         text = message.userName ?: "",
