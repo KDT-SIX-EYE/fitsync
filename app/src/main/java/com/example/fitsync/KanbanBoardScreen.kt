@@ -121,7 +121,8 @@ fun KanbanBoardScreen(viewModel: KanbanViewModel) {
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(60.dp)
-                                .padding(bottom = 8.dp)                        ) {
+                                .padding(bottom = 8.dp)
+                        ) {
                             Text("닫기", color = Color.White)
                         }
                     },
@@ -261,6 +262,7 @@ fun TaskCard(
                             onTaskDeleted(task)
                             return@Button
                         }
+
                         else -> task.status
                     }
                     viewModel.updateTaskStatus(task.id, newStatus)

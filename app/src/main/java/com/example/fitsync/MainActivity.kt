@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
-
 package com.example.fitsync
 
 import android.content.Intent
@@ -207,7 +205,7 @@ fun MainScreen(viewModel: KanbanViewModel) {
                     }
                 }
             }
-        }    ) { innerPadding ->
+        }) { innerPadding ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()

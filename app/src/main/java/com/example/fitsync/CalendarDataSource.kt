@@ -22,7 +22,8 @@ class CalendarDataSource {
         val daysToAdd = firstDayOfMonth.dayOfWeek.value % 7
         val adjustedStartDate = firstDayOfMonth.minusDays(daysToAdd.toLong())
 
-        val visibleDates = getDatesBetween(adjustedStartDate, lastDayOfMonth.plusDays(13)) // Extend by 6 days
+        val visibleDates =
+            getDatesBetween(adjustedStartDate, lastDayOfMonth.plusDays(13)) // Extend by 6 days
         return toUiModel(visibleDates, lastSelectedDate)
     }
 
