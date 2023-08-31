@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
-
 package com.example.fitsync
 
 import android.content.Intent
@@ -20,7 +18,6 @@ import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.BottomAppBar
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -60,6 +57,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(viewModel: KanbanViewModel) {
     val context = LocalContext.current
@@ -207,7 +205,7 @@ fun MainScreen(viewModel: KanbanViewModel) {
                     }
                 }
             }
-        }    ) { innerPadding ->
+        }) { innerPadding ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
