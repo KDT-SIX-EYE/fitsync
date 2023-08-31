@@ -123,7 +123,6 @@ class AttendanceActivity : ComponentActivity() {
                             }
                         }
                     Spacer(modifier = Modifier.height(10.dp))
-
                     Column(
                         modifier = Modifier
                             .fillMaxWidth(),
@@ -134,9 +133,7 @@ class AttendanceActivity : ComponentActivity() {
                         Text("출근 : $startWork")
                         Text("퇴근 : $endWork")
                     }
-
                     Spacer(modifier = Modifier.height(10.dp))
-
                     Button(
                         onClick = { startEndInfo = !startEndInfo },
                         colors = ButtonDefaults.buttonColors(
@@ -176,7 +173,6 @@ class AttendanceActivity : ComponentActivity() {
                                         managerNameList = tempList
                                         attendenceInfoList = attendenceInfo
                                     }
-
                                 Spacer(modifier = Modifier.height(6.dp))
                                 Text("날짜 : $currentDate")
                                 Spacer(modifier = Modifier.height(4.dp))
