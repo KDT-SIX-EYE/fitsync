@@ -1,4 +1,4 @@
-package com.example.fitsync.ViewModel
+package com.example.fitsync.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
