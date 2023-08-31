@@ -224,7 +224,7 @@ fun FinalScheduleManagementScreen() {
                 }
             }
         }) { innerPadding ->
-                ScheduleManagementScreen()
+        ScheduleManagementScreen()
     }
 
 }
@@ -396,8 +396,6 @@ fun ScheduleManagementScreen() {
                     )
                     val baseDocumentRef =
                         db.collection("schedule").document("$clickedDate")
-//                                .collection("Time").document("$selectedTime")
-
                     fun findAvailableDocumentName(
                         documentRef: DocumentReference,
                         candidateName: String,
@@ -458,7 +456,6 @@ fun ScheduleManagementScreen() {
             var calendarUiModel by remember {
                 mutableStateOf(dataSource.getData(lastSelectedDate = dataSource.today))
             }
-
             fun convertLocalDateToInt(dateModel: CalendarUiModel.Date): Int {
                 val date = dateModel.date
                 return date.year * 10000 + date.monthValue * 100 + date.dayOfMonth
@@ -492,30 +489,33 @@ fun ScheduleManagementScreen() {
         }
 
     }
-
     if (timeListOpen) {
-        LazyColumn(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .padding(top = 300.dp)
-                .height(250.dp)
-                .width(150.dp)
-                .background(Color.White)
-        ) {
-            item {
-                timeOptions.forEach { timeOption ->
-                    Text(
-                        text = "$timeOption ~ ${timeOption + 1}",
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                selectedTime = timeOption
-                                timeListOpen = false
-                            }
-                            .padding(8.dp)
-                    )
+        Row {
+            Spacer(modifier = Modifier.weight(1f))
+            LazyColumn(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .padding(top = 300.dp)
+                    .height(250.dp)
+                    .width(150.dp)
+                    .background(Color.White)
+            ) {
+                item {
+                    timeOptions.forEach { timeOption ->
+                        Text(
+                            text = "$timeOption ~ ${timeOption + 1}",
+                            modifier = Modifier
+                                .clickable {
+                                    selectedTime = timeOption
+                                    timeListOpen = false
+                                }
+                                .padding(8.dp)
+                        )
+                    }
                 }
             }
+            Spacer(modifier = Modifier.weight(1f))
+
         }
     }
 }
