@@ -96,8 +96,8 @@ fun KanbanBoardScreen(viewModel: KanbanViewModel) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-                .padding(bottom = 16.dp),
+                .padding(horizontal = 50.dp)
+                .padding(bottom = 50.dp),
             contentAlignment = Alignment.BottomEnd
         ) {
             Row(
@@ -187,7 +187,9 @@ fun AddTaskForm(viewModel: KanbanViewModel) {
             colors = ButtonDefaults.buttonColors(Color.Black),
             modifier = Modifier
                 .align(Alignment.End)
-
+                .wrapContentWidth()
+                .height(50.dp)
+                .padding(bottom = 8.dp)
         ) {
             Text("할 일 추가", color = Color.White)
         }
@@ -233,7 +235,6 @@ fun StatusColumn(
     }
 }
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TaskCard(
@@ -246,71 +247,66 @@ fun TaskCard(
     var description by remember { mutableStateOf(task.description) }
     var status by remember { mutableStateOf(task.status) }
 
-
-
-
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(120.dp)
-            .clickable { isEditDialogVisible = true },
+            .height(130.dp)
+            .clickable { isEditDialogVisible = true }, // 클릭 시 수정 다이얼로그 표시
         shape = RoundedCornerShape(8.dp),
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(8.dp)
+        Column(
+            modifier = Modifier.padding(8.dp)
         ) {
-            Column(
-                modifier = Modifier
-                    .verticalScroll(rememberScrollState())
-            ) {
-                Text(
-                    text = title,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Black,
-                    fontSize = 20.sp // 여기에서 폰트 크기를 조절합니다.
-                )
-                Text(
-                    text = description,
-                    color = Color.Gray,
-                    modifier = Modifier.padding(top = 4.dp)
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-            }
+            Text(
+                text = task.title,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black,
+                fontSize = 20.sp
+            )
+            Text(
+                text = task.description,
+                color = Color.Gray,
+                modifier = Modifier.padding(top = 4.dp)
+            )
+            Spacer(modifier = Modifier.height(8.dp))
 
-            Button(
-                onClick = {
-                    val newStatus = when (status) {
-                        "To Do" -> "In Progress"
-                        "In Progress" -> "Done"
-                        "Done" -> {
-                            onTaskDeleted(task)
-                            return@Button
+            Row(
+                modifier = Modifier.fillMaxSize(),
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.Bottom
+            ) {
+                Button(
+                    onClick = {
+                        val newStatus = when (task.status) {
+                            "To Do" -> "In Progress"
+                            "In Progress" -> "Done"
+                            "Done" -> {
+                                onTaskDeleted(task)
+                                return@Button
+                            }
+                            else -> task.status
                         }
-                        else -> status
-                    }
 
-                    viewModel.updateTaskStatusInViewModel(task.id, newStatus)
-                },
-                colors = ButtonDefaults.buttonColors(Color.Black),
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(8.dp)
-            ) {
-                Text(
-                    text = when (status) {
-                        "To Do" -> "시작"
-                        "In Progress" -> "완료"
-                        "Done" -> "삭제"
-                        else -> ""
+                        // Use viewModelScope.launch to run the suspend function in a coroutine
+                        viewModel.updateTaskStatusInViewModel(task.id, newStatus)
                     },
-                    color = Color.White
-                )
+                    colors = ButtonDefaults.buttonColors(Color.Black),
+                    modifier = Modifier
+                ) {
+                    Text(
+                        text = when (task.status) {
+                            "To Do" -> "Start"
+                            "In Progress" -> "Complete"
+                            "Done" -> "Delete"
+                            else -> ""
+                        },
+                        color = Color.White
+                    )
+                }
             }
         }
 
-
+        // 수정 다이얼로그 표시
         if (isEditDialogVisible) {
             AlertDialog(
                 onDismissRequest = { isEditDialogVisible = false },
@@ -345,7 +341,7 @@ fun TaskCard(
                         TextField(
                             value = title,
                             onValueChange = { title = it },
-                            label = { Text("할 일 (ex : 워크인 상담)") },
+                            label = { Text("제목") },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(8.dp)
@@ -353,7 +349,7 @@ fun TaskCard(
                         TextField(
                             value = description,
                             onValueChange = { description = it },
-                            label = { Text("설명 (ex : 담당자/pm 2~4)") },
+                            label = { Text("설명") },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(8.dp)
