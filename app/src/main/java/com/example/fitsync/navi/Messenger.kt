@@ -1,10 +1,6 @@
-package com.example.fitsync
+package com.example.fitsync.navi
 
-import android.content.Intent
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.compose.foundation.Image
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,11 +10,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
@@ -31,9 +24,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalTextStyle
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -43,50 +34,44 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.fitsync.data.ChatMessage
-import com.example.fitsync.ui.theme.FitSyncTheme
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.FirebaseDatabase.getInstance
+import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-class MessengerActivity : ComponentActivity() {
-    private lateinit var firebaseAuth: FirebaseAuth
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+@Composable
+fun Messenger(navController: NavController) {
+    val firebaseAuth = FirebaseAuth.getInstance()
+    ChatScreen(navController, firebaseAuth = firebaseAuth)
+    val onBack: () -> Unit = {
+        // Kanban 화면에서는 뒤로가기 처리
+        navController.navigate(ScreenRoute.Main_Kanban.route)
+    }
 
-        firebaseAuth = FirebaseAuth.getInstance()
-
-        setContent {
-            FitSyncTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    ChatScreen(firebaseAuth = firebaseAuth)
-                }
-            }
-        }
+    // BackHandler 함수 사용(뒤로 가기 버튼 편집)
+    BackHandler {
+        onBack()
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ChatScreen(firebaseAuth: FirebaseAuth) {
+private fun ChatScreen(navController: NavController, firebaseAuth: FirebaseAuth) {
+
+
     val user: FirebaseUser? = firebaseAuth.currentUser
     var composingMessage by remember { mutableStateOf("") }
     var sentMessages by remember { mutableStateOf(listOf<ChatMessage>()) }
@@ -103,8 +88,7 @@ private fun ChatScreen(firebaseAuth: FirebaseAuth) {
                 title = { Text(text = "Messenger", fontSize = 17.sp, fontFamily = FontFamily.SansSerif) },
                 navigationIcon = {
                     IconButton(onClick = { /* 메인 액티비티로 이동 */
-                        val intent = Intent(context, MainActivity::class.java)
-                        context.startActivity(intent)
+                        navController.navigate(ScreenRoute.Main.route)
                     }) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
@@ -141,7 +125,9 @@ private fun ChatScreen(firebaseAuth: FirebaseAuth) {
                         onValueChange = { composingMessage = it },
                         onSendClick = {
                             if (composingMessage.isNotEmpty() && user?.displayName != null) {
-                                val currentDate = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date())
+                                val currentDate = SimpleDateFormat("HH:mm", Locale.getDefault()).format(
+                                    Date()
+                                )
                                 val newChatMessage =
                                     ChatMessage(
                                         message = composingMessage,
@@ -175,7 +161,8 @@ private fun ChatScreen(firebaseAuth: FirebaseAuth) {
 }
 
 fun loadChatMessages(listener: (List<ChatMessage>) -> Unit) {
-    val database = getInstance("https://fitsyncproject-default-rtdb.asia-southeast1.firebasedatabase.app/")
+    val database =
+        FirebaseDatabase.getInstance("https://fitsyncproject-default-rtdb.asia-southeast1.firebasedatabase.app/")
     val chatRef = database.getReference("chat")
 
     chatRef.addValueEventListener(object : ValueEventListener {
@@ -196,7 +183,8 @@ fun loadChatMessages(listener: (List<ChatMessage>) -> Unit) {
 }
 
 fun saveChatMessage(chatMessage: ChatMessage) {
-    val database = getInstance("https://fitsyncproject-default-rtdb.asia-southeast1.firebasedatabase.app/")
+    val database =
+        FirebaseDatabase.getInstance("https://fitsyncproject-default-rtdb.asia-southeast1.firebasedatabase.app/")
     val chatRef = database.getReference("chat")
     val newMessageRef = chatRef.push()
     newMessageRef.setValue(chatMessage)
@@ -306,17 +294,5 @@ fun ChatItemBubble(
                     fontSize = 16.sp)
             }
         }
-    }
-}
-
-
-
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    val firebaseAuth = FirebaseAuth.getInstance()
-    FitSyncTheme {
-        ChatScreen(firebaseAuth = firebaseAuth)
     }
 }

@@ -1,11 +1,7 @@
-package com.example.fitsync
+package com.example.fitsync.navi
 
-import android.content.ContentValues.TAG
-import android.content.Intent
-import android.os.Bundle
+import android.content.ContentValues
 import android.util.Log
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -21,12 +17,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.DateRange
@@ -60,8 +53,10 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.fitsync.ui.theme.PurpleGrey40
-import com.example.fitsync.ui.theme.PurpleGrey80
+import androidx.navigation.NavController
+import com.example.fitsync.CalendarDataSource
+import com.example.fitsync.CalendarUiModel
+import com.example.fitsync.R
 import com.google.firebase.FirebaseApp
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
@@ -72,20 +67,16 @@ import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-
-class ScheduleCheckActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            val db = Firebase.firestore
-            FinalScreen2(db = db)
-        }
-    }
+@Composable
+fun ScheduleCheck(navController: NavController) {
+    val db = Firebase.firestore
+    FinalScreen2(navController, db)
 }
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FinalScreen2(db: FirebaseFirestore) {
+fun FinalScreen2(navController: NavController, db: FirebaseFirestore) {
     val context = LocalContext.current
     Scaffold(
         topBar = {
@@ -108,8 +99,7 @@ fun FinalScreen2(db: FirebaseFirestore) {
                 },
                 actions = {
                     IconButton(onClick = {
-                        val intent = Intent(context, MyProfileActivity::class.java)
-                        context.startActivity(intent)
+                        navController.navigate(ScreenRoute.MyProfile.route)
                     }) {
                         Icon(
                             imageVector = Icons.Default.Face,
@@ -134,8 +124,7 @@ fun FinalScreen2(db: FirebaseFirestore) {
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         IconButton(onClick = {
-                            val intent = Intent(context, CalendarActivity::class.java)
-                            context.startActivity(intent)
+                            navController.navigate(ScreenRoute.Calender.route)
                         }) {
                             Icon(
                                 imageVector = Icons.Default.DateRange,
@@ -154,8 +143,7 @@ fun FinalScreen2(db: FirebaseFirestore) {
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         IconButton(onClick = {
-                            val intent = Intent(context, MainActivity::class.java)
-                            context.startActivity(intent)
+                            navController.navigate(ScreenRoute.Main.route)
                         }) {
                             Icon(
                                 painter = painterResource(id = R.drawable.baseline_home_24),
@@ -174,8 +162,7 @@ fun FinalScreen2(db: FirebaseFirestore) {
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         IconButton(onClick = {
-                            val intent = Intent(context, AttendanceActivity::class.java)
-                            context.startActivity(intent)
+                            navController.navigate(ScreenRoute.QR.route)
                         }) {
                             Icon(
                                 painter = painterResource(id = R.drawable.baseline_qr_code_2_24),
@@ -194,8 +181,8 @@ fun FinalScreen2(db: FirebaseFirestore) {
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         IconButton(onClick = {
-                            val intent = Intent(context, UsersActivity::class.java)
-                            context.startActivity(intent)
+//                            val intent = Intent(context, UsersActivity::class.java)
+//                            context.startActivity(intent)
                         }) {
                             Icon(
                                 imageVector = Icons.Default.AccountCircle,
@@ -214,8 +201,7 @@ fun FinalScreen2(db: FirebaseFirestore) {
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         IconButton(onClick = {
-                            val intent = Intent(context, MessengerActivity::class.java)
-                            context.startActivity(intent)
+                            navController.navigate(ScreenRoute.Messenger.route)
                         }) {
                             Icon(
                                 painter = painterResource(id = R.drawable.baseline_mark_chat_unread_24),
@@ -387,13 +373,13 @@ fun TimeButton(db: FirebaseFirestore, clickedDate: Int, timeListOpen: Boolean) {
                                 val trainername = document.get("Trainer Name").toString()
                                 tempList.add(scheduledTime)
                                 tripelList.add(Triple(scheduledTime, membername, trainername))
-                                Log.d(TAG, "${document.id} => ${document.data}")
+                                Log.d(ContentValues.TAG, "${document.id} => ${document.data}")
                             }
                             scheduledTImeList = tempList
                             scheduledInfoList = tripelList
                         }
                         .addOnFailureListener {
-                            Log.d(TAG, "$it")
+                            Log.d(ContentValues.TAG, "$it")
                         }
                 }
 
@@ -417,7 +403,9 @@ fun TimeButton(db: FirebaseFirestore, clickedDate: Int, timeListOpen: Boolean) {
                         var time_in_Scedule by remember {
                             mutableStateOf(false)
                         }
-                        Column(modifier = Modifier.width(20.dp).padding(start = 5.dp)) {
+                        Column(modifier = Modifier
+                            .width(20.dp)
+                            .padding(start = 5.dp)) {
                             Text(text = "$timeOption",
                                 style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold))
                         }
@@ -447,7 +435,13 @@ fun TimeButton(db: FirebaseFirestore, clickedDate: Int, timeListOpen: Boolean) {
                                                     modifier = Modifier
                                                         .padding(5.dp)
                                                         .clip(RoundedCornerShape(4.dp))
-                                                        .background(color = Color(android.graphics.Color.parseColor("#B4C8BB")))
+                                                        .background(
+                                                            color = Color(
+                                                                android.graphics.Color.parseColor(
+                                                                    "#B4C8BB"
+                                                                )
+                                                            )
+                                                        )
                                                 ) {
                                                     Column {
 

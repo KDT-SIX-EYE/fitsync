@@ -88,6 +88,8 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycleVersion")
     implementation("androidx.compose.material:material:1.5.0")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:1.0.0-alpha07")
+
 
     val camerax_version = "1.3.0-alpha04"
 //    val camerax_version = "1.2.1"
@@ -104,4 +106,17 @@ dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:1.1.5")
 
     implementation ("androidx.compose.material:material-icons-extended:1.2.0")
+
+    val nav_version = "2.5.3"
+
+    implementation("androidx.navigation:navigation-compose:$nav_version")
+    implementation("androidx.navigation:navigation-runtime-ktx:2.7.0")
+
+    implementation ("com.google.android.gms:play-services-location:18.0.0")
+
+    implementation ("androidx.preference:preference-ktx:1.1.1")
+
+    //알림 기능
+    implementation ("com.android.support:support-compat:28.0.0")
+
 }

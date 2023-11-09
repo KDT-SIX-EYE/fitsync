@@ -1,11 +1,6 @@
-package com.example.fitsync
+package com.example.fitsync.navi
 
-import android.content.Intent
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,9 +12,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Email
-import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
@@ -33,7 +29,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -41,35 +36,32 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
+import androidx.navigation.NavController
+import androidx.preference.PreferenceManager
+import com.example.fitsync.R
 import com.google.firebase.auth.FirebaseAuth
 
-class LoginActivity : ComponentActivity() {
-    private val loginViewModel = LoginViewModel()
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            LoginScreen(viewModel = loginViewModel) { success ->
-                if (success) {
-                    startMainActivity()
-                }
-            }
+@Composable
+fun Login(navController: NavController) {
+    val loginViewModel = LoginViewModel()
+    LoginScreen(navController, viewModel = loginViewModel) { success ->
+        if (success) {
+            navController.navigate(ScreenRoute.Main_Kanban.route)
         }
-    }
-
-    private fun startMainActivity() {
-        val intent = Intent(this, MainActivity::class.java)
-        startActivity(intent)
-        finish()
     }
 }
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen(viewModel: LoginViewModel, onLoginSuccess: (Boolean) -> Unit) {
-    val emailState = remember { mutableStateOf("") }
-    val passwordState = remember { mutableStateOf("") }
+fun LoginScreen(navController: NavController, viewModel: LoginViewModel, onLoginSuccess: (Boolean) -> Unit) {
     val context = LocalContext.current
+
+    val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
+    val emailState = remember { mutableStateOf(sharedPreferences.getString("email", "") ?: "") }
+    val passwordState = remember { mutableStateOf(sharedPreferences.getString("password", "") ?: "") }
+
+    val rememberCredentialsState = remember { mutableStateOf(sharedPreferences.getBoolean("rememberCredentials", true)) }
 
     Column(
         modifier = Modifier
@@ -117,7 +109,28 @@ fun LoginScreen(viewModel: LoginViewModel, onLoginSuccess: (Boolean) -> Unit) {
         ) {
             Button(
                 onClick = {
-                    viewModel.login(emailState.value, passwordState.value)
+                    val email = emailState.value
+                    val password = passwordState.value
+
+                    viewModel.login(email, password)
+
+                    if (rememberCredentialsState.value) {
+                        // 이메일과 비밀번호를 SharedPreferences에 저장
+                        with(sharedPreferences.edit()) {
+                            email?.let { putString("email", it) }
+                            password?.let { putString("password", it) }
+                            putBoolean("rememberCredentials", rememberCredentialsState.value)
+
+                            apply()
+                        }
+                    } else {
+                        // CheckBox가 선택되지 않았을 경우 저장된 데이터를 제거
+                        with(sharedPreferences.edit()) {
+                            remove("email")
+                            remove("password")
+                            apply()
+                        }
+                    }
                 },
                 colors = ButtonDefaults.buttonColors(
                     Color.Black,
@@ -129,8 +142,7 @@ fun LoginScreen(viewModel: LoginViewModel, onLoginSuccess: (Boolean) -> Unit) {
 
             Button(
                 onClick = {
-                    val intent = Intent(context, Membership::class.java)
-                    context.startActivity(intent)
+                    navController.navigate(ScreenRoute.Membership.route)
                 },
                 colors = ButtonDefaults.buttonColors(
                     Color.Black,
@@ -144,6 +156,14 @@ fun LoginScreen(viewModel: LoginViewModel, onLoginSuccess: (Boolean) -> Unit) {
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Checkbox(
+                checked = rememberCredentialsState.value,
+                onCheckedChange = {
+                    rememberCredentialsState.value = it
+                },
+                colors = CheckboxDefaults.colors(Color.Black)
+            )
+            Text(text = "Remember Email and Password")
             Button(
                 onClick = {
                     val email = emailState.value

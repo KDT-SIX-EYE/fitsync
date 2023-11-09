@@ -1,4 +1,4 @@
-package com.example.fitsync.ViewModel
+package com.example.fitsync.navi
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
-class KanbanViewModel : ViewModel() {
+class Kanban_ViewModel : ViewModel() {
     private val firestore = Firebase.firestore
 
     private val _tasks = MutableStateFlow<List<Task>>(emptyList())

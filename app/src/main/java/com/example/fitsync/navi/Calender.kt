@@ -1,9 +1,6 @@
-package com.example.fitsync
+package com.example.fitsync.navi
 
-import android.content.Intent
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -57,6 +54,10 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import com.example.fitsync.CalendarDataSource
+import com.example.fitsync.CalendarUiModel
+import com.example.fitsync.R
 import com.google.firebase.FirebaseApp
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
@@ -67,27 +68,27 @@ import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-class CalendarActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            val db = Firebase.firestore
-            FinalScreen(db = db)
+@Composable
+fun Calender(navController: NavController) {
+    val db = Firebase.firestore
+    FinalScreen(navController, db)
 
-        }
+    val onBack: () -> Unit = {
+        navController.navigate(ScreenRoute.Main_Kanban.route)
+    }
+    BackHandler {
+        onBack()
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FinalScreen(db: FirebaseFirestore) {
-    val context = LocalContext.current
+fun FinalScreen(navController: NavController, db: FirebaseFirestore) {
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
                     Text(
-
                         text = "Calendar",
                         fontSize = 17.sp,
                         fontFamily = FontFamily.SansSerif
@@ -95,8 +96,7 @@ fun FinalScreen(db: FirebaseFirestore) {
                 },
                 navigationIcon = {
                     IconButton(onClick = {
-                        val intent = Intent(context, MainActivity::class.java)
-                        context.startActivity(intent)
+                        navController.navigate(ScreenRoute.Main_Kanban.route)
                     }) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
@@ -115,14 +115,11 @@ fun FinalScreen(db: FirebaseFirestore) {
                     horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    val context = LocalContext.current
-
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         IconButton(onClick = {
-                            val intent = Intent(context, CalendarActivity::class.java)
-                            context.startActivity(intent)
+                            navController.navigate(ScreenRoute.Calender.route)
                         }) {
                             Icon(
                                 imageVector = Icons.Default.DateRange,
@@ -141,8 +138,7 @@ fun FinalScreen(db: FirebaseFirestore) {
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         IconButton(onClick = {
-                            val intent = Intent(context, MainActivity::class.java)
-                            context.startActivity(intent)
+                            navController.navigate(ScreenRoute.Main_Kanban.route)
                         }) {
                             Icon(
                                 painter = painterResource(id = R.drawable.baseline_home_24),
@@ -161,8 +157,7 @@ fun FinalScreen(db: FirebaseFirestore) {
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         IconButton(onClick = {
-                            val intent = Intent(context, AttendanceActivity::class.java)
-                            context.startActivity(intent)
+                            navController.navigate(ScreenRoute.Attendance.route)
                         }) {
                             Icon(
                                 painter = painterResource(id = R.drawable.baseline_qr_code_2_24),
@@ -180,8 +175,8 @@ fun FinalScreen(db: FirebaseFirestore) {
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         IconButton(onClick = {
-                            val intent = Intent(context, UsersActivity::class.java)
-                            context.startActivity(intent)
+//                            val intent = Intent(context, UsersActivity::class.java)
+//                            context.startActivity(intent)
                         }) {
                             Icon(
                                 imageVector = Icons.Default.AccountCircle,
@@ -199,8 +194,7 @@ fun FinalScreen(db: FirebaseFirestore) {
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         IconButton(onClick = {
-                            val intent = Intent(context, MessengerActivity::class.java)
-                            context.startActivity(intent)
+                            navController.navigate(ScreenRoute.Messenger.route)
                         }) {
                             Icon(
                                 painter = painterResource(id = R.drawable.baseline_mark_chat_unread_24),
@@ -219,13 +213,13 @@ fun FinalScreen(db: FirebaseFirestore) {
         }
     ) { innerPadding ->
 
-        CalendarActivityScreen(db, innerPadding)
+        CalendarActivityScreen(navController, db, innerPadding)
 
     }
 }
 
 @Composable
-fun CalendarActivityScreen(db: FirebaseFirestore, innerPadding: PaddingValues) {
+fun CalendarActivityScreen(navController: NavController, db: FirebaseFirestore, innerPadding: PaddingValues) {
     val scrollState = rememberLazyListState()
     var showEventInputFields by remember { mutableStateOf(false) }
     var showEventCheckFields by remember {
@@ -250,7 +244,6 @@ fun CalendarActivityScreen(db: FirebaseFirestore, innerPadding: PaddingValues) {
             val calendarUiModel by remember {
                 mutableStateOf(dataSource.getData(lastSelectedDate = dataSource.today))
             }
-            val context = LocalContext.current
             var eventDate by remember { mutableStateOf("") }
             var eventName by remember { mutableStateOf("") }
             var registrant by remember { mutableStateOf("") }
@@ -265,8 +258,7 @@ fun CalendarActivityScreen(db: FirebaseFirestore, innerPadding: PaddingValues) {
             {
                 Button(
                     onClick = {
-                        val intent = Intent(context, ScheduleManagement::class.java)
-                        context.startActivity(intent)
+                        navController.navigate(ScreenRoute.ScheduleManagement.route)
                     }, colors = ButtonDefaults.buttonColors(
                         containerColor = Color.Black, // 버튼의 배경색을 검정색으로 설정합니다.
                         contentColor = Color.White // 버튼 내용의 색을 흰색으로 설정합니다.
@@ -289,8 +281,7 @@ fun CalendarActivityScreen(db: FirebaseFirestore, innerPadding: PaddingValues) {
                 }
                 Button(
                     onClick = {
-                        val intent = Intent(context, ScheduleCheckActivity::class.java)
-                        context.startActivity(intent)
+                        navController.navigate(ScreenRoute.ScheduleCheck.route)
                     },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color.Black, // 버튼의 배경색을 검정색으로 설정합니다.

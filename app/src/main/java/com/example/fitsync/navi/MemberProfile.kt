@@ -1,14 +1,9 @@
-package com.example.fitsync
+package com.example.fitsync.navi
 
-import android.content.Intent
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -43,30 +38,22 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import com.example.fitsync.R
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 
-
-class MemberProfile : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        val db = Firebase.firestore
-        val users = db.collection("users")
-
-        setContent {
-            ProfileScreen()
-        }
-    }
+@Composable
+fun MemberProfile(navController: NavController) {
+    ProfileScreen(navController)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileScreen() {
+fun ProfileScreen(navController: NavController) {
     val context = LocalContext.current
     Scaffold(
         topBar = {
@@ -89,8 +76,7 @@ fun ProfileScreen() {
                 },
                 actions = {
                     IconButton(onClick = {
-                        val intent = Intent(context, MyProfileActivity::class.java)
-                        context.startActivity(intent)
+                        navController.navigate(ScreenRoute.MyProfile.route)
                     }) {
                         Icon(
                             imageVector = Icons.Default.Face,
@@ -115,8 +101,7 @@ fun ProfileScreen() {
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         IconButton(onClick = {
-                            val intent = Intent(context, CalendarActivity::class.java)
-                            context.startActivity(intent)
+                            navController.navigate(ScreenRoute.Calender.route)
                         }) {
                             Icon(
                                 imageVector = Icons.Default.DateRange,
@@ -135,8 +120,7 @@ fun ProfileScreen() {
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         IconButton(onClick = {
-                            val intent = Intent(context, MainActivity::class.java)
-                            context.startActivity(intent)
+                            navController.navigate(ScreenRoute.Main.route)
                         }) {
                             Icon(
                                 painter = painterResource(id = R.drawable.baseline_home_24),
@@ -155,8 +139,7 @@ fun ProfileScreen() {
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         IconButton(onClick = {
-                            val intent = Intent(context, AttendanceActivity::class.java)
-                            context.startActivity(intent)
+                            navController.navigate(ScreenRoute.QR.route)
                         }) {
                             Icon(
                                 painter = painterResource(id = R.drawable.baseline_qr_code_2_24),
@@ -175,8 +158,8 @@ fun ProfileScreen() {
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         IconButton(onClick = {
-                            val intent = Intent(context, UsersActivity::class.java)
-                            context.startActivity(intent)
+//                            val intent = Intent(context, UsersActivity::class.java)
+//                            context.startActivity(intent)
                         }) {
                             Icon(
                                 imageVector = Icons.Default.AccountCircle,
@@ -195,8 +178,7 @@ fun ProfileScreen() {
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         IconButton(onClick = {
-                            val intent = Intent(context, MessengerActivity::class.java)
-                            context.startActivity(intent)
+                            navController.navigate(ScreenRoute.Messenger.route)
                         }) {
                             Icon(
                                 painter = painterResource(id = R.drawable.baseline_mark_chat_unread_24),
