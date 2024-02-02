@@ -7,27 +7,27 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:852072400896:android:fa7309f32ea814d59f30e5",
+        "mobilesdk_app_id": "app_id",
         "android_client_info": {
           "package_name": "com.example.fitsync"
         }
       },
       "oauth_client": [
         {
-          "client_id": "852072400896-daq6lom38qj9a77e9c17gie01moqn5va.apps.googleusercontent.com",
+          "client_id": "client_id",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyBmDFq1V4H3idaS8Okjv9EcmCFoXcve1Y0"
+          "current_key": "current_key"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "852072400896-daq6lom38qj9a77e9c17gie01moqn5va.apps.googleusercontent.com",
+              "client_id": "client_id",
               "client_type": 3
             }
           ]
