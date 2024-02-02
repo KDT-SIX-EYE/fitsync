@@ -1,4 +1,6 @@
-<img width="1000" alt="헤더" src="https://github.com/KDT-HeartGeti/Geti/assets/71699054/ec747e07-06ca-44db-9c60-c0c4a7c6ce4d">
+<img width="1000" alt="헤더" src="https://github.com/KDT-HeartGeti/Geti/assets/71699054/ec747e07-06ca-44db-9c60-c0c4a7c6ce4d">  
+
+
 # Fitsync (핏싱크)  
 
 핏싱크, 당신의 헬스장을 더 스마트하게 운영하세요! 
