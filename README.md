@@ -1,5 +1,6 @@
 <img width="1000" alt="헤더" src="https://github.com/KDT-HeartGeti/Geti/assets/71699054/ec747e07-06ca-44db-9c60-c0c4a7c6ce4d">
-# Fitsync (핏싱크)
+# Fitsync (핏싱크)  
+
 핏싱크, 당신의 헬스장을 더 스마트하게 운영하세요! 
 업무 혼선과 정보불명확성에서 벗어나, 트레이너의 개별관리, 업무 협업, 센터 일정 관리까지 모든 것을 한눈에 해결하는 그룹웨어 앱입니다. 헬스장 업무의 효율성을 높이고 더 나은 관리 경험을 위해, 지금 핏싱크를 경험해보세요!  
 
@@ -71,8 +72,8 @@
 ## Thanks [![Hits](https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2FKDT-SIX-EYE%2Ffitsync%2Fhit-counter&count_bg=%23998CE0&title_bg=%23FA9D6F&icon=&icon_color=%23E7E7E7&title=FitSync&edge_flat=false)](https://hits.seeyoufarm.com)
 - 참여해주신 모든 분들 감사합니다!
 - GitHub : [Contributors](https://github.com/KDT-SIX-EYE/fitsync/graphs/contributors)
-- [칸반보드](https://github.com/orgs/KDT-SIX-EYE/people/dopaminespark)
-- [메신저](https://github.com/orgs/KDT-SIX-EYE/people/vmkmym)
-- [캘린더](https://github.com/orgs/KDT-SIX-EYE/people/JD131313)
+- [칸반보드](https://github.com/dopaminespark)
+- [메신저](https://github.com/vmkmym)
+- [캘린더](https://github.com/JD131313)
 - [로그인,회원가입](https://github.com/xax219)
-- [QR코드](https://github.com/orgs/KDT-SIX-EYE/people/junnamu)
+- [QR코드](https://github.com/junnamu)
