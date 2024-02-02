@@ -9,6 +9,9 @@
 3. 칸반보드는 업무 협업을 위한 일종의 게시판으로 사용자들의 업무를 한 눈에 확인 할 수 있습니다.
 4. 캘린더로는 센터 일정 및 시설 예약을 간편하게 관리합니다.  
 
+## 개발기간
+2023.08.24~2023.08.31
+
 ## 개발 환경
 ### Language
 - Kotlin  
@@ -67,4 +70,9 @@
 
 ## Thanks [![Hits](https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2FKDT-SIX-EYE%2Ffitsync%2Fhit-counter&count_bg=%23998CE0&title_bg=%23FA9D6F&icon=&icon_color=%23E7E7E7&title=FitSync&edge_flat=false)](https://hits.seeyoufarm.com)
 - 참여해주신 모든 분들 감사합니다!
-- GitHub : [Contributors](https://github.com/KDT-HeartGeti/Geti/pulse)
+- GitHub : [Contributors](https://github.com/KDT-SIX-EYE/fitsync/graphs/contributors)
+- [칸반보드](https://github.com/orgs/KDT-SIX-EYE/people/dopaminespark)
+- [메신저](https://github.com/orgs/KDT-SIX-EYE/people/vmkmym)
+- [캘린더](https://github.com/orgs/KDT-SIX-EYE/people/JD131313)
+- [로그인,회원가입](https://github.com/xax219)
+- [QR코드](https://github.com/orgs/KDT-SIX-EYE/people/junnamu)
